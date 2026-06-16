@@ -1,4 +1,4 @@
-function TopBar({ role, setRole }) {
+function TopBar({ role, setRole, openCount }) {
   return (
     <header
       className="sticky top-0 z-50 w-full"
@@ -33,7 +33,12 @@ function TopBar({ role, setRole }) {
                   : { background: 'transparent', color: 'rgba(255,255,255,0.6)' }
               }
             >
-              {label}
+              <span>{label}</span>
+              {key === 'collector' && openCount > 0 && (
+                <span className="ml-1 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5">
+                  {openCount}
+                </span>
+              )}
             </button>
           ))}
         </div>

@@ -18,9 +18,11 @@ function App() {
     )
   }
 
+  const openCount = requests.filter(r => r.status === 'open').length
+
   return (
     <div className="min-h-screen font-sans" style={{ background: '#f3f4f2' }}>
-      <TopBar role={role} setRole={setRole} />
+      <TopBar role={role} setRole={setRole} openCount={openCount} />
 
       <main className="max-w-[430px] mx-auto">
         {role === 'poster' ? (
