@@ -14,11 +14,22 @@ const TYPE_COLORS = {
 }
 
 function ActionButton({ viewerRole, status, id, price, onUpdateStatus }) {
+  function handleAction(newStatus) {
+    const messages = {
+      accepted: 'Accept this job?',
+      collected: 'Mark this as collected?',
+      paid: `Confirm payment of ₱${price}?`,
+    }
+    if (window.confirm(messages[newStatus] ?? 'Continue?')) {
+      onUpdateStatus(id, newStatus)
+    }
+  }
+
   if (viewerRole === 'collector') {
     if (status === 'open') {
       return (
         <button
-          onClick={() => onUpdateStatus(id, 'accepted')}
+          onClick={() => handleAction('accepted')}
           className="w-full mt-4 text-white text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95"
           style={{ background: '#0d3320' }}
         >
@@ -29,7 +40,7 @@ function ActionButton({ viewerRole, status, id, price, onUpdateStatus }) {
     if (status === 'accepted') {
       return (
         <button
-          onClick={() => onUpdateStatus(id, 'collected')}
+          onClick={() => handleAction('collected')}
           className="w-full mt-4 text-white text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95"
           style={{ background: '#2f6b44' }}
         >
@@ -42,7 +53,7 @@ function ActionButton({ viewerRole, status, id, price, onUpdateStatus }) {
   if (viewerRole === 'poster' && status === 'collected') {
     return (
       <button
-        onClick={() => onUpdateStatus(id, 'paid')}
+        onClick={() => handleAction('paid')}
         className="w-full mt-4 text-white text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95"
         style={{ background: '#c97f1e' }}
       >
