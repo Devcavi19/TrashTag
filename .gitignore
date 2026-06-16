@@ -26,3 +26,4 @@ dist-ssr
 # plans and agents folder
 plans/
 .agents/
+skills-lock.json
