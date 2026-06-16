@@ -3,10 +3,30 @@ import { sampleRequest } from './data/sampleRequest'
 import PosterView from './components/PosterView'
 import CollectorView from './components/CollectorView'
 import TopBar from './components/TopBar'
+import LoadingScreen from './components/LoadingScreen'
+import AuthScreen from './components/AuthScreen'
 
 function App() {
-  const [role, setRole] = useState('poster') // 'poster' | 'collector'
+  const [appState, setAppState] = useState('loading') // 'loading' | 'auth' | 'app'
+  const [currentUser, setCurrentUser] = useState(null)
+
+  const [role, setRole] = useState('poster')
   const [requests, setRequests] = useState([sampleRequest])
+
+  function handleLoadingDone() {
+    setAppState('auth')
+  }
+
+  function handleLogin(user) {
+    setCurrentUser(user)
+    setRole(user.defaultRole)
+    setAppState('app')
+  }
+
+  function handleLogout() {
+    setCurrentUser(null)
+    setAppState('auth')
+  }
 
   function addRequest(newReq) {
     setRequests((prev) => [...prev, { ...newReq, rating: null }])
@@ -24,11 +44,25 @@ function App() {
     )
   }
 
-  const openCount = requests.filter(r => r.status === 'open').length
+  const openCount = requests.filter((r) => r.status === 'open').length
+
+  if (appState === 'loading') {
+    return <LoadingScreen onDone={handleLoadingDone} />
+  }
+
+  if (appState === 'auth') {
+    return <AuthScreen onLogin={handleLogin} />
+  }
 
   return (
     <div className="min-h-screen font-sans" style={{ background: '#f3f4f2' }}>
-      <TopBar role={role} setRole={setRole} openCount={openCount} />
+      <TopBar
+        role={role}
+        setRole={setRole}
+        openCount={openCount}
+        user={currentUser}
+        onLogout={handleLogout}
+      />
 
       <main className="max-w-[430px] mx-auto">
         {role === 'poster' ? (
