@@ -69,7 +69,9 @@ export default function TrashCard({ request, viewerRole, onUpdateStatus }) {
 
         <p className="text-green-600 font-bold text-base">₱{price}</p>
 
-        <p className="text-gray-400 text-xs">{postedAt}</p>
+        <p className="text-gray-400 text-xs">
+          {new Date(postedAt).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' })}
+        </p>
 
         <ActionButton
           viewerRole={viewerRole}
