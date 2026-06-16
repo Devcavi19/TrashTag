@@ -9,12 +9,18 @@ function App() {
   const [requests, setRequests] = useState([sampleRequest])
 
   function addRequest(newReq) {
-    setRequests((prev) => [...prev, newReq])
+    setRequests((prev) => [...prev, { ...newReq, rating: null }])
   }
 
   function updateStatus(id, newStatus) {
     setRequests((prev) =>
       prev.map((req) => (req.id === id ? { ...req, status: newStatus } : req))
+    )
+  }
+
+  function handleRate(id, stars) {
+    setRequests((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, rating: stars } : r))
     )
   }
 
@@ -30,6 +36,7 @@ function App() {
             requests={requests}
             addRequest={addRequest}
             updateStatus={updateStatus}
+            onRate={handleRate}
           />
         ) : (
           <CollectorView requests={requests} updateStatus={updateStatus} />
