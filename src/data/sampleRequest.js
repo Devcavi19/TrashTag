@@ -1,11 +1,9 @@
-const sampleRequest = {
-  id: '1718500000000',
+export const sampleRequest = {
+  id: 'sample-001',
   photo: null,
-  gps: '14.5995° N, 120.9842° E',
-  type: 'Recyclable',
-  price: 30,
+  gps: 'Brgy. Cotmon, Polangui, Albay',
+  type: 'Biodegradable',
+  price: 20,
   status: 'open',
-  postedAt: '2026-06-16T08:00:00.000Z',
+  postedAt: new Date().toISOString(),
 }
-
-export default sampleRequest
