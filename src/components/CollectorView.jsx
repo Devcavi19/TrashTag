@@ -36,9 +36,9 @@ function CollectorView({ requests, updateStatus }) {
         </h2>
         {openJobs.length === 0 ? (
           <div className="flex flex-col items-center py-12 gap-2 text-center">
-            <span className="text-3xl" style={{ opacity: 0.25 }}>📦</span>
+            <span className="text-3xl" style={{ opacity: 0.25 }}>✅</span>
             <p className="text-sm font-medium" style={{ color: '#c8c5c0' }}>
-              No open jobs right now.
+              No open jobs right now. Check back soon!
             </p>
           </div>
         ) : (
