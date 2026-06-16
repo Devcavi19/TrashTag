@@ -1,8 +1,8 @@
 import TrashCard from './TrashCard'
 
-function CollectorView({ requests, updateStatus }) {
+function CollectorView({ requests, updateStatus, currentUser }) {
   const activeJobs = requests.filter(r => r.status === 'accepted')
-  const openJobs = requests.filter(r => r.status === 'open')
+  const openJobs = requests.filter(r => r.status === 'open' && r.postedBy !== currentUser?.id)
 
   return (
     <div className="p-4 space-y-5">

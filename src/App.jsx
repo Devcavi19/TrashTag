@@ -29,7 +29,7 @@ function App() {
   }
 
   function addRequest(newReq) {
-    setRequests((prev) => [...prev, { ...newReq, rating: null }])
+    setRequests((prev) => [...prev, { ...newReq, rating: null, postedBy: currentUser?.id }])
   }
 
   function updateStatus(id, newStatus) {
@@ -73,7 +73,7 @@ function App() {
             onRate={handleRate}
           />
         ) : (
-          <CollectorView requests={requests} updateStatus={updateStatus} />
+          <CollectorView requests={requests} updateStatus={updateStatus} currentUser={currentUser} />
         )}
       </main>
     </div>
