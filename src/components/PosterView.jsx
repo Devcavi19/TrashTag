@@ -1,8 +1,22 @@
+import { useState } from 'react'
 import PostForm from './PostForm'
 import TrashCard from './TrashCard'
 import Leaderboard from './Leaderboard'
+import SuccessModal from './SuccessModal'
 
 function PosterView({ requests, addRequest, updateStatus, onRate, onLike, currentUser, users }) {
+  const [success, setSuccess] = useState(null)
+
+  function handleUpdate(reqId, newStatus) {
+    updateStatus(reqId, newStatus)
+    if (newStatus === 'paid') {
+      setSuccess({
+        title: 'Payment confirmed!',
+        message: 'Thanks for keeping the community clean. Don’t forget to rate your collector.',
+      })
+    }
+  }
+
   return (
     <div className="p-4 space-y-5">
       <PostForm onSubmit={addRequest} />
@@ -28,7 +42,7 @@ function PosterView({ requests, addRequest, updateStatus, onRate, onLike, curren
                 key={req.id}
                 request={req}
                 viewerRole="poster"
-                onUpdateStatus={updateStatus}
+                onUpdateStatus={handleUpdate}
                 onRate={onRate}
                 onLike={onLike}
                 currentUserId={currentUser?.id}
@@ -39,6 +53,14 @@ function PosterView({ requests, addRequest, updateStatus, onRate, onLike, curren
       </section>
 
       <Leaderboard requests={requests} users={users} />
+
+      <SuccessModal
+        open={!!success}
+        title={success?.title}
+        message={success?.message}
+        buttonLabel="Done"
+        onClose={() => setSuccess(null)}
+      />
     </div>
   )
 }

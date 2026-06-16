@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import ConfirmModal from './ConfirmModal'
+import SuccessModal from './SuccessModal'
 
 const TYPE_OPTIONS = [
   { key: 'Biodegradable', price: 20, color: '#22863a', bg: '#eaf5ec' },
@@ -13,6 +14,7 @@ function PostForm({ onSubmit }) {
   const [type, setType] = useState('Biodegradable')
   const [locationFocused, setLocationFocused] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [successOpen, setSuccessOpen] = useState(false)
 
   function handlePhoto(e) {
     const file = e.target.files[0]
@@ -37,6 +39,7 @@ function PostForm({ onSubmit }) {
     setGps('')
     setType('Biodegradable')
     setConfirmOpen(false)
+    setSuccessOpen(true)
   }
 
   const selectedOption = TYPE_OPTIONS.find(t => t.key === type)
@@ -184,6 +187,14 @@ function PostForm({ onSubmit }) {
         confirmColor="#0d3320"
         onConfirm={handleSubmit}
         onCancel={() => setConfirmOpen(false)}
+      />
+
+      <SuccessModal
+        open={successOpen}
+        title="Request posted!"
+        message="Collectors near you can now see your pickup request."
+        buttonLabel="Done"
+        onClose={() => setSuccessOpen(false)}
       />
     </div>
   )

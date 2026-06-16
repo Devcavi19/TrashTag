@@ -1,9 +1,22 @@
 import { useState } from 'react'
 import TrashCard from './TrashCard'
 import Leaderboard from './Leaderboard'
+import SuccessModal from './SuccessModal'
+
+const SUCCESS_MESSAGES = {
+  accepted: {
+    title: 'Job accepted!',
+    message: 'Find it under your active jobs and upload an after-photo when done.',
+  },
+  collected: {
+    title: 'Marked as collected!',
+    message: 'The poster has been notified to confirm payment.',
+  },
+}
 
 function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto, onLike, users }) {
   const [afterPhotos, setAfterPhotos] = useState({})
+  const [success, setSuccess] = useState(null)
 
   const activeJobs = requests.filter(r => r.status === 'accepted')
   const openJobs = requests.filter(r => r.status === 'open' && r.postedBy !== currentUser?.id)
@@ -15,18 +28,19 @@ function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto
     reader.readAsDataURL(file)
   }
 
-  function makeUpdateStatus(id) {
-    return (reqId, newStatus) => {
-      if (newStatus === 'collected') {
-        if (window.confirm('Mark this as collected?')) {
-          onSubmitAfterPhoto(reqId, afterPhotos[id])
-          updateStatus(reqId, 'collected')
-          setAfterPhotos(prev => { const n = { ...prev }; delete n[id]; return n })
-        }
-      } else {
-        updateStatus(reqId, newStatus)
-      }
+  function handleUpdate(reqId, newStatus, photoId) {
+    if (newStatus === 'collected') {
+      onSubmitAfterPhoto(reqId, afterPhotos[photoId])
+      updateStatus(reqId, 'collected')
+      setAfterPhotos(prev => { const n = { ...prev }; delete n[photoId]; return n })
+    } else {
+      updateStatus(reqId, newStatus)
     }
+    if (SUCCESS_MESSAGES[newStatus]) setSuccess(SUCCESS_MESSAGES[newStatus])
+  }
+
+  function makeUpdateStatus(id) {
+    return (reqId, newStatus) => handleUpdate(reqId, newStatus, id)
   }
 
   return (
@@ -122,7 +136,7 @@ function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto
                 key={r.id}
                 request={r}
                 viewerRole="collector"
-                onUpdateStatus={updateStatus}
+                onUpdateStatus={(reqId, newStatus) => handleUpdate(reqId, newStatus, r.id)}
                 onLike={onLike}
                 currentUserId={currentUser?.id}
               />
@@ -132,6 +146,14 @@ function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto
       </section>
 
       <Leaderboard requests={requests} users={users} />
+
+      <SuccessModal
+        open={!!success}
+        title={success?.title}
+        message={success?.message}
+        buttonLabel="Done"
+        onClose={() => setSuccess(null)}
+      />
     </div>
   )
 }
