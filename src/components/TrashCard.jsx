@@ -1,5 +1,12 @@
 import StatusBadge from './StatusBadge'
 
+function timeAgo(isoString) {
+  const diff = Math.floor((Date.now() - new Date(isoString)) / 1000)
+  if (diff < 60) return `${diff}s ago`
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+  return `${Math.floor(diff / 3600)}h ago`
+}
+
 const TYPE_COLORS = {
   Biodegradable: '#22863a',
   Recyclable: '#1966b5',
@@ -105,11 +112,8 @@ export default function TrashCard({ request, viewerRole, onUpdateStatus }) {
         </div>
 
         {/* Timestamp */}
-        <p className="text-[11px] mt-1" style={{ color: '#c8c5c0' }}>
-          {new Date(postedAt).toLocaleString('en-PH', {
-            dateStyle: 'medium',
-            timeStyle: 'short',
-          })}
+        <p className="text-xs mt-1" style={{ color: '#c8c5c0' }}>
+          Posted {timeAgo(postedAt)}
         </p>
 
         <ActionButton
