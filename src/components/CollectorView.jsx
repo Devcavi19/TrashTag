@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import TrashCard from './TrashCard'
 
-function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto }) {
+function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto, onLike }) {
   const [afterPhotos, setAfterPhotos] = useState({})
 
   const activeJobs = requests.filter(r => r.status === 'accepted')
@@ -91,6 +91,8 @@ function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto
                   viewerRole="collector"
                   onUpdateStatus={makeUpdateStatus(r.id)}
                   stagedAfterPhoto={afterPhotos[r.id]}
+                  onLike={onLike}
+                  currentUserId={currentUser?.id}
                 />
               </div>
             ))}
@@ -120,6 +122,8 @@ function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto
                 request={r}
                 viewerRole="collector"
                 onUpdateStatus={updateStatus}
+                onLike={onLike}
+                currentUserId={currentUser?.id}
               />
             ))}
           </div>

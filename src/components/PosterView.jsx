@@ -1,7 +1,7 @@
 import PostForm from './PostForm'
 import TrashCard from './TrashCard'
 
-function PosterView({ requests, addRequest, updateStatus, onRate }) {
+function PosterView({ requests, addRequest, updateStatus, onRate, onLike, currentUser }) {
   return (
     <div className="p-4 space-y-5">
       <PostForm onSubmit={addRequest} />
@@ -29,6 +29,8 @@ function PosterView({ requests, addRequest, updateStatus, onRate }) {
                 viewerRole="poster"
                 onUpdateStatus={updateStatus}
                 onRate={onRate}
+                onLike={onLike}
+                currentUserId={currentUser?.id}
               />
             ))}
           </div>
