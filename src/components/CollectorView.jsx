@@ -5,11 +5,16 @@ function CollectorView({ requests, updateStatus }) {
   const openJobs = requests.filter(r => r.status === 'open')
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-4 space-y-5">
       {activeJobs.length > 0 && (
         <section>
-          <h2 className="text-lg font-bold mb-3">Active Job</h2>
-          <div className="grid gap-4">
+          <h2
+            className="text-[10px] font-bold uppercase tracking-widest mb-3"
+            style={{ color: '#c97f1e' }}
+          >
+            Active Job
+          </h2>
+          <div className="space-y-3">
             {activeJobs.map(r => (
               <TrashCard
                 key={r.id}
@@ -23,11 +28,21 @@ function CollectorView({ requests, updateStatus }) {
       )}
 
       <section>
-        <h2 className="text-lg font-bold mb-3">Available Jobs</h2>
+        <h2
+          className="text-[10px] font-bold uppercase tracking-widest mb-3"
+          style={{ color: '#a8a5a0' }}
+        >
+          Available Jobs
+        </h2>
         {openJobs.length === 0 ? (
-          <p className="text-gray-500 text-sm">No open jobs right now.</p>
+          <div className="flex flex-col items-center py-12 gap-2 text-center">
+            <span className="text-3xl" style={{ opacity: 0.25 }}>📦</span>
+            <p className="text-sm font-medium" style={{ color: '#c8c5c0' }}>
+              No open jobs right now.
+            </p>
+          </div>
         ) : (
-          <div className="grid gap-4">
+          <div className="space-y-3">
             {openJobs.map(r => (
               <TrashCard
                 key={r.id}
