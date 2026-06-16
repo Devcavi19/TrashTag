@@ -44,7 +44,7 @@ function App() {
     )
   }
 
-  const openCount = requests.filter((r) => r.status === 'open').length
+  const openCount = requests.filter((r) => r.status === 'open' && r.postedBy !== currentUser?.id).length
 
   if (appState === 'loading') {
     return <LoadingScreen onDone={handleLoadingDone} />
