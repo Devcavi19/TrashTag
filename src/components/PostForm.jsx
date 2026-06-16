@@ -49,7 +49,7 @@ function PostForm({ onSubmit }) {
           value={gps}
           onChange={e => setGps(e.target.value)}
           placeholder="e.g. Brgy. San Jose, Rizal St."
-          className="border rounded px-2 py-1 w-full"
+          className="border rounded px-3 py-2 w-full text-sm"
         />
       </div>
 
@@ -74,7 +74,7 @@ function PostForm({ onSubmit }) {
       <button
         onClick={handleSubmit}
         disabled={!gps.trim()}
-        className="bg-green-600 text-white px-4 py-2 rounded disabled:opacity-40"
+        className="w-full bg-green-600 text-white font-semibold py-2 rounded-lg disabled:opacity-40 active:scale-95 transition"
       >
         Submit Request
       </button>
