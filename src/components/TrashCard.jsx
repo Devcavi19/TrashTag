@@ -14,7 +14,7 @@ const TYPE_COLORS = {
   Residual: '#b53419',
 }
 
-function ActionButton({ viewerRole, status, id, price, onUpdateStatus }) {
+function ActionButton({ viewerRole, status, id, price, onUpdateStatus, stagedAfterPhoto }) {
   function handleAction(newStatus) {
     const messages = {
       accepted: 'Accept this job?',
@@ -39,11 +39,16 @@ function ActionButton({ viewerRole, status, id, price, onUpdateStatus }) {
       )
     }
     if (status === 'accepted') {
+      const canCollect = !!stagedAfterPhoto
       return (
         <button
-          onClick={() => handleAction('collected')}
+          onClick={() => canCollect && onUpdateStatus(id, 'collected')}
+          disabled={!canCollect}
           className="w-full mt-4 text-white text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95"
-          style={{ background: '#2f6b44' }}
+          style={{
+            background: canCollect ? '#2f6b44' : '#a8a5a0',
+            cursor: canCollect ? 'pointer' : 'not-allowed',
+          }}
         >
           Mark as Collected
         </button>
@@ -66,9 +71,11 @@ function ActionButton({ viewerRole, status, id, price, onUpdateStatus }) {
   return null
 }
 
-export default function TrashCard({ request, viewerRole, onUpdateStatus, onRate }) {
-  const { id, photo, type, status, gps, price, postedAt, rating } = request
+export default function TrashCard({ request, viewerRole, onUpdateStatus, onRate, stagedAfterPhoto }) {
+  const { id, photo, type, status, gps, price, postedAt, rating, afterPhoto } = request
   const typeColor = TYPE_COLORS[type] || '#706d67'
+
+  const showComparison = (status === 'collected' || status === 'paid') && afterPhoto
 
   return (
     <div
@@ -78,8 +85,39 @@ export default function TrashCard({ request, viewerRole, onUpdateStatus, onRate 
       {/* Signature: category color strip */}
       <div style={{ height: 5, background: typeColor }} />
 
-      {/* Photo */}
-      {photo ? (
+      {/* Photo(s) */}
+      {showComparison ? (
+        <div className="grid grid-cols-2">
+          <div className="relative">
+            <img
+              src={photo || sampleTrash}
+              alt="before"
+              className="w-full object-cover"
+              style={{ maxHeight: 140 }}
+            />
+            <span
+              className="absolute bottom-1 left-1 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded"
+              style={{ background: 'rgba(0,0,0,0.5)' }}
+            >
+              Before
+            </span>
+          </div>
+          <div className="relative">
+            <img
+              src={afterPhoto}
+              alt="after"
+              className="w-full object-cover"
+              style={{ maxHeight: 140 }}
+            />
+            <span
+              className="absolute bottom-1 left-1 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded"
+              style={{ background: 'rgba(0,0,0,0.5)' }}
+            >
+              After
+            </span>
+          </div>
+        </div>
+      ) : photo ? (
         <img
           src={photo}
           alt="trash"
@@ -128,6 +166,7 @@ export default function TrashCard({ request, viewerRole, onUpdateStatus, onRate 
           id={id}
           price={price}
           onUpdateStatus={onUpdateStatus}
+          stagedAfterPhoto={stagedAfterPhoto}
         />
 
         {viewerRole === 'poster' && status === 'paid' && rating === null && (

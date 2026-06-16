@@ -1,8 +1,32 @@
+import { useState } from 'react'
 import TrashCard from './TrashCard'
 
-function CollectorView({ requests, updateStatus, currentUser }) {
+function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto }) {
+  const [afterPhotos, setAfterPhotos] = useState({})
+
   const activeJobs = requests.filter(r => r.status === 'accepted')
   const openJobs = requests.filter(r => r.status === 'open' && r.postedBy !== currentUser?.id)
+
+  function handleFileChange(id, file) {
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (e) => setAfterPhotos(prev => ({ ...prev, [id]: e.target.result }))
+    reader.readAsDataURL(file)
+  }
+
+  function makeUpdateStatus(id) {
+    return (reqId, newStatus) => {
+      if (newStatus === 'collected') {
+        if (window.confirm('Mark this as collected?')) {
+          onSubmitAfterPhoto(reqId, afterPhotos[id])
+          updateStatus(reqId, 'collected')
+          setAfterPhotos(prev => { const n = { ...prev }; delete n[id]; return n })
+        }
+      } else {
+        updateStatus(reqId, newStatus)
+      }
+    }
+  }
 
   return (
     <div className="p-4 space-y-5">
@@ -16,12 +40,59 @@ function CollectorView({ requests, updateStatus, currentUser }) {
           </h2>
           <div className="space-y-3">
             {activeJobs.map(r => (
-              <TrashCard
-                key={r.id}
-                request={r}
-                viewerRole="collector"
-                onUpdateStatus={updateStatus}
-              />
+              <div key={r.id} className="space-y-2">
+                {/* After-photo upload zone */}
+                <div
+                  className="rounded-xl overflow-hidden"
+                  style={{ border: '1.5px dashed #2f6b44', background: '#f6fdf8' }}
+                >
+                  {afterPhotos[r.id] ? (
+                    <div className="relative">
+                      <img
+                        src={afterPhotos[r.id]}
+                        alt="after"
+                        className="w-full object-cover"
+                        style={{ maxHeight: 140 }}
+                      />
+                      <label
+                        className="absolute bottom-2 right-2 text-xs font-semibold px-2 py-1 rounded-lg cursor-pointer"
+                        style={{ background: 'rgba(0,0,0,0.55)', color: '#fff' }}
+                      >
+                        Change
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={e => handleFileChange(r.id, e.target.files[0])}
+                        />
+                      </label>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center py-5 gap-1 cursor-pointer">
+                      <span className="text-2xl" style={{ opacity: 0.4 }}>📷</span>
+                      <span className="text-xs font-semibold" style={{ color: '#2f6b44' }}>
+                        Upload After Photo
+                      </span>
+                      <span className="text-[10px]" style={{ color: '#a8a5a0' }}>
+                        Required before marking collected
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={e => handleFileChange(r.id, e.target.files[0])}
+                      />
+                    </label>
+                  )}
+                </div>
+
+                <TrashCard
+                  request={r}
+                  viewerRole="collector"
+                  onUpdateStatus={makeUpdateStatus(r.id)}
+                  stagedAfterPhoto={afterPhotos[r.id]}
+                />
+              </div>
             ))}
           </div>
         </section>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { sampleRequest } from './data/sampleRequest'
+import { mockUsers as users } from './data/users'
 import PosterView from './components/PosterView'
 import CollectorView from './components/CollectorView'
 import TopBar from './components/TopBar'
@@ -29,12 +30,42 @@ function App() {
   }
 
   function addRequest(newReq) {
-    setRequests((prev) => [...prev, { ...newReq, rating: null, postedBy: currentUser?.id }])
+    setRequests((prev) => [
+      ...prev,
+      { ...newReq, rating: null, afterPhoto: null, likes: [], collectedBy: null, postedBy: currentUser?.id },
+    ])
   }
 
   function updateStatus(id, newStatus) {
     setRequests((prev) =>
-      prev.map((req) => (req.id === id ? { ...req, status: newStatus } : req))
+      prev.map((req) =>
+        req.id === id
+          ? {
+              ...req,
+              status: newStatus,
+              ...(newStatus === 'accepted' ? { collectedBy: currentUser?.id } : {}),
+            }
+          : req
+      )
+    )
+  }
+
+  function handleAfterPhoto(id, photoDataUrl) {
+    setRequests((prev) =>
+      prev.map((req) => (req.id === id ? { ...req, afterPhoto: photoDataUrl } : req))
+    )
+  }
+
+  function handleLike(requestId, userId) {
+    setRequests((prev) =>
+      prev.map((req) => {
+        if (req.id !== requestId) return req
+        const liked = req.likes.includes(userId)
+        return {
+          ...req,
+          likes: liked ? req.likes.filter((id) => id !== userId) : [...req.likes, userId],
+        }
+      })
     )
   }
 
@@ -71,9 +102,19 @@ function App() {
             addRequest={addRequest}
             updateStatus={updateStatus}
             onRate={handleRate}
+            onLike={handleLike}
+            currentUser={currentUser}
+            users={users}
           />
         ) : (
-          <CollectorView requests={requests} updateStatus={updateStatus} currentUser={currentUser} />
+          <CollectorView
+            requests={requests}
+            updateStatus={updateStatus}
+            currentUser={currentUser}
+            onSubmitAfterPhoto={handleAfterPhoto}
+            onLike={handleLike}
+            users={users}
+          />
         )}
       </main>
     </div>

@@ -7,4 +7,7 @@ export const sampleRequest = {
   status: 'open',
   postedAt: new Date().toISOString(),
   rating: null,
+  afterPhoto: null,
+  likes: [],
+  collectedBy: null,
 }
