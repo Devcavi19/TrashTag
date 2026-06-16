@@ -1,25 +1,31 @@
 const VARIANT_MAP = {
-  Biodegradable: { label: "Biodegradable", classes: "bg-green-100 text-green-800" },
-  Recyclable:    { label: "Recyclable",    classes: "bg-blue-100 text-blue-800" },
-  Residual:      { label: "Residual",      classes: "bg-red-100 text-red-800" },
-  open:          { label: "Open",               classes: "bg-gray-100 text-gray-700" },
-  accepted:      { label: "Collector on the way", classes: "bg-yellow-100 text-yellow-800" },
-  collected:     { label: "Collected",          classes: "bg-sky-100 text-sky-800" },
-  paid:          { label: "Paid ✓",             classes: "bg-green-100 text-green-800" },
-};
+  Biodegradable: { label: 'Biodegradable', bg: '#eaf5ec', color: '#22863a' },
+  Recyclable:    { label: 'Recyclable',    bg: '#e8f0fe', color: '#1966b5' },
+  Residual:      { label: 'Residual',      bg: '#fce8e6', color: '#b53419' },
+  open:          { label: 'Open',          bg: '#f3f4f2', color: '#a8a5a0' },
+  accepted:      { label: 'On the way',   bg: '#fef3e0', color: '#c97f1e' },
+  collected:     { label: 'Collected',    bg: '#eaf5ec', color: '#2f6b44' },
+  paid:          { label: 'Paid',         bg: '#e6f0eb', color: '#0d3320' },
+}
 
 export default function StatusBadge({ variant }) {
-  const config = VARIANT_MAP[variant];
+  const config = VARIANT_MAP[variant]
   if (!config) {
     return (
-      <span className="rounded-full px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-500">
-        {variant ?? "—"}
+      <span
+        className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+        style={{ background: '#f3f4f2', color: '#a8a5a0' }}
+      >
+        {variant ?? '—'}
       </span>
-    );
+    )
   }
   return (
-    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${config.classes}`}>
+    <span
+      className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+      style={{ background: config.bg, color: config.color }}
+    >
       {config.label}
     </span>
-  );
+  )
 }
