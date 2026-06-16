@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import StatusBadge from './StatusBadge'
+import ConfirmModal from './ConfirmModal'
 import sampleTrash from '../assets/sample_trash.jpg'
 
 function timeAgo(isoString) {
@@ -14,57 +16,100 @@ const TYPE_COLORS = {
   Residual: '#b53419',
 }
 
+const CONFIRM_DIALOGS = {
+  accepted: {
+    title: 'Accept this job?',
+    message: 'You commit to picking up this trash. It will move to your active jobs.',
+    confirmLabel: 'Accept Job',
+    confirmColor: '#0d3320',
+  },
+  collected: {
+    title: 'Mark as collected?',
+    message: 'Confirm you have picked up the trash. The poster will be asked to pay.',
+    confirmLabel: 'Mark as Collected',
+    confirmColor: '#2f6b44',
+  },
+  paid: {
+    title: 'Confirm & pay?',
+    confirmLabel: 'Confirm & Pay',
+    confirmColor: '#c97f1e',
+  },
+}
+
 function ActionButton({ viewerRole, status, id, price, onUpdateStatus, stagedAfterPhoto }) {
-  function handleAction(newStatus) {
-    const messages = {
-      accepted: 'Accept this job?',
-      collected: 'Mark this as collected?',
-      paid: `Confirm payment of ₱${price}?`,
-    }
-    if (window.confirm(messages[newStatus] ?? 'Continue?')) {
-      onUpdateStatus(id, newStatus)
-    }
+  const [pendingStatus, setPendingStatus] = useState(null)
+
+  function confirmPending() {
+    if (pendingStatus) onUpdateStatus(id, pendingStatus)
+    setPendingStatus(null)
   }
+
+  const dialog = pendingStatus ? CONFIRM_DIALOGS[pendingStatus] : null
+
+  const modal = (
+    <ConfirmModal
+      open={!!pendingStatus}
+      title={dialog?.title}
+      message={
+        pendingStatus === 'paid'
+          ? `Pay ₱${price} to the collector for this pickup. This cannot be undone.`
+          : dialog?.message
+      }
+      confirmLabel={dialog?.confirmLabel}
+      confirmColor={dialog?.confirmColor}
+      onConfirm={confirmPending}
+      onCancel={() => setPendingStatus(null)}
+    />
+  )
 
   if (viewerRole === 'collector') {
     if (status === 'open') {
       return (
-        <button
-          onClick={() => handleAction('accepted')}
-          className="w-full mt-4 text-white text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95"
-          style={{ background: '#0d3320' }}
-        >
-          Accept Job
-        </button>
+        <>
+          <button
+            onClick={() => setPendingStatus('accepted')}
+            className="w-full mt-4 text-white text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95"
+            style={{ background: '#0d3320' }}
+          >
+            Accept Job
+          </button>
+          {modal}
+        </>
       )
     }
     if (status === 'accepted') {
       const canCollect = !!stagedAfterPhoto
       return (
-        <button
-          onClick={() => canCollect && onUpdateStatus(id, 'collected')}
-          disabled={!canCollect}
-          className="w-full mt-4 text-white text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95"
-          style={{
-            background: canCollect ? '#2f6b44' : '#a8a5a0',
-            cursor: canCollect ? 'pointer' : 'not-allowed',
-          }}
-        >
-          Mark as Collected
-        </button>
+        <>
+          <button
+            onClick={() => canCollect && setPendingStatus('collected')}
+            disabled={!canCollect}
+            className="w-full mt-4 text-white text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95"
+            style={{
+              background: canCollect ? '#2f6b44' : '#a8a5a0',
+              cursor: canCollect ? 'pointer' : 'not-allowed',
+            }}
+          >
+            Mark as Collected
+          </button>
+          {modal}
+        </>
       )
     }
   }
 
   if (viewerRole === 'poster' && status === 'collected') {
     return (
-      <button
-        onClick={() => handleAction('paid')}
-        className="w-full mt-4 text-white text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95"
-        style={{ background: '#c97f1e' }}
-      >
-        Confirm &amp; Pay ₱{price}
-      </button>
+      <>
+        <button
+          onClick={() => setPendingStatus('paid')}
+          className="w-full mt-4 text-white text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95"
+          style={{ background: '#c97f1e' }}
+        >
+          Confirm &amp; Pay ₱{price}
+        </button>
+        {modal}
+      </>
     )
   }
 

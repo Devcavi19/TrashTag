@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import ConfirmModal from './ConfirmModal'
 
 const TYPE_OPTIONS = [
   { key: 'Biodegradable', price: 20, color: '#22863a', bg: '#eaf5ec' },
@@ -11,6 +12,7 @@ function PostForm({ onSubmit }) {
   const [gps, setGps] = useState('')
   const [type, setType] = useState('Biodegradable')
   const [locationFocused, setLocationFocused] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   function handlePhoto(e) {
     const file = e.target.files[0]
@@ -34,7 +36,10 @@ function PostForm({ onSubmit }) {
     setPhoto(null)
     setGps('')
     setType('Biodegradable')
+    setConfirmOpen(false)
   }
+
+  const selectedOption = TYPE_OPTIONS.find(t => t.key === type)
 
   return (
     <div
@@ -162,7 +167,7 @@ function PostForm({ onSubmit }) {
 
         {/* Submit */}
         <button
-          onClick={handleSubmit}
+          onClick={() => setConfirmOpen(true)}
           disabled={!gps.trim()}
           className="w-full text-white text-sm font-semibold py-3 rounded-xl transition-all active:scale-95 disabled:opacity-40"
           style={{ background: '#0d3320' }}
@@ -170,6 +175,16 @@ function PostForm({ onSubmit }) {
           Submit Request
         </button>
       </div>
+
+      <ConfirmModal
+        open={confirmOpen}
+        title="Submit pickup request?"
+        message={`Post a ${type} pickup at "${gps}" for a ₱${selectedOption?.price ?? 20} payout.`}
+        confirmLabel="Submit Request"
+        confirmColor="#0d3320"
+        onConfirm={handleSubmit}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   )
 }
