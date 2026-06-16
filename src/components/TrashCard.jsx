@@ -65,8 +65,8 @@ function ActionButton({ viewerRole, status, id, price, onUpdateStatus }) {
   return null
 }
 
-export default function TrashCard({ request, viewerRole, onUpdateStatus }) {
-  const { id, photo, type, status, gps, price, postedAt } = request
+export default function TrashCard({ request, viewerRole, onUpdateStatus, onRate }) {
+  const { id, photo, type, status, gps, price, postedAt, rating } = request
   const typeColor = TYPE_COLORS[type] || '#706d67'
 
   return (
@@ -134,6 +134,29 @@ export default function TrashCard({ request, viewerRole, onUpdateStatus }) {
           price={price}
           onUpdateStatus={onUpdateStatus}
         />
+
+        {viewerRole === 'poster' && status === 'paid' && rating === null && (
+          <div className="mt-3">
+            <p className="text-xs mb-1" style={{ color: '#a8a5a0' }}>Rate your collector:</p>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map(star => (
+                <button
+                  key={star}
+                  onClick={() => onRate(id, star)}
+                  className="text-2xl text-gray-300 hover:text-yellow-400 transition-colors"
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {viewerRole === 'poster' && status === 'paid' && rating !== null && (
+          <p className="text-sm mt-3" style={{ color: '#c97f1e' }}>
+            {'★'.repeat(rating)}{'☆'.repeat(5 - rating)} Rated
+          </p>
+        )}
       </div>
     </div>
   )
