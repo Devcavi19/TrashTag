@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { sampleRequest } from './data/sampleRequest'
+import { useSharedRequests } from './hooks/useSharedRequests'
 import { mockUsers as users } from './data/users'
 import PosterView from './components/PosterView'
 import CollectorView from './components/CollectorView'
@@ -12,7 +13,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null)
 
   const [role, setRole] = useState('poster')
-  const [requests, setRequests] = useState([sampleRequest])
+  const [requests, setRequests] = useSharedRequests([sampleRequest])
 
   function handleLoadingDone() {
     setAppState('auth')
