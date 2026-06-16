@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import sampleRequest from './data/sampleRequest'
+import { sampleRequest } from './data/sampleRequest'
 import PosterView from './components/PosterView'
 import CollectorView from './components/CollectorView'
 import TopBar from './components/TopBar'
@@ -22,15 +22,17 @@ function App() {
     <div className="min-h-screen bg-gray-50">
       <TopBar role={role} setRole={setRole} />
 
-      {role === 'poster' ? (
-        <PosterView
-          requests={requests}
-          addRequest={addRequest}
-          updateStatus={updateStatus}
-        />
-      ) : (
-        <CollectorView requests={requests} updateStatus={updateStatus} />
-      )}
+      <main className="max-w-[430px] mx-auto">
+        {role === 'poster' ? (
+          <PosterView
+            requests={requests}
+            addRequest={addRequest}
+            updateStatus={updateStatus}
+          />
+        ) : (
+          <CollectorView requests={requests} updateStatus={updateStatus} />
+        )}
+      </main>
     </div>
   )
 }
