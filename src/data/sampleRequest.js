@@ -6,4 +6,5 @@ export const sampleRequest = {
   price: 20,
   status: 'open',
   postedAt: new Date().toISOString(),
+  rating: null,
 }
