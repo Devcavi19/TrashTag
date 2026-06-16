@@ -1,28 +1,39 @@
 function TopBar({ role, setRole }) {
   return (
     <header
-      style={{ backgroundColor: '#1a472a' }}
       className="sticky top-0 z-50 w-full"
+      style={{ background: '#0d3320' }}
     >
       <div className="mx-auto flex max-w-[430px] items-center justify-between px-4 py-3">
-        <span className="text-lg font-bold text-white">TrashTag</span>
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-[17px] font-bold tracking-tight text-white">TrashTag</span>
+          <span
+            className="text-[10px] font-semibold uppercase tracking-widest"
+            style={{ color: 'rgba(255,255,255,0.35)' }}
+          >
+            PH
+          </span>
+        </div>
 
         <div
-          style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
-          className="flex rounded-full p-1"
+          className="flex rounded-full p-0.5"
+          style={{ background: 'rgba(255,255,255,0.12)' }}
         >
-          {['poster', 'collector'].map((option) => (
+          {[
+            { key: 'poster', label: 'Post' },
+            { key: 'collector', label: 'Collect' },
+          ].map(({ key, label }) => (
             <button
-              key={option}
-              onClick={() => setRole(option)}
+              key={key}
+              onClick={() => setRole(key)}
+              className="rounded-full px-4 py-1 text-sm font-semibold transition-all"
               style={
-                role === option
-                  ? { backgroundColor: '#ffffff', color: '#1a472a' }
-                  : { backgroundColor: 'transparent', color: '#ffffff' }
+                role === key
+                  ? { background: '#ffffff', color: '#0d3320' }
+                  : { background: 'transparent', color: 'rgba(255,255,255,0.6)' }
               }
-              className="rounded-full px-4 py-1 text-sm font-medium capitalize transition-colors"
             >
-              {option.charAt(0).toUpperCase() + option.slice(1)}
+              {label}
             </button>
           ))}
         </div>
