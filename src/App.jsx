@@ -19,7 +19,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen font-sans" style={{ background: '#f3f4f2' }}>
       <TopBar role={role} setRole={setRole} />
 
       <main className="max-w-[430px] mx-auto">
