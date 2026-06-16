@@ -1,7 +1,8 @@
 import PostForm from './PostForm'
 import TrashCard from './TrashCard'
+import Leaderboard from './Leaderboard'
 
-function PosterView({ requests, addRequest, updateStatus, onRate, onLike, currentUser }) {
+function PosterView({ requests, addRequest, updateStatus, onRate, onLike, currentUser, users }) {
   return (
     <div className="p-4 space-y-5">
       <PostForm onSubmit={addRequest} />
@@ -36,6 +37,8 @@ function PosterView({ requests, addRequest, updateStatus, onRate, onLike, curren
           </div>
         )}
       </section>
+
+      <Leaderboard requests={requests} users={users} />
     </div>
   )
 }

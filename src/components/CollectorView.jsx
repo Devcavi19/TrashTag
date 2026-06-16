@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import TrashCard from './TrashCard'
+import Leaderboard from './Leaderboard'
 
-function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto, onLike }) {
+function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto, onLike, users }) {
   const [afterPhotos, setAfterPhotos] = useState({})
 
   const activeJobs = requests.filter(r => r.status === 'accepted')
@@ -129,6 +130,8 @@ function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto
           </div>
         )}
       </section>
+
+      <Leaderboard requests={requests} users={users} />
     </div>
   )
 }
