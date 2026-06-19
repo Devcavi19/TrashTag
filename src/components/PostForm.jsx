@@ -8,7 +8,7 @@ import LocationPicker from './LocationPicker'
 
 const TAG_OPTIONS = ['Biodegradable', 'Recyclable', 'Residual', 'Mixed']
 
-function PostForm({ onSubmit }) {
+function PostForm({ onSubmit, onSubmitted }) {
   const [photoFile, setPhotoFile] = useState(null)
   const [photoPreview, setPhotoPreview] = useState(null)
   const [location, setLocation] = useState({ lat: null, lng: null, label: '' })
@@ -90,14 +90,14 @@ function PostForm({ onSubmit }) {
         className="px-4 py-3 flex items-center justify-between"
         style={{ borderBottom: '1px solid #f0efec' }}
       >
-        <span className="text-[15px] font-bold" style={{ color: '#1c1c1e' }}>
-          New Pickup Request
+        <span className="font-display text-[18px]" style={{ color: '#1c1c1e', fontWeight: 600 }}>
+          New pickup
         </span>
         <span
           className="text-[10px] font-bold uppercase tracking-widest"
           style={{ color: '#b0ada8' }}
         >
-          Poster
+          You pay · they clean
         </span>
       </div>
 
@@ -220,15 +220,15 @@ function PostForm({ onSubmit }) {
           className="w-full text-white text-sm font-semibold py-3 rounded-xl transition-all active:scale-95 disabled:opacity-40"
           style={{ background: '#0d3320' }}
         >
-          Submit Request
+          Post pickup
         </button>
       </div>
 
       <ConfirmModal
         open={confirmOpen}
-        title="Submit pickup request?"
+        title="Post this pickup?"
         message={`Post a ${tags.join(', ')} pickup at "${location.label}" for a ₱${priceValid ? priceNum : 0} payout.`}
-        confirmLabel="Submit Request"
+        confirmLabel="Post pickup"
         confirmColor="#0d3320"
         onConfirm={handleSubmit}
         onCancel={() => setConfirmOpen(false)}
@@ -237,9 +237,9 @@ function PostForm({ onSubmit }) {
       <SuccessModal
         open={successOpen}
         title="Request posted!"
-        message="Collectors near you can now see your pickup request."
+        message="Neighbors near you can now see and accept your pickup request."
         buttonLabel="Done"
-        onClose={() => setSuccessOpen(false)}
+        onClose={() => { setSuccessOpen(false); onSubmitted?.() }}
       />
     </div>
   )
