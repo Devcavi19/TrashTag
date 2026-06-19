@@ -5,6 +5,7 @@ const VARIANT_MAP = {
   open:          { label: 'Open',          bg: '#f3f4f2', color: '#a8a5a0' },
   accepted:      { label: 'On the way',   bg: '#fef3e0', color: '#c97f1e' },
   collected:     { label: 'Collected',    bg: '#eaf5ec', color: '#2f6b44' },
+  disputed:      { label: 'Needs redo',   bg: '#fce8e6', color: '#b53419' },
   paid:          { label: 'Paid',         bg: '#e6f0eb', color: '#0d3320' },
 }
 
