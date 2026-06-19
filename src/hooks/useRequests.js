@@ -6,6 +6,8 @@ function dbToApp(row) {
     id: row.id,
     photo: row.photo_url,
     gps: row.location_label,
+    lat: row.location_lat != null ? Number(row.location_lat) : null,
+    lng: row.location_lng != null ? Number(row.location_lng) : null,
     type: row.tags?.[0] ?? 'Biodegradable',
     price: Number(row.price),
     status: row.status,
