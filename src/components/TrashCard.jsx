@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import StatusBadge from './StatusBadge'
+import { TAG_COLORS } from '../lib/tagColors'
 import ConfirmModal from './ConfirmModal'
 import sampleTrash from '../assets/sample_trash.jpg'
 
@@ -47,12 +48,6 @@ function timeAgo(isoString) {
   if (diff < 60) return `${diff}s ago`
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
   return `${Math.floor(diff / 3600)}h ago`
-}
-
-const TYPE_COLORS = {
-  Biodegradable: '#22863a',
-  Recyclable: '#1966b5',
-  Residual: '#b53419',
 }
 
 const CONFIRM_DIALOGS = {
@@ -156,8 +151,8 @@ function ActionButton({ viewerRole, status, id, price, onUpdateStatus, stagedAft
 }
 
 export default function TrashCard({ request, viewerRole, onUpdateStatus, onRate, onLike, onOpenChat, currentUserId, stagedAfterPhoto }) {
-  const { id, photo, type, status, gps, lat, lng, price, postedAt, rating, afterPhoto, likes = [], postedBy } = request
-  const typeColor = TYPE_COLORS[type] || '#706d67'
+  const { id, photo, tags = [], status, gps, lat, lng, price, postedAt, rating, afterPhoto, likes = [], postedBy } = request
+  const typeColor = TAG_COLORS[tags[0]]?.color || '#706d67'
 
   const showComparison = (status === 'collected' || status === 'paid') && afterPhoto
 
@@ -235,7 +230,7 @@ export default function TrashCard({ request, viewerRole, onUpdateStatus, onRate,
 
         {/* Badges */}
         <div className="flex flex-wrap gap-1.5 mb-3">
-          <StatusBadge variant={type} />
+          <StatusBadge variant={tags} />
           <StatusBadge variant={status} />
         </div>
 
