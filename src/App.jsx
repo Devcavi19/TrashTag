@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import ngeohash from 'ngeohash'
 import { useRequests } from './hooks/useRequests'
 import { supabase } from './lib/supabase'
 import PosterView from './components/PosterView'
@@ -73,10 +74,17 @@ function App() {
   }
 
   async function addRequest(newReq) {
+    const geohash =
+      newReq.lat != null && newReq.lng != null
+        ? ngeohash.encode(newReq.lat, newReq.lng, 9)
+        : null
     await supabase.from('requests').insert({
       poster_id: currentUser?.id,
       photo_url: newReq.photo,
-      location_label: newReq.gps,
+      location_label: newReq.label,
+      location_lat: newReq.lat,
+      location_lng: newReq.lng,
+      location_geohash: geohash,
       tags: [newReq.type],
       price: newReq.price,
       status: 'open',
