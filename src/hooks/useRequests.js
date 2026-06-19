@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
 function dbToApp(row) {
+  const tags = row.tags ?? []
   return {
     id: row.id,
     photo: row.photo_url,
     gps: row.location_label,
     lat: row.location_lat != null ? Number(row.location_lat) : null,
     lng: row.location_lng != null ? Number(row.location_lng) : null,
-    type: row.tags?.[0] ?? 'Biodegradable',
+    tags,
+    type: tags[0] ?? 'Biodegradable', // derived: single-accent consumers (Map/Chat)
     price: Number(row.price),
     status: row.status,
     postedAt: row.created_at,
@@ -31,6 +33,7 @@ async function fetchOne(id) {
 
 export function useRequests() {
   const [requests, setRequests] = useState([])
+  const [realtimeStatus, setRealtimeStatus] = useState('CONNECTING')
 
   useEffect(() => {
     supabase
@@ -93,12 +96,12 @@ export function useRequests() {
           }
         }
       )
-      .subscribe()
+      .subscribe((status) => setRealtimeStatus(status))
 
     return () => {
       supabase.removeChannel(channel)
     }
   }, [])
 
-  return [requests]
+  return [requests, realtimeStatus]
 }
