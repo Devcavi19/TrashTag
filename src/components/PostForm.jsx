@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import ConfirmModal from './ConfirmModal'
 import SuccessModal from './SuccessModal'
+import LocationPicker from './LocationPicker'
 
 const TYPE_OPTIONS = [
   { key: 'Biodegradable', price: 20, color: '#22863a', bg: '#eaf5ec' },
@@ -12,9 +13,8 @@ const TYPE_OPTIONS = [
 function PostForm({ onSubmit }) {
   const [photoFile, setPhotoFile] = useState(null)
   const [photoPreview, setPhotoPreview] = useState(null)
-  const [gps, setGps] = useState('')
+  const [location, setLocation] = useState({ lat: null, lng: null, label: '' })
   const [type, setType] = useState('Biodegradable')
-  const [locationFocused, setLocationFocused] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [successOpen, setSuccessOpen] = useState(false)
 
@@ -44,7 +44,9 @@ function PostForm({ onSubmit }) {
     const selected = TYPE_OPTIONS.find(t => t.key === type)
     await onSubmit({
       photo: photoUrl,
-      gps,
+      lat: location.lat,
+      lng: location.lng,
+      label: location.label,
       type,
       price: selected?.price ?? 20,
       status: 'open',
@@ -52,7 +54,7 @@ function PostForm({ onSubmit }) {
     })
     setPhotoFile(null)
     setPhotoPreview(null)
-    setGps('')
+    setLocation({ lat: null, lng: null, label: '' })
     setType('Biodegradable')
     setConfirmOpen(false)
     setSuccessOpen(true)
@@ -127,21 +129,7 @@ function PostForm({ onSubmit }) {
           >
             Location
           </label>
-          <input
-            type="text"
-            value={gps}
-            onChange={e => setGps(e.target.value)}
-            onFocus={() => setLocationFocused(true)}
-            onBlur={() => setLocationFocused(false)}
-            placeholder="Barangay / Street"
-            className="w-full text-sm rounded-xl px-3 py-2.5 outline-none"
-            style={{
-              background: '#f8f7f5',
-              border: locationFocused ? '1.5px solid #2f6b44' : '1.5px solid #e2e2e0',
-              color: '#1c1c1e',
-              transition: 'border-color 0.15s',
-            }}
-          />
+          <LocationPicker onChange={setLocation} />
         </div>
 
         {/* Trash type — tile selector */}
@@ -187,7 +175,7 @@ function PostForm({ onSubmit }) {
         {/* Submit */}
         <button
           onClick={() => setConfirmOpen(true)}
-          disabled={!gps.trim()}
+          disabled={!location.label.trim()}
           className="w-full text-white text-sm font-semibold py-3 rounded-xl transition-all active:scale-95 disabled:opacity-40"
           style={{ background: '#0d3320' }}
         >
@@ -198,7 +186,7 @@ function PostForm({ onSubmit }) {
       <ConfirmModal
         open={confirmOpen}
         title="Submit pickup request?"
-        message={`Post a ${type} pickup at "${gps}" for a ₱${selectedOption?.price ?? 20} payout.`}
+        message={`Post a ${type} pickup at "${location.label}" for a ₱${selectedOption?.price ?? 20} payout.`}
         confirmLabel="Submit Request"
         confirmColor="#0d3320"
         onConfirm={handleSubmit}
