@@ -26,4 +26,5 @@ dist-ssr
 # plans and agents folder
 plans/
 .agents/
+.claude
 skills-lock.json
