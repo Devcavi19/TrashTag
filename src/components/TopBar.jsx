@@ -27,11 +27,12 @@ function TopBar({ role, setRole, openCount, user, onLogout }) {
             {[
               { key: 'poster', label: 'Post' },
               { key: 'collector', label: 'Collect' },
+              { key: 'community', label: 'Community' },
             ].map(({ key, label }) => (
               <button
                 key={key}
                 onClick={() => setRole(key)}
-                className="rounded-full px-4 py-1 text-sm font-semibold transition-all"
+                className="rounded-full px-3 py-1 text-sm font-semibold transition-all"
                 style={
                   role === key
                     ? { background: '#ffffff', color: '#0d3320' }
