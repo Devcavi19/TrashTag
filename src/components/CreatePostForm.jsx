@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { validateImage } from '../lib/validateImage'
 
 const TYPE_OPTIONS = [
   { key: 'event', label: 'Event', color: '#2f6b44', bg: '#eaf5ec' },
@@ -18,10 +19,20 @@ function CreatePostForm({ onSubmit }) {
   const [eventLocation, setEventLocation] = useState('')
   const [externalUrl, setExternalUrl] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [photoError, setPhotoError] = useState(null)
 
   function handlePhoto(e) {
     const file = e.target.files[0]
     if (!file) return
+    const err = validateImage(file)
+    if (err) {
+      setPhotoError(err)
+      setPhotoFile(null)
+      setPhotoPreview(null)
+      e.target.value = ''
+      return
+    }
+    setPhotoError(null)
     setPhotoFile(file)
     const reader = new FileReader()
     reader.onload = () => setPhotoPreview(reader.result)
@@ -34,6 +45,7 @@ function CreatePostForm({ onSubmit }) {
     setBody('')
     setPhotoFile(null)
     setPhotoPreview(null)
+    setPhotoError(null)
     setEventDate('')
     setEventLocation('')
     setExternalUrl('')
@@ -143,6 +155,7 @@ function CreatePostForm({ onSubmit }) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Give your post a headline"
+            maxLength={100}
             className="w-full rounded-xl px-3 py-2.5 text-sm"
             style={inputStyle}
           />
@@ -156,6 +169,7 @@ function CreatePostForm({ onSubmit }) {
             onChange={(e) => setBody(e.target.value)}
             placeholder="What would you like to share?"
             rows={4}
+            maxLength={2000}
             className="w-full rounded-xl px-3 py-2.5 text-sm resize-none"
             style={inputStyle}
           />
@@ -198,8 +212,11 @@ function CreatePostForm({ onSubmit }) {
                 <span className="text-xs font-medium" style={{ color: '#c8c5c0' }}>Add a photo</span>
               </div>
             )}
-            <input type="file" accept="image/*" onChange={handlePhoto} className="sr-only" />
+            <input type="file" accept="image/jpeg,image/png" onChange={handlePhoto} className="sr-only" />
           </label>
+          {photoError && (
+            <p className="text-[11px] font-medium mt-1.5" style={{ color: '#b53419' }}>{photoError}</p>
+          )}
         </div>
 
         {/* Submit */}
