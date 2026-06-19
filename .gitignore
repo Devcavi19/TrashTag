@@ -13,6 +13,13 @@ dist-ssr
 *.local
 .env
 
+# database backups (contain real data)
+backups/
+
+# supabase cli local link state
+supabase/.temp/
+supabase/.branches/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
