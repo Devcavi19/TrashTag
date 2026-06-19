@@ -155,7 +155,7 @@ function ActionButton({ viewerRole, status, id, price, onUpdateStatus, stagedAft
   return null
 }
 
-export default function TrashCard({ request, viewerRole, onUpdateStatus, onRate, onLike, currentUserId, stagedAfterPhoto }) {
+export default function TrashCard({ request, viewerRole, onUpdateStatus, onRate, onLike, onOpenChat, currentUserId, stagedAfterPhoto }) {
   const { id, photo, type, status, gps, lat, lng, price, postedAt, rating, afterPhoto, likes = [], postedBy } = request
   const typeColor = TYPE_COLORS[type] || '#706d67'
 
@@ -286,6 +286,19 @@ export default function TrashCard({ request, viewerRole, onUpdateStatus, onRate,
           onUpdateStatus={onUpdateStatus}
           stagedAfterPhoto={stagedAfterPhoto}
         />
+
+        {status === 'accepted' && onOpenChat && (
+          <button
+            onClick={() => onOpenChat(request)}
+            className="flex items-center gap-1.5 w-full mt-2 text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95 justify-center"
+            style={{ background: '#edf2fb', color: '#1966b5' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            Chat
+          </button>
+        )}
 
         {viewerRole === 'poster' && status === 'paid' && rating === null && (
           <div className="mt-3">
