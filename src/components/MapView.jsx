@@ -67,6 +67,8 @@ export default function MapView({ requests, onSelectRequest, collectorLocation, 
       style={{
         height: 200,
         boxShadow: '0 1px 3px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04)',
+        // Contain Leaflet's high z-index panes so they can't paint over fixed overlays (chat, modals).
+        isolation: 'isolate',
       }}
     >
       <MapContainer
