@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { sampleRequest } from './data/sampleRequest'
 import { useSharedRequests } from './hooks/useSharedRequests'
-import { mockUsers as users } from './data/users'
+import { supabase } from './lib/supabase'
 import PosterView from './components/PosterView'
 import CollectorView from './components/CollectorView'
 import TopBar from './components/TopBar'
@@ -11,22 +11,65 @@ import AuthScreen from './components/AuthScreen'
 function App() {
   const [appState, setAppState] = useState('loading') // 'loading' | 'auth' | 'app'
   const [currentUser, setCurrentUser] = useState(null)
+  const [profiles, setProfiles] = useState([])
 
   const [role, setRole] = useState('poster')
   const [requests, setRequests] = useSharedRequests([sampleRequest])
 
-  function handleLoadingDone() {
-    setAppState('auth')
+  async function fetchProfile(userId) {
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, name, default_role')
+      .eq('id', userId)
+      .single()
+    return data
   }
 
-  function handleLogin(user) {
+  async function fetchAllProfiles() {
+    const { data } = await supabase.from('profiles').select('id, name, default_role')
+    if (data) setProfiles(data)
+  }
+
+  // Listen for auth state changes — only act on explicit sign-out
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        setCurrentUser(null)
+        setProfiles([])
+        setAppState('auth')
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  // Called when the splash animation finishes — check for an existing session
+  async function handleLoadingDone() {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session?.user) {
+      const profile = await fetchProfile(session.user.id)
+      const user = { ...session.user, name: profile?.name, defaultRole: profile?.default_role }
+      setCurrentUser(user)
+      setRole(profile?.default_role ?? 'poster')
+      await fetchAllProfiles()
+      setAppState('app')
+    } else {
+      setAppState('auth')
+    }
+  }
+
+  async function handleLogin(authUser) {
+    const profile = await fetchProfile(authUser.id)
+    const user = { ...authUser, name: profile?.name, defaultRole: profile?.default_role }
     setCurrentUser(user)
-    setRole(user.defaultRole)
+    setRole(profile?.default_role ?? 'poster')
+    await fetchAllProfiles()
     setAppState('app')
   }
 
-  function handleLogout() {
+  async function handleLogout() {
+    await supabase.auth.signOut()
     setCurrentUser(null)
+    setProfiles([])
     setAppState('auth')
   }
 
@@ -105,7 +148,7 @@ function App() {
             onRate={handleRate}
             onLike={handleLike}
             currentUser={currentUser}
-            users={users}
+            users={profiles}
           />
         ) : (
           <CollectorView
@@ -114,7 +157,7 @@ function App() {
             currentUser={currentUser}
             onSubmitAfterPhoto={handleAfterPhoto}
             onLike={handleLike}
-            users={users}
+            users={profiles}
           />
         )}
       </main>
