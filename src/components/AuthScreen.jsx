@@ -1,16 +1,14 @@
 import { useState } from 'react'
-import { mockUsers } from '../data/users'
-
-// In-memory registry — survives within the session but resets on page refresh
-const userRegistry = [...mockUsers]
+import { supabase } from '../lib/supabase'
 
 export default function AuthScreen({ onLogin }) {
-  const [mode, setMode] = useState('login') // 'login' | 'signup'
+  const [mode, setMode] = useState('login') // 'login' | 'signup' | 'confirm'
 
   // Login state
   const [loginEmail, setLoginEmail] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
   const [loginError, setLoginError] = useState('')
+  const [loginLoading, setLoginLoading] = useState(false)
 
   // Signup state
   const [signupName, setSignupName] = useState('')
@@ -19,48 +17,63 @@ export default function AuthScreen({ onLogin }) {
   const [signupConfirm, setSignupConfirm] = useState('')
   const [signupRole, setSignupRole] = useState('poster')
   const [signupError, setSignupError] = useState('')
+  const [signupLoading, setSignupLoading] = useState(false)
 
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault()
     setLoginError('')
+    setLoginLoading(true)
 
-    const user = userRegistry.find(
-      (u) =>
-        u.email.toLowerCase() === loginEmail.trim().toLowerCase() &&
-        u.password === loginPassword
-    )
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: loginEmail.trim(),
+      password: loginPassword,
+    })
 
-    if (!user) {
-      setLoginError('Invalid email or password.')
+    setLoginLoading(false)
+
+    if (error) {
+      setLoginError(error.message)
       return
     }
 
-    onLogin(user)
+    onLogin(data.user)
   }
 
-  function handleSignup(e) {
+  async function handleSignup(e) {
     e.preventDefault()
     setSignupError('')
 
     if (!signupName.trim()) return setSignupError('Name is required.')
-    if (!signupEmail.trim()) return setSignupError('Email is required.')
     if (signupPassword.length < 6) return setSignupError('Password must be at least 6 characters.')
     if (signupPassword !== signupConfirm) return setSignupError('Passwords do not match.')
 
-    const exists = userRegistry.find(
-      (u) => u.email.toLowerCase() === signupEmail.trim().toLowerCase()
-    )
-    if (exists) return setSignupError('An account with this email already exists.')
+    setSignupLoading(true)
 
-    const newUser = {
-      id: `u${Date.now()}`,
-      name: signupName.trim(),
-      email: signupEmail.trim().toLowerCase(),
+    const { data, error } = await supabase.auth.signUp({
+      email: signupEmail.trim(),
       password: signupPassword,
-      defaultRole: signupRole,
+      options: {
+        data: {
+          name: signupName.trim(),
+          default_role: signupRole,
+        },
+      },
+    })
+
+    setSignupLoading(false)
+
+    if (error) {
+      setSignupError(String(error.message || 'Sign up failed. Please try again.'))
+      return
     }
-    userRegistry.push(newUser)
-    onLogin(newUser)
+
+    // Email confirmation required — no session yet
+    if (!data.session) {
+      setMode('confirm')
+      return
+    }
+
+    onLogin(data.user)
   }
 
   return (
@@ -97,7 +110,28 @@ export default function AuthScreen({ onLogin }) {
 
       {/* Card */}
       <div className="w-full max-w-[390px] bg-white rounded-2xl shadow-sm p-6">
-        {/* Tab toggle */}
+
+        {/* Email confirmation pending */}
+        {mode === 'confirm' && (
+          <div className="flex flex-col items-center gap-4 py-4 text-center">
+            <div className="text-4xl">📬</div>
+            <h2 className="font-bold text-lg" style={{ color: '#0d3320' }}>Check your email</h2>
+            <p className="text-sm" style={{ color: '#6b7280' }}>
+              We sent a confirmation link to your email address. Click it to activate your account, then log in below.
+            </p>
+            <button
+              onClick={() => setMode('login')}
+              className="w-full py-3 rounded-xl font-bold text-sm text-white mt-2"
+              style={{ background: '#0d3320' }}
+            >
+              Go to Log In
+            </button>
+          </div>
+        )}
+
+        {/* Tab toggle + forms — hidden on confirm screen */}
+        {mode !== 'confirm' && (
+        <>
         <div
           className="flex rounded-xl mb-6 p-1"
           style={{ background: '#f3f4f2' }}
@@ -160,16 +194,12 @@ export default function AuthScreen({ onLogin }) {
 
             <button
               type="submit"
+              disabled={loginLoading}
               className="w-full py-3 rounded-xl font-bold text-sm text-white mt-1"
-              style={{ background: '#0d3320' }}
+              style={{ background: '#0d3320', opacity: loginLoading ? 0.7 : 1 }}
             >
-              Log In
+              {loginLoading ? 'Logging in…' : 'Log In'}
             </button>
-
-            {/* Demo hint */}
-            <p className="text-xs text-center mt-1" style={{ color: '#9ca3af' }}>
-              Demo: <span className="font-medium">juan@test.com</span> / <span className="font-medium">password123</span>
-            </p>
           </form>
         ) : (
           <form onSubmit={handleSignup} className="flex flex-col gap-4">
@@ -266,12 +296,15 @@ export default function AuthScreen({ onLogin }) {
 
             <button
               type="submit"
+              disabled={signupLoading}
               className="w-full py-3 rounded-xl font-bold text-sm text-white mt-1"
-              style={{ background: '#c97f1e' }}
+              style={{ background: '#c97f1e', opacity: signupLoading ? 0.7 : 1 }}
             >
-              Create Account
+              {signupLoading ? 'Creating account…' : 'Create Account'}
             </button>
           </form>
+        )}
+        </>
         )}
       </div>
     </div>
