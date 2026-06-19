@@ -3,6 +3,7 @@ import PostForm from './PostForm'
 import TrashCard from './TrashCard'
 import Leaderboard from './Leaderboard'
 import SuccessModal from './SuccessModal'
+import CollectorTracker from './CollectorTracker'
 
 function PosterView({ requests, addRequest, updateStatus, onRate, onLike, currentUser, users }) {
   const [success, setSuccess] = useState(null)
@@ -38,15 +39,19 @@ function PosterView({ requests, addRequest, updateStatus, onRate, onLike, curren
         ) : (
           <div className="space-y-3">
             {requests.map(req => (
-              <TrashCard
-                key={req.id}
-                request={req}
-                viewerRole="poster"
-                onUpdateStatus={handleUpdate}
-                onRate={onRate}
-                onLike={onLike}
-                currentUserId={currentUser?.id}
-              />
+              <div key={req.id}>
+                <TrashCard
+                  request={req}
+                  viewerRole="poster"
+                  onUpdateStatus={handleUpdate}
+                  onRate={onRate}
+                  onLike={onLike}
+                  currentUserId={currentUser?.id}
+                />
+                {req.status === 'accepted' && (
+                  <CollectorTracker request={req} />
+                )}
+              </div>
             ))}
           </div>
         )}
