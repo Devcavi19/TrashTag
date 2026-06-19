@@ -1,16 +1,21 @@
-function TopBar({ role, setRole, openCount, user, onLogout }) {
+function TopBar({ user, unreadCount = 0, onOpenMessages, onLogout }) {
   const initials = user
-    ? user.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
+    ? user.name?.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
     : '?'
 
   return (
     <header
-      className="sticky top-0 z-50 w-full"
+      className="sticky top-0 z-40 w-full"
       style={{ background: '#0d3320' }}
     >
       <div className="mx-auto flex max-w-[430px] items-center justify-between px-4 py-3">
         <div className="flex items-baseline gap-1.5">
-          <span className="text-[17px] font-bold tracking-tight text-white">TrashTag</span>
+          <span
+            className="font-display text-[21px] leading-none text-white"
+            style={{ fontWeight: 600 }}
+          >
+            TrashTag
+          </span>
           <span
             className="text-[10px] font-semibold uppercase tracking-widest"
             style={{ color: 'rgba(255,255,255,0.35)' }}
@@ -19,41 +24,32 @@ function TopBar({ role, setRole, openCount, user, onLogout }) {
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div
-            className="flex rounded-full p-0.5"
-            style={{ background: 'rgba(255,255,255,0.12)' }}
+        <div className="flex items-center gap-2.5">
+          {/* Messages */}
+          <button
+            onClick={onOpenMessages}
+            className="relative flex h-9 w-9 items-center justify-center rounded-full transition-all active:scale-95"
+            style={{ background: 'rgba(255,255,255,0.12)', color: '#fff' }}
+            aria-label={unreadCount > 0 ? `Messages, ${unreadCount} active` : 'Messages'}
           >
-            {[
-              { key: 'poster', label: 'Post' },
-              { key: 'collector', label: 'Collect' },
-              { key: 'community', label: 'Community' },
-            ].map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => setRole(key)}
-                className="rounded-full px-3 py-1 text-sm font-semibold transition-all"
-                style={
-                  role === key
-                    ? { background: '#ffffff', color: '#0d3320' }
-                    : { background: 'transparent', color: 'rgba(255,255,255,0.6)' }
-                }
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            {unreadCount > 0 && (
+              <span
+                className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white"
+                style={{ background: '#c97f1e' }}
               >
-                <span>{label}</span>
-                {key === 'collector' && openCount > 0 && (
-                  <span className="ml-1 bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5">
-                    {openCount}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
+                {unreadCount}
+              </span>
+            )}
+          </button>
 
           {/* Avatar + logout */}
           <button
             onClick={onLogout}
             title={`Logout (${user?.name})`}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all active:scale-95"
             style={{ background: '#c97f1e', color: 'white' }}
           >
             {initials}
