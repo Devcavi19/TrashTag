@@ -15,7 +15,8 @@ const SUCCESS_MESSAGES = {
 }
 
 function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto, onLike, users }) {
-  const [afterPhotos, setAfterPhotos] = useState({})
+  const [afterPhotoFiles, setAfterPhotoFiles] = useState({})
+  const [afterPhotoPreviews, setAfterPhotoPreviews] = useState({})
   const [success, setSuccess] = useState(null)
 
   const activeJobs = requests.filter(r => r.status === 'accepted')
@@ -23,16 +24,16 @@ function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto
 
   function handleFileChange(id, file) {
     if (!file) return
-    const reader = new FileReader()
-    reader.onload = (e) => setAfterPhotos(prev => ({ ...prev, [id]: e.target.result }))
-    reader.readAsDataURL(file)
+    setAfterPhotoFiles(prev => ({ ...prev, [id]: file }))
+    setAfterPhotoPreviews(prev => ({ ...prev, [id]: URL.createObjectURL(file) }))
   }
 
   function handleUpdate(reqId, newStatus, photoId) {
     if (newStatus === 'collected') {
-      onSubmitAfterPhoto(reqId, afterPhotos[photoId])
+      onSubmitAfterPhoto(reqId, afterPhotoFiles[photoId])
       updateStatus(reqId, 'collected')
-      setAfterPhotos(prev => { const n = { ...prev }; delete n[photoId]; return n })
+      setAfterPhotoFiles(prev => { const n = { ...prev }; delete n[photoId]; return n })
+      setAfterPhotoPreviews(prev => { const n = { ...prev }; delete n[photoId]; return n })
     } else {
       updateStatus(reqId, newStatus)
     }
@@ -61,10 +62,10 @@ function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto
                   className="rounded-xl overflow-hidden"
                   style={{ border: '1.5px dashed #2f6b44', background: '#f6fdf8' }}
                 >
-                  {afterPhotos[r.id] ? (
+                  {afterPhotoPreviews[r.id] ? (
                     <div className="relative">
                       <img
-                        src={afterPhotos[r.id]}
+                        src={afterPhotoPreviews[r.id]}
                         alt="after"
                         className="w-full object-cover"
                         style={{ maxHeight: 140 }}
@@ -105,7 +106,7 @@ function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto
                   request={r}
                   viewerRole="collector"
                   onUpdateStatus={makeUpdateStatus(r.id)}
-                  stagedAfterPhoto={afterPhotos[r.id]}
+                  stagedAfterPhoto={afterPhotoFiles[r.id]}
                   onLike={onLike}
                   currentUserId={currentUser?.id}
                 />
