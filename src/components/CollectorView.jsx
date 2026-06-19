@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { supabase } from '../lib/supabase'
 import TrashCard from './TrashCard'
 import Leaderboard from './Leaderboard'
 import SuccessModal from './SuccessModal'
+import MapView from './MapView'
 
 const SUCCESS_MESSAGES = {
   accepted: {
@@ -18,9 +20,39 @@ function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto
   const [afterPhotoFiles, setAfterPhotoFiles] = useState({})
   const [afterPhotoPreviews, setAfterPhotoPreviews] = useState({})
   const [success, setSuccess] = useState(null)
+  const broadcastRef = useRef(null)
 
   const activeJobs = requests.filter(r => r.status === 'accepted')
   const openJobs = requests.filter(r => r.status === 'open' && r.postedBy !== currentUser?.id)
+
+  // Broadcast collector position every 5s while a job is accepted
+  const activeJobId = activeJobs[0]?.id ?? null
+  useEffect(() => {
+    if (!activeJobId || !currentUser?.id || !navigator.geolocation) return
+
+    function broadcast() {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        await supabase.from('collector_locations').upsert(
+          {
+            collector_id: currentUser.id,
+            request_id: activeJobId,
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'collector_id' }
+        )
+      })
+    }
+
+    broadcast() // immediate first ping
+    broadcastRef.current = setInterval(broadcast, 5000)
+
+    return () => {
+      clearInterval(broadcastRef.current)
+      broadcastRef.current = null
+    }
+  }, [activeJobId, currentUser?.id])
 
   function handleFileChange(id, file) {
     if (!file) return
@@ -123,6 +155,11 @@ function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto
         >
           Available Jobs
         </h2>
+        {openJobs.some(r => r.lat != null) && (
+          <div className="mb-3">
+            <MapView requests={openJobs} />
+          </div>
+        )}
         {openJobs.length === 0 ? (
           <div className="flex flex-col items-center py-12 gap-2 text-center">
             <span className="text-3xl" style={{ opacity: 0.25 }}>✅</span>
