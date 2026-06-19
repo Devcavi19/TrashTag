@@ -4,9 +4,11 @@ import TrashCard from './TrashCard'
 import Leaderboard from './Leaderboard'
 import SuccessModal from './SuccessModal'
 import CollectorTracker from './CollectorTracker'
+import ChatDrawer from './ChatDrawer'
 
 function PosterView({ requests, addRequest, updateStatus, onRate, onLike, currentUser, users }) {
   const [success, setSuccess] = useState(null)
+  const [chatRequest, setChatRequest] = useState(null)
 
   function handleUpdate(reqId, newStatus) {
     updateStatus(reqId, newStatus)
@@ -46,6 +48,7 @@ function PosterView({ requests, addRequest, updateStatus, onRate, onLike, curren
                   onUpdateStatus={handleUpdate}
                   onRate={onRate}
                   onLike={onLike}
+                  onOpenChat={req.status === 'accepted' ? setChatRequest : undefined}
                   currentUserId={currentUser?.id}
                 />
                 {req.status === 'accepted' && (
@@ -65,6 +68,14 @@ function PosterView({ requests, addRequest, updateStatus, onRate, onLike, curren
         message={success?.message}
         buttonLabel="Done"
         onClose={() => setSuccess(null)}
+      />
+
+      <ChatDrawer
+        open={!!chatRequest}
+        onClose={() => setChatRequest(null)}
+        request={chatRequest}
+        currentUser={currentUser}
+        users={users}
       />
     </div>
   )
