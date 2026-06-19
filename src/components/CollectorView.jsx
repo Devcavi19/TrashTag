@@ -4,6 +4,7 @@ import TrashCard from './TrashCard'
 import Leaderboard from './Leaderboard'
 import SuccessModal from './SuccessModal'
 import MapView from './MapView'
+import ChatDrawer from './ChatDrawer'
 
 const SUCCESS_MESSAGES = {
   accepted: {
@@ -20,6 +21,7 @@ function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto
   const [afterPhotoFiles, setAfterPhotoFiles] = useState({})
   const [afterPhotoPreviews, setAfterPhotoPreviews] = useState({})
   const [success, setSuccess] = useState(null)
+  const [chatRequest, setChatRequest] = useState(null)
   const broadcastRef = useRef(null)
 
   const activeJobs = requests.filter(r => r.status === 'accepted')
@@ -140,6 +142,7 @@ function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto
                   onUpdateStatus={makeUpdateStatus(r.id)}
                   stagedAfterPhoto={afterPhotoFiles[r.id]}
                   onLike={onLike}
+                  onOpenChat={setChatRequest}
                   currentUserId={currentUser?.id}
                 />
               </div>
@@ -191,6 +194,14 @@ function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto
         message={success?.message}
         buttonLabel="Done"
         onClose={() => setSuccess(null)}
+      />
+
+      <ChatDrawer
+        open={!!chatRequest}
+        onClose={() => setChatRequest(null)}
+        request={chatRequest}
+        currentUser={currentUser}
+        users={users}
       />
     </div>
   )
