@@ -47,116 +47,19 @@ function timeAgo(isoString) {
   const diff = Math.floor((Date.now() - new Date(isoString)) / 1000)
   if (diff < 60) return `${diff}s ago`
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
-  return `${Math.floor(diff / 3600)}h ago`
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
+  return `${Math.floor(diff / 86400)}d ago`
 }
 
-const CONFIRM_DIALOGS = {
-  accepted: {
-    title: 'Accept this job?',
-    message: 'You commit to picking up this trash. It will move to your active jobs.',
-    confirmLabel: 'Accept Job',
-    confirmColor: '#0d3320',
-  },
-  collected: {
-    title: 'Mark as collected?',
-    message: 'Confirm you have picked up the trash. The poster will be asked to pay.',
-    confirmLabel: 'Mark as Collected',
-    confirmColor: '#2f6b44',
-  },
-  paid: {
-    title: 'Confirm & pay?',
-    confirmLabel: 'Confirm & Pay',
-    confirmColor: '#c97f1e',
-  },
-}
-
-function ActionButton({ viewerRole, status, id, price, onUpdateStatus, stagedAfterPhoto }) {
-  const [pendingStatus, setPendingStatus] = useState(null)
-
-  function confirmPending() {
-    if (pendingStatus) onUpdateStatus(id, pendingStatus)
-    setPendingStatus(null)
-  }
-
-  const dialog = pendingStatus ? CONFIRM_DIALOGS[pendingStatus] : null
-
-  const modal = (
-    <ConfirmModal
-      open={!!pendingStatus}
-      title={dialog?.title}
-      message={
-        pendingStatus === 'paid'
-          ? `Pay ₱${price} to the collector for this pickup. This cannot be undone.`
-          : dialog?.message
-      }
-      confirmLabel={dialog?.confirmLabel}
-      confirmColor={dialog?.confirmColor}
-      onConfirm={confirmPending}
-      onCancel={() => setPendingStatus(null)}
-    />
-  )
-
-  if (viewerRole === 'collector') {
-    if (status === 'open') {
-      return (
-        <>
-          <button
-            onClick={() => setPendingStatus('accepted')}
-            className="w-full mt-4 text-white text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95"
-            style={{ background: '#0d3320' }}
-          >
-            Accept Job
-          </button>
-          {modal}
-        </>
-      )
-    }
-    if (status === 'accepted') {
-      const canCollect = !!stagedAfterPhoto
-      return (
-        <>
-          <button
-            onClick={() => canCollect && setPendingStatus('collected')}
-            disabled={!canCollect}
-            className="w-full mt-4 text-white text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95"
-            style={{
-              background: canCollect ? '#2f6b44' : '#a8a5a0',
-              cursor: canCollect ? 'pointer' : 'not-allowed',
-            }}
-          >
-            Mark as Collected
-          </button>
-          {modal}
-        </>
-      )
-    }
-  }
-
-  if (viewerRole === 'poster' && status === 'collected') {
-    return (
-      <>
-        <button
-          onClick={() => setPendingStatus('paid')}
-          className="w-full mt-4 text-white text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95"
-          style={{ background: '#c97f1e' }}
-        >
-          Confirm &amp; Pay ₱{price}
-        </button>
-        {modal}
-      </>
-    )
-  }
-
-  return null
-}
-
-export default function TrashCard({ request, viewerRole, onUpdateStatus, onRate, onLike, onOpenChat, currentUserId, stagedAfterPhoto }) {
-  const { id, photo, tags = [], status, gps, lat, lng, price, postedAt, rating, afterPhoto, likes = [], postedBy } = request
+export default function TrashCard({ request, currentUserId, onAccept, onLike, onOpenThread }) {
+  const { id, photo, tags = [], status, gps, lat, lng, price, postedAt, likes = [], postedBy, collectedBy } = request
   const typeColor = TAG_COLORS[tags[0]]?.color || '#706d67'
 
-  const showComparison = (status === 'collected' || status === 'paid') && afterPhoto
+  const [confirmAccept, setConfirmAccept] = useState(false)
 
-  const isOwnPost = viewerRole === 'poster' && postedBy === currentUserId
+  const isOwner = postedBy === currentUserId
+  const isCollector = collectedBy === currentUserId
+  const involved = isOwner || isCollector
   const liked = likes.includes(currentUserId)
 
   return (
@@ -167,53 +70,12 @@ export default function TrashCard({ request, viewerRole, onUpdateStatus, onRate,
       {/* Signature: category color strip */}
       <div style={{ height: 5, background: typeColor }} />
 
-      {/* Photo(s) */}
-      {showComparison ? (
-        <div className="grid grid-cols-2">
-          <div className="relative">
-            <img
-              src={photo || sampleTrash}
-              alt="before"
-              className="w-full object-cover"
-              style={{ maxHeight: 140 }}
-            />
-            <span
-              className="absolute bottom-1 left-1 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded"
-              style={{ background: 'rgba(0,0,0,0.5)' }}
-            >
-              Before
-            </span>
-          </div>
-          <div className="relative">
-            <img
-              src={afterPhoto}
-              alt="after"
-              className="w-full object-cover"
-              style={{ maxHeight: 140 }}
-            />
-            <span
-              className="absolute bottom-1 left-1 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded"
-              style={{ background: 'rgba(0,0,0,0.5)' }}
-            >
-              After
-            </span>
-          </div>
-        </div>
-      ) : photo ? (
-        <img
-          src={photo}
-          alt="trash"
-          className="w-full object-cover"
-          style={{ maxHeight: 160 }}
-        />
-      ) : (
-        <img
-          src={sampleTrash}
-          alt="sample trash"
-          className="w-full object-cover"
-          style={{ maxHeight: 160 }}
-        />
-      )}
+      <img
+        src={photo || sampleTrash}
+        alt="trash"
+        className="w-full object-cover"
+        style={{ maxHeight: 160 }}
+      />
 
       <div className="px-4 pt-3 pb-4">
         {/* Location */}
@@ -249,73 +111,60 @@ export default function TrashCard({ request, viewerRole, onUpdateStatus, onRate,
           Posted {timeAgo(postedAt)}
         </p>
 
-        {/* Like button */}
-        {onLike && !isOwnPost && (
+        {/* Like — can't like your own post */}
+        {onLike && !isOwner && (
           <button
             onClick={() => onLike(id, currentUserId)}
             className="flex items-center gap-1.5 mt-2.5 text-sm font-semibold transition-all active:scale-95"
             style={{ color: liked ? '#c0392b' : '#a8a5a0' }}
             aria-pressed={liked}
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill={liked ? 'currentColor' : 'none'}
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
             <span>{likes.length}</span>
           </button>
         )}
 
-        <ActionButton
-          viewerRole={viewerRole}
-          status={status}
-          id={id}
-          price={price}
-          onUpdateStatus={onUpdateStatus}
-          stagedAfterPhoto={stagedAfterPhoto}
-        />
+        {/* Primary action — Accept on others' open jobs; Open conversation once involved */}
+        {status === 'open' && !isOwner && (
+          <>
+            <button
+              onClick={() => setConfirmAccept(true)}
+              className="w-full mt-4 text-white text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95"
+              style={{ background: '#0d3320' }}
+            >
+              Accept pickup
+            </button>
+            <ConfirmModal
+              open={confirmAccept}
+              title="Accept this pickup?"
+              message="You commit to collecting this trash. It opens a conversation with the poster where you'll track, upload proof, and get paid."
+              confirmLabel="Accept pickup"
+              confirmColor="#0d3320"
+              onConfirm={() => { setConfirmAccept(false); onAccept(id) }}
+              onCancel={() => setConfirmAccept(false)}
+            />
+          </>
+        )}
 
-        {status === 'accepted' && onOpenChat && (
+        {status === 'open' && isOwner && (
+          <p className="mt-4 text-center text-xs font-medium" style={{ color: '#a8a5a0' }}>
+            Waiting for a neighbor to accept…
+          </p>
+        )}
+
+        {status !== 'open' && involved && onOpenThread && (
           <button
-            onClick={() => onOpenChat(request)}
-            className="flex items-center gap-1.5 w-full mt-2 text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95 justify-center"
+            onClick={() => onOpenThread(request)}
+            className="flex items-center justify-center gap-1.5 w-full mt-4 text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95"
             style={{ background: '#edf2fb', color: '#1966b5' }}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
-            Chat
+            Open conversation
           </button>
-        )}
-
-        {viewerRole === 'poster' && status === 'paid' && rating === null && (
-          <div className="mt-3">
-            <p className="text-xs mb-1" style={{ color: '#a8a5a0' }}>Rate your collector:</p>
-            <div className="flex gap-1">
-              {[1, 2, 3, 4, 5].map(star => (
-                <button
-                  key={star}
-                  onClick={() => onRate(id, star)}
-                  className="text-2xl text-gray-300 hover:text-yellow-400 transition-colors"
-                >
-                  ★
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {viewerRole === 'poster' && status === 'paid' && rating !== null && (
-          <p className="text-sm mt-3" style={{ color: '#c97f1e' }}>
-            {'★'.repeat(rating)}{'☆'.repeat(5 - rating)} Rated
-          </p>
         )}
       </div>
     </div>
