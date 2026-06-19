@@ -3,10 +3,13 @@ import ngeohash from 'ngeohash'
 import { useRequests } from './hooks/useRequests'
 import { useFeed } from './hooks/useFeed'
 import { supabase } from './lib/supabase'
-import PosterView from './components/PosterView'
-import CollectorView from './components/CollectorView'
+import HomeFeed from './components/HomeFeed'
 import FeedView from './components/FeedView'
+import Conversations from './components/Conversations'
+import MessageThread from './components/MessageThread'
+import ComposerModal from './components/ComposerModal'
 import TopBar from './components/TopBar'
+import BottomNav from './components/BottomNav'
 import LoadingScreen from './components/LoadingScreen'
 import AuthScreen from './components/AuthScreen'
 import Toast from './components/Toast'
@@ -16,7 +19,11 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null)
   const [profiles, setProfiles] = useState([])
 
-  const [role, setRole] = useState('poster')
+  const [view, setView] = useState('home') // 'home' | 'community'
+  const [messagesOpen, setMessagesOpen] = useState(false)
+  const [activeRequestId, setActiveRequestId] = useState(null)
+  const [composerOpen, setComposerOpen] = useState(false)
+
   const [requests, realtimeStatus] = useRequests()
   const [posts] = useFeed()
 
@@ -25,14 +32,14 @@ function App() {
   async function fetchProfile(userId) {
     const { data } = await supabase
       .from('profiles')
-      .select('id, name, default_role')
+      .select('id, name')
       .eq('id', userId)
       .single()
     return data
   }
 
   async function fetchAllProfiles() {
-    const { data } = await supabase.from('profiles').select('id, name, default_role')
+    const { data } = await supabase.from('profiles').select('id, name')
     if (data) setProfiles(data)
   }
 
@@ -53,9 +60,7 @@ function App() {
     const { data: { session } } = await supabase.auth.getSession()
     if (session?.user) {
       const profile = await fetchProfile(session.user.id)
-      const user = { ...session.user, name: profile?.name, defaultRole: profile?.default_role }
-      setCurrentUser(user)
-      setRole(profile?.default_role ?? 'poster')
+      setCurrentUser({ ...session.user, name: profile?.name })
       await fetchAllProfiles()
       setAppState('app')
     } else {
@@ -65,9 +70,7 @@ function App() {
 
   async function handleLogin(authUser) {
     const profile = await fetchProfile(authUser.id)
-    const user = { ...authUser, name: profile?.name, defaultRole: profile?.default_role }
-    setCurrentUser(user)
-    setRole(profile?.default_role ?? 'poster')
+    setCurrentUser({ ...authUser, name: profile?.name })
     await fetchAllProfiles()
     setAppState('app')
   }
@@ -103,6 +106,14 @@ function App() {
     await supabase.from('requests').update(updates).eq('id', id)
   }
 
+  // Poster reviews the after-photo: accept → paid, or reject → disputed (photo cleared)
+  async function handlePayment(id, accept) {
+    const updates = accept
+      ? { status: 'paid' }
+      : { status: 'disputed', after_photo_url: null }
+    await supabase.from('requests').update(updates).eq('id', id)
+  }
+
   async function handleAfterPhoto(id, file) {
     if (!file) return
     const ext = file.name.split('.').pop() || 'jpg'
@@ -125,8 +136,10 @@ function App() {
     }
   }
 
-  async function handleRate(id, stars) {
-    await supabase.from('requests').update({ rating: stars }).eq('id', id)
+  // by: 'poster' writes requests.rating; 'collector' writes requests.collector_rating
+  async function handleRate(id, stars, by) {
+    const column = by === 'collector' ? 'collector_rating' : 'rating'
+    await supabase.from('requests').update({ [column]: stars }).eq('id', id)
   }
 
   async function addPost(newPost) {
@@ -144,7 +157,21 @@ function App() {
     }
   }
 
-  const openCount = requests.filter((r) => r.status === 'open' && r.postedBy !== currentUser?.id).length
+  // Jobs I'm part of that are still in motion — drives the Messages badge.
+  const myId = currentUser?.id
+  const activeConvoCount = requests.filter(
+    (r) =>
+      (r.postedBy === myId || r.collectedBy === myId) &&
+      ['accepted', 'collected', 'disputed'].includes(r.status)
+  ).length
+
+  function openThread(request) {
+    setActiveRequestId(request.id)
+  }
+
+  const activeRequest = activeRequestId
+    ? requests.find((r) => r.id === activeRequestId) ?? null
+    : null
 
   if (appState === 'loading') {
     return <LoadingScreen onDone={handleLoadingDone} />
@@ -157,36 +184,24 @@ function App() {
   return (
     <div className="min-h-screen font-sans" style={{ background: '#f3f4f2' }}>
       <TopBar
-        role={role}
-        setRole={setRole}
-        openCount={openCount}
         user={currentUser}
+        unreadCount={activeConvoCount}
+        onOpenMessages={() => setMessagesOpen(true)}
         onLogout={handleLogout}
       />
 
-      <main className="max-w-[430px] mx-auto">
-        {role === 'poster' && (
-          <PosterView
+      <main className="max-w-[430px] mx-auto pb-24">
+        {view === 'home' ? (
+          <HomeFeed
             requests={requests}
-            addRequest={addRequest}
-            updateStatus={updateStatus}
-            onRate={handleRate}
-            onLike={handleLike}
             currentUser={currentUser}
             users={profiles}
-          />
-        )}
-        {role === 'collector' && (
-          <CollectorView
-            requests={requests}
-            updateStatus={updateStatus}
-            currentUser={currentUser}
-            onSubmitAfterPhoto={handleAfterPhoto}
+            onCompose={() => setComposerOpen(true)}
+            onAccept={(id) => updateStatus(id, 'accepted')}
             onLike={handleLike}
-            users={profiles}
+            onOpenThread={openThread}
           />
-        )}
-        {role === 'community' && (
+        ) : (
           <FeedView
             posts={posts}
             addPost={addPost}
@@ -195,6 +210,39 @@ function App() {
           />
         )}
       </main>
+
+      <BottomNav
+        view={view}
+        setView={setView}
+        onCompose={() => setComposerOpen(true)}
+      />
+
+      {composerOpen && (
+        <ComposerModal onClose={() => setComposerOpen(false)} onSubmit={addRequest} />
+      )}
+
+      {messagesOpen && !activeRequest && (
+        <Conversations
+          requests={requests}
+          currentUser={currentUser}
+          users={profiles}
+          onClose={() => setMessagesOpen(false)}
+          onOpenThread={openThread}
+        />
+      )}
+
+      {activeRequest && (
+        <MessageThread
+          request={activeRequest}
+          currentUser={currentUser}
+          users={profiles}
+          onClose={() => setActiveRequestId(null)}
+          onUpdateStatus={updateStatus}
+          onSubmitAfterPhoto={handleAfterPhoto}
+          onPayment={handlePayment}
+          onRate={handleRate}
+        />
+      )}
 
       <Toast message={realtimeDown ? 'Connection lost — reconnecting…' : null} />
     </div>
