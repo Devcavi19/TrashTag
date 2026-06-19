@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { supabase } from '../lib/supabase'
 import ConfirmModal from './ConfirmModal'
 import SuccessModal from './SuccessModal'
 
@@ -9,7 +10,8 @@ const TYPE_OPTIONS = [
 ]
 
 function PostForm({ onSubmit }) {
-  const [photo, setPhoto] = useState(null)
+  const [photoFile, setPhotoFile] = useState(null)
+  const [photoPreview, setPhotoPreview] = useState(null)
   const [gps, setGps] = useState('')
   const [type, setType] = useState('Biodegradable')
   const [locationFocused, setLocationFocused] = useState(false)
@@ -19,23 +21,37 @@ function PostForm({ onSubmit }) {
   function handlePhoto(e) {
     const file = e.target.files[0]
     if (!file) return
+    setPhotoFile(file)
     const reader = new FileReader()
-    reader.onload = () => setPhoto(reader.result)
+    reader.onload = () => setPhotoPreview(reader.result)
     reader.readAsDataURL(file)
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
+    let photoUrl = null
+    if (photoFile) {
+      const ext = photoFile.name.split('.').pop() || 'jpg'
+      const path = `${Date.now()}.${ext}`
+      const { data: uploadData } = await supabase.storage
+        .from('trash-photos')
+        .upload(path, photoFile)
+      if (uploadData) {
+        const { data: { publicUrl } } = supabase.storage.from('trash-photos').getPublicUrl(uploadData.path)
+        photoUrl = publicUrl
+      }
+    }
+
     const selected = TYPE_OPTIONS.find(t => t.key === type)
-    onSubmit({
-      id: String(Date.now()),
-      photo,
+    await onSubmit({
+      photo: photoUrl,
       gps,
       type,
       price: selected?.price ?? 20,
       status: 'open',
       postedAt: new Date().toISOString(),
     })
-    setPhoto(null)
+    setPhotoFile(null)
+    setPhotoPreview(null)
     setGps('')
     setType('Biodegradable')
     setConfirmOpen(false)
@@ -79,12 +95,12 @@ function PostForm({ onSubmit }) {
             style={{
               height: 120,
               border: '2px dashed #dddcda',
-              background: photo ? 'transparent' : '#fafaf9',
+              background: photoPreview ? 'transparent' : '#fafaf9',
             }}
           >
-            {photo ? (
+            {photoPreview ? (
               <img
-                src={photo}
+                src={photoPreview}
                 alt="preview"
                 className="h-full w-full object-cover"
               />
