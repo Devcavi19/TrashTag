@@ -14,7 +14,8 @@ function dbToApp(row) {
     price: Number(row.price),
     status: row.status,
     postedAt: row.created_at,
-    rating: row.rating,
+    rating: row.rating, // poster's rating of the collector
+    collectorRating: row.collector_rating, // collector's rating of the poster
     afterPhoto: row.after_photo_url,
     postedBy: row.poster_id,
     collectedBy: row.collected_by,
