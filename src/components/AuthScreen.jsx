@@ -15,7 +15,6 @@ export default function AuthScreen({ onLogin }) {
   const [signupEmail, setSignupEmail] = useState('')
   const [signupPassword, setSignupPassword] = useState('')
   const [signupConfirm, setSignupConfirm] = useState('')
-  const [signupRole, setSignupRole] = useState('poster')
   const [signupError, setSignupError] = useState('')
   const [signupLoading, setSignupLoading] = useState(false)
 
@@ -55,7 +54,6 @@ export default function AuthScreen({ onLogin }) {
       options: {
         data: {
           name: signupName.trim(),
-          default_role: signupRole,
         },
       },
     })
@@ -103,8 +101,8 @@ export default function AuthScreen({ onLogin }) {
             />
           </svg>
         </div>
-        <h1 className="font-bold text-2xl" style={{ color: '#0d3320' }}>
-          TrashTag <span style={{ color: '#c97f1e' }} className="text-base font-semibold">PH</span>
+        <h1 className="font-display text-3xl" style={{ color: '#0d3320', fontWeight: 600 }}>
+          TrashTag <span style={{ color: '#c97f1e' }} className="text-base font-sans font-semibold align-middle">PH</span>
         </h1>
       </div>
 
@@ -263,32 +261,9 @@ export default function AuthScreen({ onLogin }) {
               />
             </div>
 
-            {/* Role picker */}
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold" style={{ color: '#374151' }}>
-                I want to…
-              </label>
-              <div className="flex gap-2">
-                {[
-                  { value: 'poster', label: '🏠 Post Requests' },
-                  { value: 'collector', label: '♻️ Collect Trash' },
-                ].map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setSignupRole(opt.value)}
-                    className="flex-1 py-2.5 rounded-xl text-xs font-semibold border-2 transition-all"
-                    style={
-                      signupRole === opt.value
-                        ? { borderColor: '#0d3320', background: '#0d3320', color: 'white' }
-                        : { borderColor: '#e5e7eb', color: '#374151' }
-                    }
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <p className="text-[11px] leading-snug" style={{ color: '#9aa0a6' }}>
+              One account does it all — post pickups and collect them whenever you like.
+            </p>
 
             {signupError && (
               <p className="text-xs text-red-500 text-center">{signupError}</p>
