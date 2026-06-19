@@ -23,6 +23,7 @@ function App() {
   const [messagesOpen, setMessagesOpen] = useState(false)
   const [activeRequestId, setActiveRequestId] = useState(null)
   const [composerOpen, setComposerOpen] = useState(false)
+  const [notice, setNotice] = useState(null)
 
   const [requests, realtimeStatus] = useRequests()
   const [posts] = useFeed()
@@ -42,6 +43,13 @@ function App() {
     const { data } = await supabase.from('profiles').select('id, name')
     if (data) setProfiles(data)
   }
+
+  // Auto-dismiss transient menu notices
+  useEffect(() => {
+    if (!notice) return
+    const t = setTimeout(() => setNotice(null), 2600)
+    return () => clearTimeout(t)
+  }, [notice])
 
   // Listen for auth state changes — only act on explicit sign-out
   useEffect(() => {
@@ -165,6 +173,21 @@ function App() {
       ['accepted', 'collected', 'disputed'].includes(r.status)
   ).length
 
+  // Real impact ledger for the account menu — derived from live requests, no fake numbers.
+  const myRatings = requests.filter(
+    (r) => r.collectedBy === myId && r.rating != null
+  )
+  const userStats = {
+    posted: requests.filter((r) => r.postedBy === myId).length,
+    collected: requests.filter(
+      (r) => r.collectedBy === myId && ['collected', 'paid'].includes(r.status)
+    ).length,
+    ratingCount: myRatings.length,
+    rating: myRatings.length
+      ? myRatings.reduce((sum, r) => sum + r.rating, 0) / myRatings.length
+      : 0,
+  }
+
   function openThread(request) {
     setActiveRequestId(request.id)
   }
@@ -185,9 +208,11 @@ function App() {
     <div className="min-h-screen font-sans" style={{ background: '#f3f4f2' }}>
       <TopBar
         user={currentUser}
+        stats={userStats}
         unreadCount={activeConvoCount}
         onOpenMessages={() => setMessagesOpen(true)}
         onLogout={handleLogout}
+        onNotice={setNotice}
       />
 
       <main className="max-w-[430px] mx-auto pb-24">
@@ -245,6 +270,7 @@ function App() {
       )}
 
       <Toast message={realtimeDown ? 'Connection lost — reconnecting…' : null} />
+      <Toast message={!realtimeDown ? notice : null} tone="info" />
     </div>
   )
 }
