@@ -9,6 +9,7 @@ import FeedView from './components/FeedView'
 import TopBar from './components/TopBar'
 import LoadingScreen from './components/LoadingScreen'
 import AuthScreen from './components/AuthScreen'
+import Toast from './components/Toast'
 
 function App() {
   const [appState, setAppState] = useState('loading') // 'loading' | 'auth' | 'app'
@@ -16,8 +17,10 @@ function App() {
   const [profiles, setProfiles] = useState([])
 
   const [role, setRole] = useState('poster')
-  const [requests] = useRequests()
+  const [requests, realtimeStatus] = useRequests()
   const [posts] = useFeed()
+
+  const realtimeDown = realtimeStatus === 'CHANNEL_ERROR' || realtimeStatus === 'TIMED_OUT'
 
   async function fetchProfile(userId) {
     const { data } = await supabase
@@ -88,7 +91,7 @@ function App() {
       location_lat: newReq.lat,
       location_lng: newReq.lng,
       location_geohash: geohash,
-      tags: [newReq.type],
+      tags: newReq.tags,
       price: newReq.price,
       status: 'open',
     })
@@ -192,6 +195,8 @@ function App() {
           />
         )}
       </main>
+
+      <Toast message={realtimeDown ? 'Connection lost — reconnecting…' : null} />
     </div>
   )
 }
