@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
+import { validateImage } from '../lib/validateImage'
 import TrashCard from './TrashCard'
 import Leaderboard from './Leaderboard'
 import SuccessModal from './SuccessModal'
@@ -20,6 +21,7 @@ const SUCCESS_MESSAGES = {
 function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto, onLike, users }) {
   const [afterPhotoFiles, setAfterPhotoFiles] = useState({})
   const [afterPhotoPreviews, setAfterPhotoPreviews] = useState({})
+  const [afterPhotoErrors, setAfterPhotoErrors] = useState({})
   const [success, setSuccess] = useState(null)
   const [chatRequest, setChatRequest] = useState(null)
   const broadcastRef = useRef(null)
@@ -58,6 +60,12 @@ function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto
 
   function handleFileChange(id, file) {
     if (!file) return
+    const err = validateImage(file)
+    if (err) {
+      setAfterPhotoErrors(prev => ({ ...prev, [id]: err }))
+      return
+    }
+    setAfterPhotoErrors(prev => { const n = { ...prev }; delete n[id]; return n })
     setAfterPhotoFiles(prev => ({ ...prev, [id]: file }))
     setAfterPhotoPreviews(prev => ({ ...prev, [id]: URL.createObjectURL(file) }))
   }
@@ -111,7 +119,7 @@ function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto
                         Change
                         <input
                           type="file"
-                          accept="image/*"
+                          accept="image/jpeg,image/png"
                           className="hidden"
                           onChange={e => handleFileChange(r.id, e.target.files[0])}
                         />
@@ -135,6 +143,11 @@ function CollectorView({ requests, updateStatus, currentUser, onSubmitAfterPhoto
                     </label>
                   )}
                 </div>
+                {afterPhotoErrors[r.id] && (
+                  <p className="text-[11px] font-medium" style={{ color: '#b53419' }}>
+                    {afterPhotoErrors[r.id]}
+                  </p>
+                )}
 
                 <TrashCard
                   request={r}
