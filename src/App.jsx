@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { sampleRequest } from './data/sampleRequest'
-import { useSharedRequests } from './hooks/useSharedRequests'
+import { useRequests } from './hooks/useRequests'
 import { supabase } from './lib/supabase'
 import PosterView from './components/PosterView'
 import CollectorView from './components/CollectorView'
@@ -14,7 +13,7 @@ function App() {
   const [profiles, setProfiles] = useState([])
 
   const [role, setRole] = useState('poster')
-  const [requests, setRequests] = useSharedRequests([sampleRequest])
+  const [requests] = useRequests()
 
   async function fetchProfile(userId) {
     const { data } = await supabase
@@ -73,50 +72,47 @@ function App() {
     setAppState('auth')
   }
 
-  function addRequest(newReq) {
-    setRequests((prev) => [
-      ...prev,
-      { ...newReq, rating: null, afterPhoto: null, likes: [], collectedBy: null, postedBy: currentUser?.id },
-    ])
+  async function addRequest(newReq) {
+    await supabase.from('requests').insert({
+      poster_id: currentUser?.id,
+      photo_url: newReq.photo,
+      location_label: newReq.gps,
+      tags: [newReq.type],
+      price: newReq.price,
+      status: 'open',
+    })
   }
 
-  function updateStatus(id, newStatus) {
-    setRequests((prev) =>
-      prev.map((req) =>
-        req.id === id
-          ? {
-              ...req,
-              status: newStatus,
-              ...(newStatus === 'accepted' ? { collectedBy: currentUser?.id } : {}),
-            }
-          : req
-      )
-    )
+  async function updateStatus(id, newStatus) {
+    const updates = { status: newStatus }
+    if (newStatus === 'accepted') updates.collected_by = currentUser?.id
+    await supabase.from('requests').update(updates).eq('id', id)
   }
 
-  function handleAfterPhoto(id, photoDataUrl) {
-    setRequests((prev) =>
-      prev.map((req) => (req.id === id ? { ...req, afterPhoto: photoDataUrl } : req))
-    )
+  async function handleAfterPhoto(id, file) {
+    if (!file) return
+    const ext = file.name.split('.').pop() || 'jpg'
+    const path = `${id}/${Date.now()}.${ext}`
+    const { data: uploadData, error } = await supabase.storage
+      .from('after-photos')
+      .upload(path, file)
+    if (error || !uploadData) return
+    const { data: { publicUrl } } = supabase.storage.from('after-photos').getPublicUrl(uploadData.path)
+    await supabase.from('requests').update({ after_photo_url: publicUrl }).eq('id', id)
   }
 
-  function handleLike(requestId, userId) {
-    setRequests((prev) =>
-      prev.map((req) => {
-        if (req.id !== requestId) return req
-        const liked = req.likes.includes(userId)
-        return {
-          ...req,
-          likes: liked ? req.likes.filter((id) => id !== userId) : [...req.likes, userId],
-        }
-      })
-    )
+  async function handleLike(requestId, userId) {
+    const req = requests.find((r) => r.id === requestId)
+    if (!req) return
+    if (req.likes.includes(userId)) {
+      await supabase.from('request_likes').delete().eq('request_id', requestId).eq('user_id', userId)
+    } else {
+      await supabase.from('request_likes').insert({ request_id: requestId, user_id: userId })
+    }
   }
 
-  function handleRate(id, stars) {
-    setRequests((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, rating: stars } : r))
-    )
+  async function handleRate(id, stars) {
+    await supabase.from('requests').update({ rating: stars }).eq('id', id)
   }
 
   const openCount = requests.filter((r) => r.status === 'open' && r.postedBy !== currentUser?.id).length
