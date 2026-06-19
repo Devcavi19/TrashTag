@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import ngeohash from 'ngeohash'
 import { useRequests } from './hooks/useRequests'
+import { useFeed } from './hooks/useFeed'
 import { supabase } from './lib/supabase'
 import PosterView from './components/PosterView'
 import CollectorView from './components/CollectorView'
+import FeedView from './components/FeedView'
 import TopBar from './components/TopBar'
 import LoadingScreen from './components/LoadingScreen'
 import AuthScreen from './components/AuthScreen'
@@ -15,6 +17,7 @@ function App() {
 
   const [role, setRole] = useState('poster')
   const [requests] = useRequests()
+  const [posts] = useFeed()
 
   async function fetchProfile(userId) {
     const { data } = await supabase
@@ -123,6 +126,21 @@ function App() {
     await supabase.from('requests').update({ rating: stars }).eq('id', id)
   }
 
+  async function addPost(newPost) {
+    await supabase.from('posts').insert({ ...newPost, author_id: currentUser?.id })
+  }
+
+  async function handlePostLike(postId, userId) {
+    if (!userId) return
+    const post = posts.find((p) => p.id === postId)
+    if (!post) return
+    if (post.likes.includes(userId)) {
+      await supabase.from('post_likes').delete().eq('post_id', postId).eq('user_id', userId)
+    } else {
+      await supabase.from('post_likes').insert({ post_id: postId, user_id: userId })
+    }
+  }
+
   const openCount = requests.filter((r) => r.status === 'open' && r.postedBy !== currentUser?.id).length
 
   if (appState === 'loading') {
@@ -144,7 +162,7 @@ function App() {
       />
 
       <main className="max-w-[430px] mx-auto">
-        {role === 'poster' ? (
+        {role === 'poster' && (
           <PosterView
             requests={requests}
             addRequest={addRequest}
@@ -154,7 +172,8 @@ function App() {
             currentUser={currentUser}
             users={profiles}
           />
-        ) : (
+        )}
+        {role === 'collector' && (
           <CollectorView
             requests={requests}
             updateStatus={updateStatus}
@@ -162,6 +181,14 @@ function App() {
             onSubmitAfterPhoto={handleAfterPhoto}
             onLike={handleLike}
             users={profiles}
+          />
+        )}
+        {role === 'community' && (
+          <FeedView
+            posts={posts}
+            addPost={addPost}
+            onLike={handlePostLike}
+            currentUser={currentUser}
           />
         )}
       </main>
