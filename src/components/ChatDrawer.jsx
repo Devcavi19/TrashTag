@@ -209,6 +209,7 @@ export default function ChatDrawer({ open, onClose, request, currentUser, users 
             style={{ background: '#f3f4f2', color: '#2d2b27' }}
             placeholder="Type a message…"
             value={text}
+            maxLength={500}
             onChange={e => setText(e.target.value)}
             onKeyDown={handleKeyDown}
           />
