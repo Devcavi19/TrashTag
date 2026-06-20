@@ -45,18 +45,20 @@ function Item({ icon, label, onClick, danger = false }) {
   )
 }
 
-export default function UserMenu({ user, stats, onSignOut, onNotice, onClose }) {
+export default function UserMenu({ user, stats, onSignOut, onNotice, onClose, placement = 'bottom' }) {
   const initials = user?.name
     ? user.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
     : '?'
   const title = deriveTitle(stats)
   const rating = stats.ratingCount > 0 ? stats.rating.toFixed(1) : '—'
+  const anchor = placement === 'top' ? 'bottom-full mb-3' : 'top-12'
 
   return (
     <div
       role="menu"
       aria-label="Account menu"
-      className="usermenu-pop absolute right-0 top-12 z-50 w-[272px] overflow-hidden rounded-2xl"
+      data-placement={placement}
+      className={`usermenu-pop absolute right-0 ${anchor} z-50 w-[272px] overflow-hidden rounded-2xl`}
       style={{ background: '#fff', border: `1px solid ${LINE}`, boxShadow: '0 14px 40px rgba(13,51,32,0.22)' }}
     >
       {/* Identity band — continues the TopBar's forest green */}
