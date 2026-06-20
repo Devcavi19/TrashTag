@@ -5,45 +5,6 @@ import { formatDistance } from '../utils/haversine'
 import ConfirmModal from './ConfirmModal'
 import sampleTrash from '../assets/sample_trash.jpg'
 
-function MapPreview({ lat, lng }) {
-  const z = 15
-  const n = 1 << z
-  const tx = Math.floor(((lng + 180) / 360) * n)
-  const latRad = (lat * Math.PI) / 180
-  const lnTanSec = Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI
-  const ty = Math.floor(((1 - lnTanSec) / 2) * n)
-  const px = Math.round((((lng + 180) / 360) * n - tx) * 256)
-  const py = Math.round((((1 - lnTanSec) / 2) * n - ty) * 256)
-
-  return (
-    <div
-      className="relative rounded-xl overflow-hidden"
-      style={{
-        height: 90,
-        backgroundImage: `url(https://tile.openstreetmap.org/${z}/${tx}/${ty}.png)`,
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: '256px 256px',
-        backgroundPosition: `calc(50% - ${px}px) calc(50% - ${py}px)`,
-      }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -100%)',
-          fontSize: 18,
-          lineHeight: 1,
-          filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.4))',
-          pointerEvents: 'none',
-        }}
-      >
-        📍
-      </div>
-    </div>
-  )
-}
-
 function timeAgo(isoString) {
   const diff = Math.floor((Date.now() - new Date(isoString)) / 1000)
   if (diff < 60) return `${diff}s ago`
@@ -53,7 +14,7 @@ function timeAgo(isoString) {
 }
 
 export default function TrashCard({ request, currentUserId, onAccept, onLike, onOpenThread, distanceMeters }) {
-  const { id, photo, tags = [], status, gps, lat, lng, price, postedAt, likes = [], postedBy, collectedBy } = request
+  const { id, photo, tags = [], status, gps, price, postedAt, likes = [], postedBy, collectedBy } = request
   const typeColor = TAG_COLORS[tags[0]]?.color || '#706d67'
 
   const [confirmAccept, setConfirmAccept] = useState(false)
@@ -99,16 +60,9 @@ export default function TrashCard({ request, currentUserId, onAccept, onLike, on
 
       <div className="px-4 pt-3 pb-4">
         {/* Location */}
-        <p className="text-xs font-medium mb-2.5" style={{ color: '#a8a5a0' }}>
+        <p className="text-xs font-medium mb-3" style={{ color: '#a8a5a0' }}>
           {gps}
         </p>
-
-        {/* Map preview */}
-        {lat != null && lng != null && (
-          <div className="mb-2.5">
-            <MapPreview lat={lat} lng={lng} />
-          </div>
-        )}
 
         {/* Badges */}
         <div className="flex flex-wrap gap-1.5 mb-3">
