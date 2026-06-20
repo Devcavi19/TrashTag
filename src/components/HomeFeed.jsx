@@ -1,5 +1,6 @@
 import TrashCard from './TrashCard'
-import MapView from './MapView'
+import { useViewerLocation } from '../hooks/useViewerLocation'
+import { rankRequests } from '../utils/rankRequests'
 
 function ComposerPrompt({ user, onCompose }) {
   const initials = user
@@ -34,20 +35,44 @@ function ComposerPrompt({ user, onCompose }) {
 
 export default function HomeFeed({ requests, currentUser, onCompose, onAccept, onLike, onOpenThread }) {
   const myId = currentUser?.id
+  const { location } = useViewerLocation()
+
   // Newest first (the hook already orders requests desc, but be explicit for the feed).
   const feed = [...requests].sort((a, b) => new Date(b.postedAt) - new Date(a.postedAt))
-  const openWithCoords = feed.filter((r) => r.status === 'open' && r.lat != null)
+
+  // Closest open pickups, scored by distance + freshness + price.
+  const open = feed.filter((r) => r.status === 'open')
+  const nearest = rankRequests(open, location)
+  const nearestIds = new Set(nearest.map((r) => r.id))
+
+  // Everything else, newest first — minus what's already surfaced above.
+  const rest = feed.filter((r) => !nearestIds.has(r.id))
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-5 p-4">
       <ComposerPrompt user={currentUser} onCompose={onCompose} />
 
-      {openWithCoords.length > 0 && (
-        <div>
-          <h2 className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: '#a8a5a0' }}>
-            Open pickups near you
-          </h2>
-          <MapView requests={openWithCoords} />
+      {nearest.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#a8a5a0' }}>
+              Nearest open pickups
+            </h2>
+            <span className="text-[10px] font-semibold" style={{ color: '#2f6b44' }}>
+              Closest to you
+            </span>
+          </div>
+          {nearest.map((r) => (
+            <TrashCard
+              key={r.id}
+              request={r}
+              currentUserId={myId}
+              onAccept={onAccept}
+              onLike={onLike}
+              onOpenThread={onOpenThread}
+              distanceMeters={r.distanceMeters}
+            />
+          ))}
         </div>
       )}
 
@@ -60,7 +85,12 @@ export default function HomeFeed({ requests, currentUser, onCompose, onAccept, o
         </div>
       ) : (
         <div className="space-y-3">
-          {feed.map((r) => (
+          {nearest.length > 0 && rest.length > 0 && (
+            <h2 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#a8a5a0' }}>
+              More in the community
+            </h2>
+          )}
+          {rest.map((r) => (
             <TrashCard
               key={r.id}
               request={r}
