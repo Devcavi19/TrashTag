@@ -1,5 +1,4 @@
 import TrashCard from './TrashCard'
-import Leaderboard from './Leaderboard'
 import MapView from './MapView'
 
 function ComposerPrompt({ user, onCompose }) {
@@ -33,7 +32,7 @@ function ComposerPrompt({ user, onCompose }) {
   )
 }
 
-export default function HomeFeed({ requests, currentUser, users, onCompose, onAccept, onLike, onOpenThread }) {
+export default function HomeFeed({ requests, currentUser, onCompose, onAccept, onLike, onOpenThread }) {
   const myId = currentUser?.id
   // Newest first (the hook already orders requests desc, but be explicit for the feed).
   const feed = [...requests].sort((a, b) => new Date(b.postedAt) - new Date(a.postedAt))
@@ -73,8 +72,6 @@ export default function HomeFeed({ requests, currentUser, users, onCompose, onAc
           ))}
         </div>
       )}
-
-      <Leaderboard requests={requests} users={users} />
     </div>
   )
 }
