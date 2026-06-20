@@ -45,8 +45,9 @@ export default function HomeFeed({ requests, currentUser, onCompose, onAccept, o
   const nearest = rankRequests(open, location)
   const nearestIds = new Set(nearest.map((r) => r.id))
 
-  // Everything else, newest first — minus what's already surfaced above.
-  const rest = feed.filter((r) => !nearestIds.has(r.id))
+  // Everything else, newest first — minus what's already surfaced above and
+  // minus completed pickups: once a job is paid it leaves the live feed.
+  const rest = feed.filter((r) => !nearestIds.has(r.id) && r.status !== 'paid')
 
   return (
     <div className="space-y-5 p-4">
@@ -76,7 +77,7 @@ export default function HomeFeed({ requests, currentUser, onCompose, onAccept, o
         </div>
       )}
 
-      {feed.length === 0 ? (
+      {nearest.length === 0 && rest.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-16 text-center">
           <span className="text-3xl" style={{ opacity: 0.25 }}>🌱</span>
           <p className="text-sm font-medium" style={{ color: '#c8c5c0' }}>
