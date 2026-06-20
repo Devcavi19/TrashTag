@@ -6,6 +6,7 @@ import { supabase } from './lib/supabase'
 import HomeFeed from './components/HomeFeed'
 import FeedView from './components/FeedView'
 import LeaderboardView from './components/LeaderboardView'
+import ProfileView from './components/ProfileView'
 import Conversations from './components/Conversations'
 import MessageThread from './components/MessageThread'
 import ComposerModal from './components/ComposerModal'
@@ -20,7 +21,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null)
   const [profiles, setProfiles] = useState([])
 
-  const [view, setView] = useState('home') // 'home' | 'community' | 'leaderboard'
+  const [view, setView] = useState('home') // 'home' | 'community' | 'leaderboard' | 'you'
   const [messagesOpen, setMessagesOpen] = useState(false)
   const [activeRequestId, setActiveRequestId] = useState(null)
   const [composerOpen, setComposerOpen] = useState(false)
@@ -235,6 +236,15 @@ function App() {
             currentUser={currentUser}
           />
         )}
+        {view === 'you' && (
+          <ProfileView
+            currentUser={currentUser}
+            requests={requests}
+            stats={userStats}
+            onLogout={handleLogout}
+            onNotice={setNotice}
+          />
+        )}
       </main>
 
       <BottomNav
@@ -242,10 +252,6 @@ function App() {
         setView={setView}
         unreadCount={activeConvoCount}
         onOpenMessages={() => setMessagesOpen(true)}
-        user={currentUser}
-        stats={userStats}
-        onLogout={handleLogout}
-        onNotice={setNotice}
       />
 
       {composerOpen && (
