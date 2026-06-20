@@ -5,6 +5,7 @@ import { useFeed } from './hooks/useFeed'
 import { supabase } from './lib/supabase'
 import HomeFeed from './components/HomeFeed'
 import FeedView from './components/FeedView'
+import LeaderboardView from './components/LeaderboardView'
 import Conversations from './components/Conversations'
 import MessageThread from './components/MessageThread'
 import ComposerModal from './components/ComposerModal'
@@ -19,7 +20,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null)
   const [profiles, setProfiles] = useState([])
 
-  const [view, setView] = useState('home') // 'home' | 'community'
+  const [view, setView] = useState('home') // 'home' | 'community' | 'leaderboard'
   const [messagesOpen, setMessagesOpen] = useState(false)
   const [activeRequestId, setActiveRequestId] = useState(null)
   const [composerOpen, setComposerOpen] = useState(false)
@@ -209,28 +210,33 @@ function App() {
       <TopBar
         user={currentUser}
         stats={userStats}
-        unreadCount={activeConvoCount}
-        onOpenMessages={() => setMessagesOpen(true)}
         onLogout={handleLogout}
         onNotice={setNotice}
       />
 
       <main className="max-w-[430px] mx-auto pb-24">
-        {view === 'home' ? (
+        {view === 'home' && (
           <HomeFeed
             requests={requests}
             currentUser={currentUser}
-            users={profiles}
             onCompose={() => setComposerOpen(true)}
             onAccept={(id) => updateStatus(id, 'accepted')}
             onLike={handleLike}
             onOpenThread={openThread}
           />
-        ) : (
+        )}
+        {view === 'community' && (
           <FeedView
             posts={posts}
             addPost={addPost}
             onLike={handlePostLike}
+            currentUser={currentUser}
+          />
+        )}
+        {view === 'leaderboard' && (
+          <LeaderboardView
+            requests={requests}
+            users={profiles}
             currentUser={currentUser}
           />
         )}
@@ -240,6 +246,8 @@ function App() {
         view={view}
         setView={setView}
         onCompose={() => setComposerOpen(true)}
+        unreadCount={activeConvoCount}
+        onOpenMessages={() => setMessagesOpen(true)}
       />
 
       {composerOpen && (
