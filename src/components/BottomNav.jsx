@@ -1,3 +1,6 @@
+import { useState, useEffect, useRef } from 'react'
+import UserMenu from './UserMenu'
+
 const FOREST = '#0d3320'
 const FAINT = '#a8a5a0'
 const AMBER = '#c97f1e'
@@ -26,7 +29,36 @@ function NavButton({ active, label, onClick, badge, children }) {
   )
 }
 
-export default function BottomNav({ view, setView, onCompose, unreadCount = 0, onOpenMessages }) {
+export default function BottomNav({
+  view,
+  setView,
+  unreadCount = 0,
+  onOpenMessages,
+  user,
+  stats,
+  onLogout,
+  onNotice,
+}) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef(null)
+
+  // Close the account menu on outside click or Escape
+  useEffect(() => {
+    if (!menuOpen) return
+    function handlePointer(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false)
+    }
+    function handleKey(e) {
+      if (e.key === 'Escape') setMenuOpen(false)
+    }
+    document.addEventListener('mousedown', handlePointer)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handlePointer)
+      document.removeEventListener('keydown', handleKey)
+    }
+  }, [menuOpen])
+
   return (
     <nav
       className="fixed bottom-0 left-1/2 z-40 w-full max-w-[430px] -translate-x-1/2"
@@ -50,11 +82,11 @@ export default function BottomNav({ view, setView, onCompose, unreadCount = 0, o
           </svg>
         </NavButton>
 
-        {/* Compose pickup — the raised center action */}
+        {/* Messages — the raised center action, badged with active conversations */}
         <div className="flex flex-1 justify-center">
           <button
-            onClick={onCompose}
-            className="flex items-center justify-center rounded-full transition-all active:scale-90"
+            onClick={onOpenMessages}
+            className="relative flex items-center justify-center rounded-full transition-all active:scale-90"
             style={{
               width: 52,
               height: 52,
@@ -63,11 +95,19 @@ export default function BottomNav({ view, setView, onCompose, unreadCount = 0, o
               color: '#fff',
               boxShadow: '0 6px 16px rgba(13,51,32,0.35)',
             }}
-            aria-label="Post a pickup"
+            aria-label="Messages"
           >
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 5v14M5 12h14" />
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
+            {unreadCount > 0 && (
+              <span
+                className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white"
+                style={{ background: AMBER, boxShadow: '0 0 0 2px #fff' }}
+              >
+                {unreadCount}
+              </span>
+            )}
           </button>
         </div>
 
@@ -77,11 +117,30 @@ export default function BottomNav({ view, setView, onCompose, unreadCount = 0, o
           </svg>
         </NavButton>
 
-        <NavButton label="Inbox" onClick={onOpenMessages} badge={unreadCount}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-        </NavButton>
+        {/* Account — replaces the old Inbox slot; opens the menu upward */}
+        <div className="relative flex flex-1 justify-center" ref={menuRef}>
+          <NavButton
+            active={menuOpen}
+            label="You"
+            onClick={() => setMenuOpen((o) => !o)}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill={menuOpen ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21a8 8 0 0 1 16 0" />
+            </svg>
+          </NavButton>
+
+          {menuOpen && (
+            <UserMenu
+              user={user}
+              stats={stats}
+              onSignOut={onLogout}
+              onNotice={onNotice}
+              onClose={() => setMenuOpen(false)}
+              placement="top"
+            />
+          )}
+        </div>
       </div>
     </nav>
   )
