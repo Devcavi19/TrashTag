@@ -207,12 +207,7 @@ function App() {
 
   return (
     <div className="min-h-screen font-sans" style={{ background: '#f3f4f2' }}>
-      <TopBar
-        user={currentUser}
-        stats={userStats}
-        onLogout={handleLogout}
-        onNotice={setNotice}
-      />
+      <TopBar />
 
       <main className="max-w-[430px] mx-auto pb-24">
         {view === 'home' && (
@@ -245,9 +240,12 @@ function App() {
       <BottomNav
         view={view}
         setView={setView}
-        onCompose={() => setComposerOpen(true)}
         unreadCount={activeConvoCount}
         onOpenMessages={() => setMessagesOpen(true)}
+        user={currentUser}
+        stats={userStats}
+        onLogout={handleLogout}
+        onNotice={setNotice}
       />
 
       {composerOpen && (
