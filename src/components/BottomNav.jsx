@@ -1,6 +1,3 @@
-import { useState, useEffect, useRef } from 'react'
-import UserMenu from './UserMenu'
-
 const FOREST = '#0d3320'
 const FAINT = '#a8a5a0'
 const AMBER = '#c97f1e'
@@ -34,31 +31,7 @@ export default function BottomNav({
   setView,
   unreadCount = 0,
   onOpenMessages,
-  user,
-  stats,
-  onLogout,
-  onNotice,
 }) {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const menuRef = useRef(null)
-
-  // Close the account menu on outside click or Escape
-  useEffect(() => {
-    if (!menuOpen) return
-    function handlePointer(e) {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false)
-    }
-    function handleKey(e) {
-      if (e.key === 'Escape') setMenuOpen(false)
-    }
-    document.addEventListener('mousedown', handlePointer)
-    document.addEventListener('keydown', handleKey)
-    return () => {
-      document.removeEventListener('mousedown', handlePointer)
-      document.removeEventListener('keydown', handleKey)
-    }
-  }, [menuOpen])
-
   return (
     <nav
       className="fixed bottom-0 left-1/2 z-40 w-full max-w-[430px] -translate-x-1/2"
@@ -117,30 +90,13 @@ export default function BottomNav({
           </svg>
         </NavButton>
 
-        {/* Account — replaces the old Inbox slot; opens the menu upward */}
-        <div className="relative flex flex-1 justify-center" ref={menuRef}>
-          <NavButton
-            active={menuOpen}
-            label="You"
-            onClick={() => setMenuOpen((o) => !o)}
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill={menuOpen ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 21a8 8 0 0 1 16 0" />
-            </svg>
-          </NavButton>
-
-          {menuOpen && (
-            <UserMenu
-              user={user}
-              stats={stats}
-              onSignOut={onLogout}
-              onNotice={onNotice}
-              onClose={() => setMenuOpen(false)}
-              placement="top"
-            />
-          )}
-        </div>
+        {/* You — your field record, now its own section */}
+        <NavButton active={view === 'you'} label="You" onClick={() => setView('you')}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill={view === 'you' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 21a8 8 0 0 1 16 0" />
+          </svg>
+        </NavButton>
       </div>
     </nav>
   )
