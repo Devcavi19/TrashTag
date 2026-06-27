@@ -61,7 +61,12 @@ export default function AuthScreen({ onLogin }) {
     setSignupLoading(false)
 
     if (error) {
-      setSignupError(String(error.message || 'Sign up failed. Please try again.'))
+      const msg = error.message && error.message !== '{}'
+        ? error.message
+        : error.status >= 500
+          ? 'Sign up is temporarily unavailable. Please try again later.'
+          : 'Sign up failed. Please try again.'
+      setSignupError(msg)
       return
     }
 
