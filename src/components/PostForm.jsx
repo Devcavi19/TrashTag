@@ -1,48 +1,84 @@
 import { useState } from 'react'
+import { supabase } from '../lib/supabase'
+import { TAG_COLORS } from '../lib/tagColors'
+import { validateImage } from '../lib/validateImage'
 import ConfirmModal from './ConfirmModal'
 import SuccessModal from './SuccessModal'
+import LocationPicker from './LocationPicker'
 
-const TYPE_OPTIONS = [
-  { key: 'Biodegradable', price: 20, color: '#22863a', bg: '#eaf5ec' },
-  { key: 'Recyclable',    price: 30, color: '#1966b5', bg: '#e8f0fe' },
-  { key: 'Residual',      price: 50, color: '#b53419', bg: '#fce8e6' },
-]
+const TAG_OPTIONS = ['Biodegradable', 'Recyclable', 'Residual', 'Mixed']
 
-function PostForm({ onSubmit }) {
-  const [photo, setPhoto] = useState(null)
-  const [gps, setGps] = useState('')
-  const [type, setType] = useState('Biodegradable')
-  const [locationFocused, setLocationFocused] = useState(false)
+function PostForm({ onSubmit, onSubmitted }) {
+  const [photoFile, setPhotoFile] = useState(null)
+  const [photoPreview, setPhotoPreview] = useState(null)
+  const [location, setLocation] = useState({ lat: null, lng: null, label: '' })
+  const [tags, setTags] = useState(['Biodegradable'])
+  const [price, setPrice] = useState('')
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [successOpen, setSuccessOpen] = useState(false)
+  const [photoError, setPhotoError] = useState(null)
 
   function handlePhoto(e) {
     const file = e.target.files[0]
     if (!file) return
+    const err = validateImage(file)
+    if (err) {
+      setPhotoError(err)
+      setPhotoFile(null)
+      setPhotoPreview(null)
+      e.target.value = ''
+      return
+    }
+    setPhotoError(null)
+    setPhotoFile(file)
     const reader = new FileReader()
-    reader.onload = () => setPhoto(reader.result)
+    reader.onload = () => setPhotoPreview(reader.result)
     reader.readAsDataURL(file)
   }
 
-  function handleSubmit() {
-    const selected = TYPE_OPTIONS.find(t => t.key === type)
-    onSubmit({
-      id: String(Date.now()),
-      photo,
-      gps,
-      type,
-      price: selected?.price ?? 20,
+  function toggleTag(tag) {
+    setTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    )
+  }
+
+  const priceNum = Number(price)
+  const priceValid = Number.isInteger(priceNum) && priceNum > 0 && priceNum <= 10000000
+  const canSubmit = priceValid && tags.length > 0 && location.label.trim()
+
+  async function handleSubmit() {
+    let photoUrl = null
+    if (photoFile) {
+      const ext = photoFile.name.split('.').pop() || 'jpg'
+      const path = `${Date.now()}.${ext}`
+      const { data: uploadData } = await supabase.storage
+        .from('trash-photos')
+        .upload(path, photoFile)
+      if (uploadData) {
+        const { data: { publicUrl } } = supabase.storage.from('trash-photos').getPublicUrl(uploadData.path)
+        photoUrl = publicUrl
+      }
+    }
+
+    await onSubmit({
+      photo: photoUrl,
+      lat: location.lat,
+      lng: location.lng,
+      label: location.label,
+      tags,
+      price: priceNum,
       status: 'open',
       postedAt: new Date().toISOString(),
     })
-    setPhoto(null)
-    setGps('')
-    setType('Biodegradable')
+    setPhotoFile(null)
+    setPhotoPreview(null)
+    setPhotoError(null)
+    setLocation({ lat: null, lng: null, label: '' })
+    setTags(['Biodegradable'])
+    setPrice('')
     setConfirmOpen(false)
     setSuccessOpen(true)
   }
-
-  const selectedOption = TYPE_OPTIONS.find(t => t.key === type)
 
   return (
     <div
@@ -54,14 +90,14 @@ function PostForm({ onSubmit }) {
         className="px-4 py-3 flex items-center justify-between"
         style={{ borderBottom: '1px solid #f0efec' }}
       >
-        <span className="text-[15px] font-bold" style={{ color: '#1c1c1e' }}>
-          New Pickup Request
+        <span className="font-display text-[18px]" style={{ color: '#1c1c1e', fontWeight: 600 }}>
+          New pickup
         </span>
         <span
           className="text-[10px] font-bold uppercase tracking-widest"
           style={{ color: '#b0ada8' }}
         >
-          Poster
+          You pay · they clean
         </span>
       </div>
 
@@ -79,12 +115,12 @@ function PostForm({ onSubmit }) {
             style={{
               height: 120,
               border: '2px dashed #dddcda',
-              background: photo ? 'transparent' : '#fafaf9',
+              background: photoPreview ? 'transparent' : '#fafaf9',
             }}
           >
-            {photo ? (
+            {photoPreview ? (
               <img
-                src={photo}
+                src={photoPreview}
                 alt="preview"
                 className="h-full w-full object-cover"
               />
@@ -99,8 +135,11 @@ function PostForm({ onSubmit }) {
                 </span>
               </div>
             )}
-            <input type="file" accept="image/*" onChange={handlePhoto} className="sr-only" />
+            <input type="file" accept="image/jpeg,image/png" onChange={handlePhoto} className="sr-only" />
           </label>
+          {photoError && (
+            <p className="text-[11px] font-medium mt-1.5" style={{ color: '#b53419' }}>{photoError}</p>
+          )}
         </div>
 
         {/* Location */}
@@ -111,79 +150,85 @@ function PostForm({ onSubmit }) {
           >
             Location
           </label>
-          <input
-            type="text"
-            value={gps}
-            onChange={e => setGps(e.target.value)}
-            onFocus={() => setLocationFocused(true)}
-            onBlur={() => setLocationFocused(false)}
-            placeholder="Barangay / Street"
-            className="w-full text-sm rounded-xl px-3 py-2.5 outline-none"
-            style={{
-              background: '#f8f7f5',
-              border: locationFocused ? '1.5px solid #2f6b44' : '1.5px solid #e2e2e0',
-              color: '#1c1c1e',
-              transition: 'border-color 0.15s',
-            }}
-          />
+          <LocationPicker onChange={setLocation} />
         </div>
 
-        {/* Trash type — tile selector */}
+        {/* Trash tags — multi-select pills */}
         <div>
           <label
             className="block text-[11px] font-bold uppercase tracking-widest mb-2"
             style={{ color: '#a8a5a0' }}
           >
-            Trash Type
+            Tags
           </label>
-          <div className="grid grid-cols-3 gap-2">
-            {TYPE_OPTIONS.map(opt => {
-              const selected = type === opt.key
+          <div className="flex flex-wrap gap-2">
+            {TAG_OPTIONS.map((tag) => {
+              const selected = tags.includes(tag)
+              const c = TAG_COLORS[tag]
               return (
                 <button
-                  key={opt.key}
-                  onClick={() => setType(opt.key)}
-                  className="rounded-xl py-3 text-center transition-all active:scale-95"
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className="rounded-full px-3.5 py-1.5 text-[12px] font-bold transition-all active:scale-95"
                   style={{
-                    border: selected ? `2px solid ${opt.color}` : '2px solid #e8e8e6',
-                    background: selected ? opt.bg : '#fafaf9',
+                    border: selected ? `2px solid ${c.color}` : '2px solid #e8e8e6',
+                    background: selected ? c.bg : '#fafaf9',
+                    color: selected ? c.color : '#a8a5a0',
                     outline: 'none',
                   }}
                 >
-                  <div
-                    className="text-[11px] font-bold leading-tight mb-1"
-                    style={{ color: selected ? opt.color : '#a8a5a0' }}
-                  >
-                    {opt.key}
-                  </div>
-                  <div
-                    className="text-[15px] font-bold"
-                    style={{ color: selected ? opt.color : '#c8c5c0' }}
-                  >
-                    ₱{opt.price}
-                  </div>
+                  {tag}
                 </button>
               )
             })}
           </div>
         </div>
 
+        {/* Offer price */}
+        <div>
+          <label
+            className="block text-[11px] font-bold uppercase tracking-widest mb-2"
+            style={{ color: '#a8a5a0' }}
+          >
+            Offer Price
+          </label>
+          <div
+            className="flex items-center rounded-xl overflow-hidden"
+            style={{ border: '2px solid #e8e8e6', background: '#fafaf9' }}
+          >
+            <span className="pl-3.5 pr-1 text-[20px] font-bold" style={{ color: '#c97f1e' }}>
+              ₱
+            </span>
+            <input
+              type="number"
+              min="1"
+              max="10000000"
+              step="1"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="100"
+              className="flex-1 bg-transparent py-3 pr-3.5 text-[20px] font-bold outline-none"
+              style={{ color: '#1c1c1e' }}
+            />
+          </div>
+        </div>
+
         {/* Submit */}
         <button
           onClick={() => setConfirmOpen(true)}
-          disabled={!gps.trim()}
+          disabled={!canSubmit}
           className="w-full text-white text-sm font-semibold py-3 rounded-xl transition-all active:scale-95 disabled:opacity-40"
           style={{ background: '#0d3320' }}
         >
-          Submit Request
+          Post pickup
         </button>
       </div>
 
       <ConfirmModal
         open={confirmOpen}
-        title="Submit pickup request?"
-        message={`Post a ${type} pickup at "${gps}" for a ₱${selectedOption?.price ?? 20} payout.`}
-        confirmLabel="Submit Request"
+        title="Post this pickup?"
+        message={`Post a ${tags.join(', ')} pickup at "${location.label}" for a ₱${priceValid ? priceNum : 0} payout.`}
+        confirmLabel="Post pickup"
         confirmColor="#0d3320"
         onConfirm={handleSubmit}
         onCancel={() => setConfirmOpen(false)}
@@ -192,9 +237,9 @@ function PostForm({ onSubmit }) {
       <SuccessModal
         open={successOpen}
         title="Request posted!"
-        message="Collectors near you can now see your pickup request."
+        message="Neighbors near you can now see and accept your pickup request."
         buttonLabel="Done"
-        onClose={() => setSuccessOpen(false)}
+        onClose={() => { setSuccessOpen(false); onSubmitted?.() }}
       />
     </div>
   )

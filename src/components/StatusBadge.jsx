@@ -1,14 +1,15 @@
+import { TAG_COLORS } from '../lib/tagColors'
+
 const VARIANT_MAP = {
-  Biodegradable: { label: 'Biodegradable', bg: '#eaf5ec', color: '#22863a' },
-  Recyclable:    { label: 'Recyclable',    bg: '#e8f0fe', color: '#1966b5' },
-  Residual:      { label: 'Residual',      bg: '#fce8e6', color: '#b53419' },
+  ...TAG_COLORS,
   open:          { label: 'Open',          bg: '#f3f4f2', color: '#a8a5a0' },
   accepted:      { label: 'On the way',   bg: '#fef3e0', color: '#c97f1e' },
   collected:     { label: 'Collected',    bg: '#eaf5ec', color: '#2f6b44' },
+  disputed:      { label: 'Needs redo',   bg: '#fce8e6', color: '#b53419' },
   paid:          { label: 'Paid',         bg: '#e6f0eb', color: '#0d3320' },
 }
 
-export default function StatusBadge({ variant }) {
+function Badge({ variant }) {
   const config = VARIANT_MAP[variant]
   if (!config) {
     return (
@@ -28,4 +29,18 @@ export default function StatusBadge({ variant }) {
       {config.label}
     </span>
   )
+}
+
+// `variant` may be a single value or an array of tag values (renders one badge each).
+export default function StatusBadge({ variant }) {
+  if (Array.isArray(variant)) {
+    return (
+      <>
+        {variant.map((v) => (
+          <Badge key={v} variant={v} />
+        ))}
+      </>
+    )
+  }
+  return <Badge variant={variant} />
 }
