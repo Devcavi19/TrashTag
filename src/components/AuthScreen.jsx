@@ -1,6 +1,34 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
+function getLoginErrorMessage(error) {
+  if (!error) return 'Login failed. Please try again.'
+  if (error.status === 400 || error.message?.includes('credentials')) {
+    return 'Invalid email or password.'
+  }
+  if (error.status === 429) {
+    return 'Too many login attempts. Please try again later.'
+  }
+  if (error.status >= 500) {
+    return 'Login service temporarily unavailable. Please try again later.'
+  }
+  return 'Login failed. Please try again.'
+}
+
+function getSignupErrorMessage(error) {
+  if (!error) return 'Sign up failed. Please try again.'
+  if (error.message?.includes('User already registered') || error.message?.includes('email')) {
+    return 'That email address is already in use.'
+  }
+  if (error.status === 429) {
+    return 'Too many sign-up attempts. Please try again later.'
+  }
+  if (error.status >= 500) {
+    return 'Sign up service temporarily unavailable. Please try again later.'
+  }
+  return 'Sign up failed. Please try again.'
+}
+
 export default function AuthScreen({ onLogin }) {
   const [mode, setMode] = useState('login') // 'login' | 'signup' | 'confirm'
 
@@ -31,7 +59,7 @@ export default function AuthScreen({ onLogin }) {
     setLoginLoading(false)
 
     if (error) {
-      setLoginError(error.message)
+      setLoginError(getLoginErrorMessage(error))
       return
     }
 
@@ -61,12 +89,7 @@ export default function AuthScreen({ onLogin }) {
     setSignupLoading(false)
 
     if (error) {
-      const msg = error.message && error.message !== '{}'
-        ? error.message
-        : error.status >= 500
-          ? 'Sign up is temporarily unavailable. Please try again later.'
-          : 'Sign up failed. Please try again.'
-      setSignupError(msg)
+      setSignupError(getSignupErrorMessage(error))
       return
     }
 
