@@ -15,6 +15,21 @@ function getLoginErrorMessage(error) {
   return 'Login failed. Please try again.'
 }
 
+const MIN_PASSWORD_LENGTH = 8
+
+// Mirror the server-side policy as closely as the client can. The real
+// enforcement is the Supabase dashboard password policy; this is UX + a first
+// line of defence. Returns an error string, or null when the password is valid.
+function getPasswordError(password) {
+  if (password.length < MIN_PASSWORD_LENGTH) {
+    return `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`
+  }
+  if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+    return 'Password must include upper- and lower-case letters and a number.'
+  }
+  return null
+}
+
 function getSignupErrorMessage(error) {
   if (!error) return 'Sign up failed. Please try again.'
   if (error.message?.includes('User already registered') || error.message?.includes('email')) {
@@ -71,7 +86,8 @@ export default function AuthScreen({ onLogin }) {
     setSignupError('')
 
     if (!signupName.trim()) return setSignupError('Name is required.')
-    if (signupPassword.length < 6) return setSignupError('Password must be at least 6 characters.')
+    const passwordError = getPasswordError(signupPassword)
+    if (passwordError) return setSignupError(passwordError)
     if (signupPassword !== signupConfirm) return setSignupError('Passwords do not match.')
 
     setSignupLoading(true)
@@ -267,7 +283,7 @@ export default function AuthScreen({ onLogin }) {
                 type="password"
                 value={signupPassword}
                 onChange={(e) => setSignupPassword(e.target.value)}
-                placeholder="At least 6 characters"
+                placeholder="8+ chars, mixed case & a number"
                 required
                 className="border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2"
                 style={{ borderColor: '#e5e7eb', '--tw-ring-color': '#0d3320' }}
