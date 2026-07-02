@@ -1,6 +1,14 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
+// Grab-inspired palette
+const GRAB_GREEN = '#00B14F'
+const GRAB_GREEN_DARK = '#00843B'
+const INK = '#1A1A1A'
+const MUTED = '#6B7280'
+const FIELD_BG = '#F5F6F7'
+const FIELD_BORDER = '#E8E9EB'
+
 function getLoginErrorMessage(error) {
   if (!error) return 'Login failed. Please try again.'
   if (error.status === 400 || error.message?.includes('credentials')) {
@@ -44,8 +52,30 @@ function getSignupErrorMessage(error) {
   return 'Sign up failed. Please try again.'
 }
 
-export default function AuthScreen({ onLogin }) {
+// Shared field styling — soft filled inputs, green focus ring (Grab style).
+const fieldBase =
+  'w-full rounded-xl px-4 py-3.5 text-[15px] outline-none transition-shadow focus:ring-2'
+const fieldStyle = {
+  background: FIELD_BG,
+  border: `1px solid ${FIELD_BORDER}`,
+  color: INK,
+  '--tw-ring-color': GRAB_GREEN,
+}
+
+function Field({ label, ...props }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-[13px] font-semibold" style={{ color: INK }}>
+        {label}
+      </label>
+      <input className={fieldBase} style={fieldStyle} {...props} />
+    </div>
+  )
+}
+
+export default function AuthScreen({ onLogin, notice }) {
   const [mode, setMode] = useState('login') // 'login' | 'signup' | 'confirm'
+  const [showNotice, setShowNotice] = useState(true)
 
   // Login state
   const [loginEmail, setLoginEmail] = useState('')
@@ -120,212 +150,192 @@ export default function AuthScreen({ onLogin }) {
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center px-5"
-      style={{ background: '#f3f4f2' }}
+      className="min-h-screen flex flex-col px-6 pt-14 pb-8"
+      style={{ background: '#ffffff' }}
     >
-      {/* Logo */}
-      <div className="flex flex-col items-center mb-8">
+      {/* Brand mark — Grab-style "two solid bars" motif in a green tile */}
+      <div className="flex items-center gap-3 mb-9">
         <div
-          className="w-14 h-14 rounded-xl flex items-center justify-center mb-3"
-          style={{ background: '#0d3320' }}
+          className="w-12 h-12 rounded-2xl flex items-center justify-center"
+          style={{ background: GRAB_GREEN }}
         >
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"
-              stroke="#c97f1e"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M10 11v5M14 11v5"
-              stroke="#c97f1e"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+            <rect x="4" y="6" width="16" height="3.4" rx="1.7" fill="white" />
+            <rect x="4" y="14.6" width="16" height="3.4" rx="1.7" fill="white" fillOpacity="0.75" />
           </svg>
         </div>
-        <h1 className="font-display text-3xl" style={{ color: '#0d3320', fontWeight: 600 }}>
-          TrashTag <span style={{ color: '#c97f1e' }} className="text-base font-sans font-semibold align-middle">PH</span>
-        </h1>
+        <span className="text-[22px] font-bold tracking-tight" style={{ color: INK }}>
+          TrashTag
+        </span>
       </div>
 
-      {/* Card */}
-      <div className="w-full max-w-[390px] bg-white rounded-2xl shadow-sm p-6">
-
-        {/* Email confirmation pending */}
-        {mode === 'confirm' && (
-          <div className="flex flex-col items-center gap-4 py-4 text-center">
-            <div className="text-4xl">📬</div>
-            <h2 className="font-bold text-lg" style={{ color: '#0d3320' }}>Check your email</h2>
-            <p className="text-sm" style={{ color: '#6b7280' }}>
-              We sent a confirmation link to your email address. Click it to activate your account, then log in below.
+      {/* Email confirmation pending */}
+      {mode === 'confirm' ? (
+        <div className="flex flex-col gap-5 pt-4">
+          <div className="text-5xl">📬</div>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-[26px] font-bold leading-tight" style={{ color: INK }}>
+              Check your email
+            </h1>
+            <p className="text-[15px] leading-relaxed" style={{ color: MUTED }}>
+              We sent a confirmation link to your inbox. Tap it to activate your account, then log in
+              below.
             </p>
-            <button
-              onClick={() => setMode('login')}
-              className="w-full py-3 rounded-xl font-bold text-sm text-white mt-2"
-              style={{ background: '#0d3320' }}
-            >
-              Go to Log In
-            </button>
           </div>
-        )}
-
-        {/* Tab toggle + forms — hidden on confirm screen */}
-        {mode !== 'confirm' && (
-        <>
-        <div
-          className="flex rounded-xl mb-6 p-1"
-          style={{ background: '#f3f4f2' }}
-        >
-          {['login', 'signup'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => {
-                setMode(tab)
-                setLoginError('')
-                setSignupError('')
-              }}
-              className="flex-1 py-2 rounded-lg text-sm font-semibold capitalize transition-all"
-              style={
-                mode === tab
-                  ? { background: '#0d3320', color: 'white' }
-                  : { color: '#6b7280' }
-              }
-            >
-              {tab === 'login' ? 'Log In' : 'Sign Up'}
-            </button>
-          ))}
+          <button
+            onClick={() => setMode('login')}
+            className="w-full py-3.5 rounded-xl font-bold text-[15px] text-white mt-2 transition-colors"
+            style={{ background: GRAB_GREEN }}
+            onMouseDown={(e) => (e.currentTarget.style.background = GRAB_GREEN_DARK)}
+            onMouseUp={(e) => (e.currentTarget.style.background = GRAB_GREEN)}
+          >
+            Go to log in
+          </button>
         </div>
+      ) : (
+        <>
+          {/* Greeting */}
+          <div className="flex flex-col gap-1.5 mb-7">
+            <h1 className="text-[28px] font-bold leading-tight" style={{ color: INK }}>
+              {mode === 'login' ? 'Welcome back' : 'Create your account'}
+            </h1>
+            <p className="text-[15px]" style={{ color: MUTED }}>
+              {mode === 'login'
+                ? 'Log in to post pickups and collect trash.'
+                : 'One account posts pickups and collects them.'}
+            </p>
+          </div>
 
-        {mode === 'login' ? (
-          <form onSubmit={handleLogin} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold" style={{ color: '#374151' }}>
-                Email
-              </label>
-              <input
+          {notice && showNotice && (
+            <div
+              className="flex items-start gap-2 rounded-xl px-4 py-3 mb-5 text-[13px]"
+              style={{ background: '#ECFBF2', border: '1px solid #B9EBCE', color: GRAB_GREEN_DARK }}
+            >
+              <span className="mt-px">⏱️</span>
+              <span className="flex-1">{notice}</span>
+              <button
+                onClick={() => setShowNotice(false)}
+                className="font-bold leading-none"
+                style={{ color: GRAB_GREEN }}
+                aria-label="Dismiss"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
+          {/* Segmented toggle */}
+          <div
+            className="flex rounded-full mb-7 p-1"
+            style={{ background: FIELD_BG, border: `1px solid ${FIELD_BORDER}` }}
+          >
+            {['login', 'signup'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => {
+                  setMode(tab)
+                  setLoginError('')
+                  setSignupError('')
+                }}
+                className="flex-1 py-2.5 rounded-full text-[14px] font-bold transition-all"
+                style={
+                  mode === tab
+                    ? { background: GRAB_GREEN, color: 'white', boxShadow: '0 1px 3px rgba(0,177,79,0.35)' }
+                    : { color: MUTED, background: 'transparent' }
+                }
+              >
+                {tab === 'login' ? 'Log in' : 'Sign up'}
+              </button>
+            ))}
+          </div>
+
+          {mode === 'login' ? (
+            <form onSubmit={handleLogin} className="flex flex-col gap-4">
+              <Field
+                label="Email"
                 type="email"
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
-                className="border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2"
-                style={{ borderColor: '#e5e7eb', '--tw-ring-color': '#0d3320' }}
               />
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold" style={{ color: '#374151' }}>
-                Password
-              </label>
-              <input
+              <Field
+                label="Password"
                 type="password"
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Enter your password"
                 required
-                className="border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2"
-                style={{ borderColor: '#e5e7eb', '--tw-ring-color': '#0d3320' }}
               />
-            </div>
 
-            {loginError && (
-              <p className="text-xs text-red-500 text-center">{loginError}</p>
-            )}
+              {loginError && <p className="text-[13px] text-red-500">{loginError}</p>}
 
-            <button
-              type="submit"
-              disabled={loginLoading}
-              className="w-full py-3 rounded-xl font-bold text-sm text-white mt-1"
-              style={{ background: '#0d3320', opacity: loginLoading ? 0.7 : 1 }}
-            >
-              {loginLoading ? 'Logging in…' : 'Log In'}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleSignup} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold" style={{ color: '#374151' }}>
-                Full Name
-              </label>
-              <input
+              <button
+                type="submit"
+                disabled={loginLoading}
+                className="w-full py-3.5 rounded-xl font-bold text-[15px] text-white mt-2 transition-colors"
+                style={{ background: GRAB_GREEN, opacity: loginLoading ? 0.7 : 1 }}
+                onMouseDown={(e) => !loginLoading && (e.currentTarget.style.background = GRAB_GREEN_DARK)}
+                onMouseUp={(e) => (e.currentTarget.style.background = GRAB_GREEN)}
+              >
+                {loginLoading ? 'Logging in…' : 'Log in'}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleSignup} className="flex flex-col gap-4">
+              <Field
+                label="Full name"
                 type="text"
                 value={signupName}
                 onChange={(e) => setSignupName(e.target.value)}
                 placeholder="Juan Dela Cruz"
                 required
-                className="border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2"
-                style={{ borderColor: '#e5e7eb', '--tw-ring-color': '#0d3320' }}
               />
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold" style={{ color: '#374151' }}>
-                Email
-              </label>
-              <input
+              <Field
+                label="Email"
                 type="email"
                 value={signupEmail}
                 onChange={(e) => setSignupEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
-                className="border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2"
-                style={{ borderColor: '#e5e7eb', '--tw-ring-color': '#0d3320' }}
               />
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold" style={{ color: '#374151' }}>
-                Password
-              </label>
-              <input
+              <Field
+                label="Password"
                 type="password"
                 value={signupPassword}
                 onChange={(e) => setSignupPassword(e.target.value)}
                 placeholder="8+ chars, mixed case & a number"
                 required
-                className="border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2"
-                style={{ borderColor: '#e5e7eb', '--tw-ring-color': '#0d3320' }}
               />
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold" style={{ color: '#374151' }}>
-                Confirm Password
-              </label>
-              <input
+              <Field
+                label="Confirm password"
                 type="password"
                 value={signupConfirm}
                 onChange={(e) => setSignupConfirm(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Re-enter your password"
                 required
-                className="border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2"
-                style={{ borderColor: '#e5e7eb', '--tw-ring-color': '#0d3320' }}
               />
-            </div>
 
-            <p className="text-[11px] leading-snug" style={{ color: '#9aa0a6' }}>
-              One account does it all — post pickups and collect them whenever you like.
-            </p>
+              {signupError && <p className="text-[13px] text-red-500">{signupError}</p>}
 
-            {signupError && (
-              <p className="text-xs text-red-500 text-center">{signupError}</p>
-            )}
+              <button
+                type="submit"
+                disabled={signupLoading}
+                className="w-full py-3.5 rounded-xl font-bold text-[15px] text-white mt-2 transition-colors"
+                style={{ background: GRAB_GREEN, opacity: signupLoading ? 0.7 : 1 }}
+                onMouseDown={(e) => !signupLoading && (e.currentTarget.style.background = GRAB_GREEN_DARK)}
+                onMouseUp={(e) => (e.currentTarget.style.background = GRAB_GREEN)}
+              >
+                {signupLoading ? 'Creating account…' : 'Create account'}
+              </button>
 
-            <button
-              type="submit"
-              disabled={signupLoading}
-              className="w-full py-3 rounded-xl font-bold text-sm text-white mt-1"
-              style={{ background: '#c97f1e', opacity: signupLoading ? 0.7 : 1 }}
-            >
-              {signupLoading ? 'Creating account…' : 'Create Account'}
-            </button>
-          </form>
-        )}
+              <p className="text-[12px] leading-snug text-center mt-1" style={{ color: MUTED }}>
+                By continuing you agree to keep our neighborhoods clean. 🌱
+              </p>
+            </form>
+          )}
         </>
-        )}
-      </div>
+      )}
     </div>
   )
 }

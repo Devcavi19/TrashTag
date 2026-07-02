@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import ngeohash from 'ngeohash'
 import { useRequests } from './hooks/useRequests'
 import { useFeed } from './hooks/useFeed'
+import { useIdleLogout } from './hooks/useIdleLogout'
 import { supabase } from './lib/supabase'
 import HomeFeed from './components/HomeFeed'
 import FeedView from './components/FeedView'
@@ -26,6 +27,7 @@ function App() {
   const [activeRequestId, setActiveRequestId] = useState(null)
   const [composerOpen, setComposerOpen] = useState(false)
   const [notice, setNotice] = useState(null)
+  const [authNotice, setAuthNotice] = useState(null)
 
   const [requests, realtimeStatus] = useRequests()
   const [posts] = useFeed()
@@ -79,6 +81,7 @@ function App() {
   }
 
   async function handleLogin(authUser) {
+    setAuthNotice(null)
     const profile = await fetchProfile(authUser.id)
     setCurrentUser({ ...authUser, name: profile?.name })
     await fetchAllProfiles()
@@ -91,6 +94,13 @@ function App() {
     setProfiles([])
     setAppState('auth')
   }
+
+  // Auto sign-out after 10 minutes of inactivity while signed in.
+  async function handleIdleLogout() {
+    setAuthNotice('You were signed out after 10 minutes of inactivity.')
+    await handleLogout()
+  }
+  useIdleLogout(appState === 'app', handleIdleLogout)
 
   async function addRequest(newReq) {
     const geohash =
@@ -203,7 +213,7 @@ function App() {
   }
 
   if (appState === 'auth') {
-    return <AuthScreen onLogin={handleLogin} />
+    return <AuthScreen onLogin={handleLogin} notice={authNotice} />
   }
 
   return (
