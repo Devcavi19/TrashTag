@@ -5,7 +5,7 @@ import { haversineDistance, proximityLabel, formatDistance } from '../utils/have
 
 const STATUS_COLORS = {
   'Collector arrived': '#2f6b44',
-  'Collector is nearby': '#c97f1e',
+  'Collector is nearby': 'var(--brand-accent)',
   'Collector on the way': '#706d67',
 }
 

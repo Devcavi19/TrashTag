@@ -2,7 +2,7 @@ function TopBar() {
   return (
     <header
       className="sticky top-0 z-40 w-full"
-      style={{ background: '#0d3320' }}
+      style={{ background: 'var(--brand)' }}
     >
       <div className="mx-auto flex max-w-[430px] items-center px-4 py-3">
         <div className="flex items-baseline gap-1.5">

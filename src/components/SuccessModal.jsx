@@ -51,7 +51,7 @@ function SuccessModal({
           <button
             onClick={onClose}
             className="w-full text-white text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95"
-            style={{ background: '#0d3320' }}
+            style={{ background: 'var(--brand)' }}
           >
             {buttonLabel}
           </button>

@@ -16,7 +16,7 @@ export default function LoadingScreen({ onDone }) {
     <div
       className="fixed inset-0 flex flex-col items-center justify-center"
       style={{
-        background: '#0d3320',
+        background: 'var(--brand)',
         transition: 'opacity 0.5s ease',
         opacity: fading ? 0 : 1,
         zIndex: 9999,
@@ -26,7 +26,7 @@ export default function LoadingScreen({ onDone }) {
       <div className="flex flex-col items-center gap-4">
         <div
           className="w-20 h-20 rounded-2xl flex items-center justify-center"
-          style={{ background: '#c97f1e' }}
+          style={{ background: 'var(--brand-accent)' }}
         >
           <svg width="44" height="44" viewBox="0 0 24 24" fill="none">
             <path
@@ -48,7 +48,7 @@ export default function LoadingScreen({ onDone }) {
         <div className="text-center">
           <h1 className="text-white font-bold text-3xl tracking-tight">
             TrashTag
-            <span style={{ color: '#c97f1e' }} className="text-lg ml-1 font-medium">PH</span>
+            <span style={{ color: 'var(--brand-accent)' }} className="text-lg ml-1 font-medium">PH</span>
           </h1>
           <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
             Trash that pays. Community that cleans.
@@ -60,7 +60,7 @@ export default function LoadingScreen({ onDone }) {
       <div className="mt-12">
         <div
           className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"
-          style={{ borderColor: 'rgba(255,255,255,0.25)', borderTopColor: '#c97f1e' }}
+          style={{ borderColor: 'rgba(255,255,255,0.25)', borderTopColor: 'var(--brand-accent)' }}
         />
       </div>
     </div>

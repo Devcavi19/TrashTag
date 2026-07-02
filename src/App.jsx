@@ -4,6 +4,7 @@ import { useRequests } from './hooks/useRequests'
 import { useFeed } from './hooks/useFeed'
 import { useIdleLogout } from './hooks/useIdleLogout'
 import { supabase } from './lib/supabase'
+import { getStoredTheme, applyTheme, setStoredTheme } from './lib/themes'
 import HomeFeed from './components/HomeFeed'
 import FeedView from './components/FeedView'
 import LeaderboardView from './components/LeaderboardView'
@@ -28,6 +29,7 @@ function App() {
   const [composerOpen, setComposerOpen] = useState(false)
   const [notice, setNotice] = useState(null)
   const [authNotice, setAuthNotice] = useState(null)
+  const [theme, setTheme] = useState(getStoredTheme)
 
   const [requests, realtimeStatus] = useRequests()
   const [posts] = useFeed()
@@ -200,6 +202,12 @@ function App() {
       : 0,
   }
 
+  function handleThemeChange(id) {
+    setTheme(id)
+    applyTheme(id)
+    setStoredTheme(id)
+  }
+
   function openThread(request) {
     setActiveRequestId(request.id)
   }
@@ -217,7 +225,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen font-sans" style={{ background: '#f3f4f2' }}>
+    <div className="min-h-screen font-sans" style={{ background: 'var(--app-bg)' }}>
       <TopBar />
 
       <main className="max-w-[430px] mx-auto pb-24">
@@ -253,6 +261,8 @@ function App() {
             stats={userStats}
             onLogout={handleLogout}
             onNotice={setNotice}
+            theme={theme}
+            onThemeChange={handleThemeChange}
           />
         )}
       </main>

@@ -1,6 +1,6 @@
-const FOREST = '#0d3320'
+const FOREST = 'var(--brand)'
 const FAINT = '#a8a5a0'
-const AMBER = '#c97f1e'
+const AMBER = 'var(--brand-accent)'
 
 function NavButton({ active, label, onClick, badge, children }) {
   return (

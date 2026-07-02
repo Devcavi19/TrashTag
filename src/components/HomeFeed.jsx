@@ -14,7 +14,7 @@ function ComposerPrompt({ user, onCompose }) {
     >
       <span
         className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-        style={{ background: '#0d3320' }}
+        style={{ background: 'var(--brand)' }}
       >
         {initials}
       </span>
@@ -23,7 +23,7 @@ function ComposerPrompt({ user, onCompose }) {
       </span>
       <span
         className="flex h-7 w-7 items-center justify-center rounded-full"
-        style={{ background: '#fef3e0', color: '#c97f1e' }}
+        style={{ background: '#fef3e0', color: 'var(--brand-accent)' }}
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 5v14M5 12h14" />

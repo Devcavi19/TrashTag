@@ -29,7 +29,7 @@ function FeedView({ posts, addPost, onLike, currentUser }) {
               className="rounded-full px-4 py-1.5 text-[13px] font-semibold whitespace-nowrap transition-all active:scale-95"
               style={
                 active
-                  ? { background: '#0d3320', color: '#ffffff' }
+                  ? { background: 'var(--brand)', color: '#ffffff' }
                   : { background: '#ffffff', color: '#a8a5a0', boxShadow: '0 0 0 1px rgba(0,0,0,0.04)' }
               }
             >

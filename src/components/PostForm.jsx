@@ -196,7 +196,7 @@ function PostForm({ onSubmit, onSubmitted }) {
             className="flex items-center rounded-xl overflow-hidden"
             style={{ border: '2px solid #e8e8e6', background: '#fafaf9' }}
           >
-            <span className="pl-3.5 pr-1 text-[20px] font-bold" style={{ color: '#c97f1e' }}>
+            <span className="pl-3.5 pr-1 text-[20px] font-bold" style={{ color: 'var(--brand-accent)' }}>
               ₱
             </span>
             <input
@@ -218,7 +218,7 @@ function PostForm({ onSubmit, onSubmitted }) {
           onClick={() => setConfirmOpen(true)}
           disabled={!canSubmit}
           className="w-full text-white text-sm font-semibold py-3 rounded-xl transition-all active:scale-95 disabled:opacity-40"
-          style={{ background: '#0d3320' }}
+          style={{ background: 'var(--brand)' }}
         >
           Post pickup
         </button>
@@ -229,7 +229,7 @@ function PostForm({ onSubmit, onSubmitted }) {
         title="Post this pickup?"
         message={`Post a ${tags.join(', ')} pickup at "${location.label}" for a ₱${priceValid ? priceNum : 0} payout.`}
         confirmLabel="Post pickup"
-        confirmColor="#0d3320"
+        confirmColor="var(--brand)"
         onConfirm={handleSubmit}
         onCancel={() => setConfirmOpen(false)}
       />

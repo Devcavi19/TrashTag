@@ -1,3 +1,11 @@
+/* Theme tokens — forest defaults; overwritten on <html> by lib/themes.js.
+   Kept here so first paint is correct even before JS runs. */
+:root {
+  --brand: #0d3320;
+  --brand-accent: #c97f1e;
+  --app-bg: #f3f4f2;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -5,7 +13,7 @@
 body {
   margin: 0;
   font-family: 'DM Sans', system-ui, sans-serif;
-  background: #f3f4f2;
+  background: var(--app-bg);
   color: #1c1c1e;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -18,7 +26,7 @@ body {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  background: #f3f4f2;
+  background: var(--app-bg);
   border-inline: 1px solid #e2e2e0;
 }
 

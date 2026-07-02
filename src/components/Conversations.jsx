@@ -24,7 +24,7 @@ function Avatar({ name, stacked }) {
       )}
       <span
         className="absolute inset-0 flex items-center justify-center rounded-full text-xs font-bold text-white"
-        style={{ background: '#0d3320' }}
+        style={{ background: 'var(--brand)' }}
       >
         {initialsOf(name)}
       </span>
@@ -53,14 +53,14 @@ function Header({ title, onBack }) {
       <button
         onClick={onBack}
         className="flex h-8 w-8 items-center justify-center rounded-full transition-all active:scale-95"
-        style={{ background: '#f3f4f2', color: '#706d67' }}
+        style={{ background: 'var(--app-bg)', color: '#706d67' }}
         aria-label="Back"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="m15 18-6-6 6-6" />
         </svg>
       </button>
-      <span className="font-display text-[20px]" style={{ color: '#0d3320', fontWeight: 600 }}>
+      <span className="font-display text-[20px]" style={{ color: 'var(--brand)', fontWeight: 600 }}>
         {title}
       </span>
     </div>
@@ -97,7 +97,7 @@ export default function Conversations({ requests, currentUser, users, onClose, o
   const person = openPersonId != null ? groups.find((g) => g.id === openPersonId) : null
   if (person) {
     return (
-      <div className="fixed inset-0 z-50 mx-auto flex max-w-[430px] flex-col" style={{ background: '#f3f4f2' }}>
+      <div className="fixed inset-0 z-50 mx-auto flex max-w-[430px] flex-col" style={{ background: 'var(--app-bg)' }}>
         <Header title={nameOf(person.id)} onBack={() => setOpenPersonId(null)} />
         <div className="flex-1 overflow-y-auto p-3">
           <p className="px-1 pb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: '#a8a5a0' }}>
@@ -108,7 +108,7 @@ export default function Conversations({ requests, currentUser, users, onClose, o
               <Row key={r.id} onClick={() => onOpenThread(r)}>
                 <span
                   className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-base"
-                  style={{ background: '#f3f4f2' }}
+                  style={{ background: 'var(--app-bg)' }}
                 >
                   {r.postedBy === myId ? '📤' : '🧹'}
                 </span>
@@ -131,7 +131,7 @@ export default function Conversations({ requests, currentUser, users, onClose, o
 
   // --- Inbox: one row per person ---
   return (
-    <div className="fixed inset-0 z-50 mx-auto flex max-w-[430px] flex-col" style={{ background: '#f3f4f2' }}>
+    <div className="fixed inset-0 z-50 mx-auto flex max-w-[430px] flex-col" style={{ background: 'var(--app-bg)' }}>
       <Header title="Messages" onBack={onClose} />
 
       <div className="flex-1 overflow-y-auto p-3">
@@ -167,7 +167,7 @@ export default function Conversations({ requests, currentUser, users, onClose, o
                     <span className="flex items-center gap-1.5">
                       <span
                         className="rounded-full px-2 py-0.5 text-[11px] font-bold"
-                        style={{ background: activeCount ? '#fef3e0' : '#e6f0eb', color: activeCount ? '#c97f1e' : '#0d3320' }}
+                        style={{ background: activeCount ? '#fef3e0' : '#e6f0eb', color: activeCount ? 'var(--brand-accent)' : 'var(--brand)' }}
                       >
                         {g.jobs.length}
                       </span>

@@ -1,13 +1,13 @@
 // The Leaderboard's own screen, reached from the bottom nav. It opens with the
 // community's real impact (the thesis), then ranks collectors by completed jobs.
 
-const FOREST = '#0d3320'
-const AMBER = '#c97f1e'
+const FOREST = 'var(--brand)'
+const AMBER = 'var(--brand-accent)'
 const FAINT = '#a8a5a0'
 const LINE = '#e9e9e6'
 
 const RANK_BADGES = {
-  0: { emoji: '🥇', bg: '#fbf0d4', color: '#c97f1e' },
+  0: { emoji: '🥇', bg: '#fbf0d4', color: 'var(--brand-accent)' },
   1: { emoji: '🥈', bg: '#eef0f1', color: '#7c8a92' },
   2: { emoji: '🥉', bg: '#f3e6da', color: '#a4632a' },
 }
@@ -53,7 +53,7 @@ function Row({ entry, rank, isMe }) {
         style={{
           width: 32,
           height: 32,
-          background: badge ? badge.bg : '#f3f4f2',
+          background: badge ? badge.bg : 'var(--app-bg)',
           color: badge ? badge.color : FAINT,
         }}
       >

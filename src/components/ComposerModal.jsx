@@ -18,7 +18,7 @@ export default function ComposerModal({ onClose, onSubmit }) {
     >
       <div
         className="flex w-full flex-col overflow-hidden rounded-t-2xl"
-        style={{ maxWidth: 430, maxHeight: '92vh', background: '#f3f4f2' }}
+        style={{ maxWidth: 430, maxHeight: '92vh', background: 'var(--app-bg)' }}
       >
         <div className="relative flex flex-shrink-0 items-center justify-center px-4 pt-3 pb-1">
           <span className="h-1 w-9 rounded-full" style={{ background: '#d8d6d2' }} aria-hidden="true" />

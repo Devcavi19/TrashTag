@@ -6,7 +6,7 @@ function ConfirmModal({
   message,
   confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
-  confirmColor = '#0d3320',
+  confirmColor = 'var(--brand)',
   onConfirm,
   onCancel,
 }) {

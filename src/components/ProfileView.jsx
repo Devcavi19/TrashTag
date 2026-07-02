@@ -1,9 +1,10 @@
 // The "You" section — a full-screen field record, not a dropdown. Everything
 // here is derived from live requests; nothing is a vanity number.
 import { TAG_COLORS } from '../lib/tagColors'
+import { THEMES } from '../lib/themes'
 
-const FOREST = '#0d3320'
-const AMBER = '#c97f1e'
+const FOREST = 'var(--brand)'
+const AMBER = 'var(--brand-accent)'
 const INK = '#1c1c1e'
 const MUTED = '#706d67'
 const FAINT = '#a8a5a0'
@@ -56,7 +57,7 @@ function ActionRow({ icon, label, hint, danger, onClick }) {
         {label}
       </span>
       {hint && (
-        <span className="rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest" style={{ background: '#f3f4f2', color: FAINT }}>
+        <span className="rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest" style={{ background: 'var(--app-bg)', color: FAINT }}>
           {hint}
         </span>
       )}
@@ -69,7 +70,60 @@ function ActionRow({ icon, label, hint, danger, onClick }) {
   )
 }
 
-export default function ProfileView({ currentUser, requests, stats, onLogout, onNotice }) {
+// Theme picker — swatches always show each theme's own colors so their identity
+// reads regardless of which one is active; the active ring uses the live accent.
+function ThemePicker({ current, onChange }) {
+  return (
+    <section className="rounded-2xl bg-white p-4" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)' }}>
+      <div className="flex items-center gap-2">
+        <span className="flex h-[18px] w-[18px] items-center justify-center" style={{ color: MUTED }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" /><circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
+            <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" /><circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.012 17.5 2 12 2z" />
+          </svg>
+        </span>
+        <h2 className="font-display text-[15px]" style={{ color: FOREST, fontWeight: 600 }}>Appearance</h2>
+      </div>
+      <p className="mt-1 text-[12px]" style={{ color: FAINT }}>
+        Pick the color theme for the whole app.
+      </p>
+      <div className="mt-3 grid grid-cols-3 gap-2.5">
+        {Object.entries(THEMES).map(([id, t]) => {
+          const active = id === current
+          return (
+            <button
+              key={id}
+              onClick={() => onChange(id)}
+              className="relative flex flex-col items-center gap-2 rounded-xl px-2 py-3 transition-all active:scale-95"
+              style={{
+                background: active ? '#f7f7f6' : 'transparent',
+                boxShadow: active ? `0 0 0 2px ${AMBER}` : '0 0 0 1px #e7e6e2',
+              }}
+              aria-pressed={active}
+              title={t.blurb}
+            >
+              <span className="flex h-9 w-9 overflow-hidden rounded-full" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.18)' }}>
+                <span className="h-full w-1/2" style={{ background: t.swatch[0] }} />
+                <span className="h-full w-1/2" style={{ background: t.swatch[1] }} />
+              </span>
+              <span className="text-[11px] font-bold" style={{ color: INK }}>{t.name}</span>
+              {active && (
+                <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full text-white" style={{ background: AMBER }}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+export default function ProfileView({ currentUser, requests, stats, onLogout, onNotice, theme, onThemeChange }) {
   const myId = currentUser?.id
   const title = deriveTitle(stats)
   const rating = stats.ratingCount > 0 ? stats.rating.toFixed(1) : '—'
@@ -159,7 +213,7 @@ export default function ProfileView({ currentUser, requests, stats, onLogout, on
             </p>
           ) : (
             <>
-              <div className="mt-3 flex h-3 w-full overflow-hidden rounded-full" style={{ background: '#f3f4f2' }}>
+              <div className="mt-3 flex h-3 w-full overflow-hidden rounded-full" style={{ background: 'var(--app-bg)' }}>
                 {segments.map((c) => (
                   <div
                     key={c}
@@ -179,6 +233,9 @@ export default function ProfileView({ currentUser, requests, stats, onLogout, on
             </>
           )}
         </section>
+
+        {/* Appearance — theme switcher, applies app-wide */}
+        <ThemePicker current={theme} onChange={onThemeChange} />
 
         {/* Account actions */}
         <section className="overflow-hidden rounded-2xl bg-white" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)' }}>

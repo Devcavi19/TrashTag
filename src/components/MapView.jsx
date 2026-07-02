@@ -30,7 +30,7 @@ function pinIcon(color) {
 
 const collectorIcon = L.divIcon({
   className: '',
-  html: `<div style="width:18px;height:18px;background:#0d3320;border:3px solid white;border-radius:50%;box-shadow:0 0 0 4px rgba(13,51,32,0.25),0 2px 8px rgba(0,0,0,0.4)"></div>`,
+  html: `<div style="width:18px;height:18px;background:var(--brand);border:3px solid white;border-radius:50%;box-shadow:0 0 0 4px rgba(13,51,32,0.25),0 2px 8px rgba(0,0,0,0.4)"></div>`,
   iconSize: [18, 18],
   iconAnchor: [9, 9],
 })
@@ -93,7 +93,7 @@ export default function MapView({ requests, onSelectRequest, collectorLocation, 
               <div style={{ fontSize: 13, minWidth: 130 }}>
                 <strong>{r.type}</strong>
                 <br />
-                <span style={{ color: '#c97f1e', fontWeight: 700 }}>₱{r.price}</span>
+                <span style={{ color: 'var(--brand-accent)', fontWeight: 700 }}>₱{r.price}</span>
                 <br />
                 {r.gps && (
                   <span style={{ color: '#706d67', fontSize: 11 }}>

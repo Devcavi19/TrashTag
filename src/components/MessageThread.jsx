@@ -14,7 +14,7 @@ function nameOf(users, id, fallback = 'Unknown') {
   return users.find((u) => u.id === id)?.name ?? fallback
 }
 
-const NODE_COLORS = { done: '#2f6b44', active: '#c97f1e', redo: '#b53419', todo: '#d8d6d2' }
+const NODE_COLORS = { done: '#2f6b44', active: 'var(--brand-accent)', redo: '#b53419', todo: '#d8d6d2' }
 
 function RailNode({ state, last, title, time, children }) {
   const color = NODE_COLORS[state]
@@ -55,7 +55,7 @@ function Stars({ value, onRate, readOnly }) {
           disabled={readOnly}
           onClick={() => !readOnly && onRate(s)}
           className={`text-xl leading-none transition-colors ${readOnly ? 'cursor-default' : 'active:scale-90'}`}
-          style={{ color: s <= value ? '#c97f1e' : '#dcdad6' }}
+          style={{ color: s <= value ? 'var(--brand-accent)' : '#dcdad6' }}
           aria-label={`${s} star${s > 1 ? 's' : ''}`}
         >
           ★
@@ -206,28 +206,28 @@ export default function MessageThread({ request, currentUser, users, onClose, on
 
   const confirmCopy = {
     collected: { title: 'Mark as collected?', message: 'Your after-photo will be sent to the poster to confirm payment.', label: 'Mark collected', color: '#2f6b44' },
-    pay: { title: `Pay ₱${price}?`, message: 'Release payment to the collector for this pickup. This cannot be undone.', label: `Pay ₱${price}`, color: '#c97f1e' },
+    pay: { title: `Pay ₱${price}?`, message: 'Release payment to the collector for this pickup. This cannot be undone.', label: `Pay ₱${price}`, color: 'var(--brand-accent)' },
     reject: { title: 'Reject this proof?', message: 'The job returns to the collector to re-upload a new after-photo. No payment is sent.', label: 'Reject', color: '#b53419' },
   }
   const cc = pending ? confirmCopy[pending] : null
 
   return (
-    <div className="fixed inset-0 z-50 mx-auto flex max-w-[430px] flex-col" style={{ background: '#f3f4f2' }}>
+    <div className="fixed inset-0 z-50 mx-auto flex max-w-[430px] flex-col" style={{ background: 'var(--app-bg)' }}>
       {/* Header */}
       <div className="flex flex-shrink-0 items-center gap-3 bg-white px-3 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-        <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full transition-all active:scale-95" style={{ background: '#f3f4f2', color: '#706d67' }} aria-label="Back">
+        <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full transition-all active:scale-95" style={{ background: 'var(--app-bg)', color: '#706d67' }} aria-label="Back">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
         </button>
         <img src={photo || sampleTrash} alt="" className="h-10 w-10 flex-shrink-0 rounded-lg object-cover" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-bold" style={{ color: '#1c1c1e' }}>{counterpart}</p>
-          <p className="truncate text-xs" style={{ color: '#a8a5a0' }}>{gps} · <span style={{ color: '#c97f1e', fontWeight: 600 }}>₱{price}</span></p>
+          <p className="truncate text-xs" style={{ color: '#a8a5a0' }}>{gps} · <span style={{ color: 'var(--brand-accent)', fontWeight: 600 }}>₱{price}</span></p>
         </div>
       </div>
 
       {/* Journey rail (signature) — own scroll so actions stay reachable */}
       <div className="flex-shrink-0 overflow-y-auto bg-white px-4 pb-3 pt-4" style={{ maxHeight: '46vh', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-        <h2 className="mb-3 font-display text-[15px]" style={{ color: '#0d3320', fontWeight: 600 }}>Pickup journey</h2>
+        <h2 className="mb-3 font-display text-[15px]" style={{ color: 'var(--brand)', fontWeight: 600 }}>Pickup journey</h2>
 
         <RailNode state={acceptedState} title="Accepted" >
           <p className="text-xs" style={{ color: '#706d67' }}>{collectorName} is on this pickup.</p>
@@ -281,7 +281,7 @@ export default function MessageThread({ request, currentUser, users, onClose, on
                   <button onClick={() => setPending('reject')} className="flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all active:scale-95" style={{ background: '#fce8e6', color: '#b53419' }}>
                     Reject
                   </button>
-                  <button onClick={() => setPending('pay')} className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white transition-all active:scale-95" style={{ background: '#c97f1e' }}>
+                  <button onClick={() => setPending('pay')} className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white transition-all active:scale-95" style={{ background: 'var(--brand-accent)' }}>
                     Accept &amp; Pay ₱{price}
                   </button>
                 </div>
@@ -336,7 +336,7 @@ export default function MessageThread({ request, currentUser, users, onClose, on
               <div
                 className="max-w-[75%] px-3 py-2 text-sm"
                 style={{
-                  background: own ? '#0d3320' : '#fff',
+                  background: own ? 'var(--brand)' : '#fff',
                   color: own ? '#fff' : '#2d2b27',
                   borderRadius: own ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                   boxShadow: '0 1px 2px rgba(0,0,0,0.07)',
@@ -356,7 +356,7 @@ export default function MessageThread({ request, currentUser, users, onClose, on
         <input
           ref={inputRef}
           className="flex-1 rounded-xl px-3 py-2.5 text-sm outline-none"
-          style={{ background: '#f3f4f2', color: '#2d2b27' }}
+          style={{ background: 'var(--app-bg)', color: '#2d2b27' }}
           placeholder="Type a message…"
           value={text}
           maxLength={500}
@@ -367,7 +367,7 @@ export default function MessageThread({ request, currentUser, users, onClose, on
           onClick={handleSend}
           disabled={!text.trim()}
           className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl transition-all active:scale-95"
-          style={{ background: text.trim() ? '#0d3320' : '#e8e6e1', color: text.trim() ? '#fff' : '#a8a5a0' }}
+          style={{ background: text.trim() ? 'var(--brand)' : '#e8e6e1', color: text.trim() ? '#fff' : '#a8a5a0' }}
           aria-label="Send"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4 20-7z" /></svg>

@@ -2,7 +2,7 @@
 export default function Toast({ message, tone = 'error' }) {
   if (!message) return null
 
-  const bg = tone === 'error' ? '#b53419' : '#0d3320'
+  const bg = tone === 'error' ? '#b53419' : 'var(--brand)'
 
   return (
     <div

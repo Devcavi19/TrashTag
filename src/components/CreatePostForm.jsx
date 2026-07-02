@@ -5,7 +5,7 @@ import { validateImage } from '../lib/validateImage'
 const TYPE_OPTIONS = [
   { key: 'event', label: 'Event', color: '#2f6b44', bg: '#eaf5ec' },
   { key: 'news',  label: 'News',  color: '#1966b5', bg: '#e8f0fe' },
-  { key: 'post',  label: 'Post',  color: '#c97f1e', bg: '#fef3e0' },
+  { key: 'post',  label: 'Post',  color: 'var(--brand-accent)', bg: '#fef3e0' },
 ]
 
 function CreatePostForm({ onSubmit }) {
@@ -224,7 +224,7 @@ function CreatePostForm({ onSubmit }) {
           onClick={handleSubmit}
           disabled={!body.trim() || submitting}
           className="w-full text-white text-sm font-semibold py-3 rounded-xl transition-all active:scale-95 disabled:opacity-40"
-          style={{ background: '#0d3320' }}
+          style={{ background: 'var(--brand)' }}
         >
           {submitting ? 'Posting…' : 'Share Post'}
         </button>

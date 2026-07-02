@@ -44,7 +44,7 @@ export default function TrashCard({ request, currentUserId, onAccept, onLike, on
             className="absolute top-2 left-2 flex items-center gap-1 rounded-full pl-1.5 pr-2 py-1 text-[11px] font-bold"
             style={{
               background: 'rgba(255,255,255,0.92)',
-              color: '#0d3320',
+              color: 'var(--brand)',
               backdropFilter: 'blur(4px)',
               boxShadow: '0 1px 3px rgba(0,0,0,0.18)',
             }}
@@ -72,7 +72,7 @@ export default function TrashCard({ request, currentUserId, onAccept, onLike, on
 
         {/* Price */}
         <div className="flex items-baseline gap-1.5">
-          <span className="text-[22px] font-bold leading-none" style={{ color: '#c97f1e' }}>
+          <span className="text-[22px] font-bold leading-none" style={{ color: 'var(--brand-accent)' }}>
             ₱{price}
           </span>
           <span className="text-[11px] font-medium" style={{ color: '#c8c5c0' }}>
@@ -106,7 +106,7 @@ export default function TrashCard({ request, currentUserId, onAccept, onLike, on
             <button
               onClick={() => setConfirmAccept(true)}
               className="w-full mt-4 text-white text-sm font-semibold py-2.5 rounded-xl transition-all active:scale-95"
-              style={{ background: '#0d3320' }}
+              style={{ background: 'var(--brand)' }}
             >
               Accept pickup
             </button>
@@ -115,7 +115,7 @@ export default function TrashCard({ request, currentUserId, onAccept, onLike, on
               title="Accept this pickup?"
               message="You commit to collecting this trash. It opens a conversation with the poster where you'll track, upload proof, and get paid."
               confirmLabel="Accept pickup"
-              confirmColor="#0d3320"
+              confirmColor="var(--brand)"
               onConfirm={() => { setConfirmAccept(false); onAccept(id) }}
               onCancel={() => setConfirmAccept(false)}
             />

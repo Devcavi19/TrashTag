@@ -5,7 +5,7 @@
 //   post  → a neighbor's note (casual, avatar- and photo-forward)
 // You can tell them apart mid-scroll without reading the badge.
 
-const FOREST = '#0d3320'
+const FOREST = 'var(--brand)'
 const INK = '#1c1c1e'
 const BODY = '#3a3a3c'
 const FAINT = '#a8a5a0'
@@ -13,7 +13,7 @@ const LIKE_ON = '#c0392b'
 
 const EVENT = { color: '#2f6b44', bg: '#eaf5ec' }
 const NEWS = { color: '#1966b5', bg: '#e8f0fe' }
-const POST = { color: '#c97f1e', bg: '#fef3e0' }
+const POST = { color: 'var(--brand-accent)', bg: '#fef3e0' }
 
 const CARD_SHADOW = '0 1px 3px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04)'
 
