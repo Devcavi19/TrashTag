@@ -147,6 +147,12 @@ input, select, button, textarea {
   animation: tt-pop 0.3s ease-out;
 }
 
+/* Dark theme: invert OSM raster tiles so maps match the surface */
+html[data-dark] .leaflet-layer,
+html[data-dark] .leaflet-control-attribution {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tt-scrim, .tt-sheet, .tt-skeleton, .tt-pop {
     animation: none;

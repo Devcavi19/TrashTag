@@ -14,9 +14,10 @@ L.Icon.Default.mergeOptions({
 })
 
 const TYPE_COLORS = {
-  Biodegradable: '#22863a',
-  Recyclable: '#1966b5',
-  Residual: '#b53419',
+  Biodegradable: 'var(--tag-bio-fg)',
+  Recyclable: 'var(--tag-rec-fg)',
+  Residual: 'var(--tag-res-fg)',
+  Mixed: 'var(--tag-mix-fg)',
 }
 
 function pinIcon(color) {
@@ -63,10 +64,12 @@ export default function MapView({ requests, onSelectRequest, collectorLocation, 
 
   return (
     <div
-      className="rounded-2xl overflow-hidden"
+      className="overflow-hidden"
       style={{
         height: 200,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04)',
+        borderRadius: 'var(--radius-card)',
+        border: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-card)',
         // Contain Leaflet's high z-index panes so they can't paint over fixed overlays (chat, modals).
         isolation: 'isolate',
       }}
@@ -86,17 +89,17 @@ export default function MapView({ requests, onSelectRequest, collectorLocation, 
           <Marker
             key={r.id}
             position={[r.lat, r.lng]}
-            icon={pinIcon(TYPE_COLORS[r.type] ?? '#706d67')}
+            icon={pinIcon(TYPE_COLORS[r.type] ?? 'var(--text-muted)')}
             eventHandlers={{ click: () => onSelectRequest?.(r) }}
           >
             <Popup>
               <div style={{ fontSize: 13, minWidth: 130 }}>
                 <strong>{r.type}</strong>
                 <br />
-                <span style={{ color: 'var(--brand-accent)', fontWeight: 700 }}>₱{r.price}</span>
+                <span style={{ color: 'var(--accent)', fontWeight: 700 }}>₱{r.price}</span>
                 <br />
                 {r.gps && (
-                  <span style={{ color: '#706d67', fontSize: 11 }}>
+                  <span style={{ color: '#6b7280', fontSize: 11 }}>
                     {r.gps.split(',').slice(0, 2).join(',')}
                   </span>
                 )}

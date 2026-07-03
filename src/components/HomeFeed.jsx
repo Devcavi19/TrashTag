@@ -1,35 +1,49 @@
 import TrashCard from './TrashCard'
 import { useViewerLocation } from '../hooks/useViewerLocation'
 import { rankRequests } from '../utils/rankRequests'
+import Avatar from './ui/Avatar'
+import EmptyState from './ui/EmptyState'
 
 function ComposerPrompt({ user, onCompose }) {
-  const initials = user
-    ? user.name?.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
-    : '?'
   return (
     <button
       onClick={onCompose}
-      className="flex w-full items-center gap-3 rounded-2xl bg-white px-4 py-3 text-left transition-all active:scale-[0.99]"
-      style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04)' }}
+      className="tt-press flex w-full items-center gap-3 px-4 py-3 text-left"
+      style={{
+        background: 'var(--surface-card)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-card)',
+        boxShadow: 'var(--shadow-card)',
+      }}
     >
-      <span
-        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-        style={{ background: 'var(--brand)' }}
-      >
-        {initials}
-      </span>
-      <span className="flex-1 text-sm" style={{ color: '#a8a5a0' }}>
+      <Avatar name={user?.name || '?'} />
+      <span className="flex-1 text-sm" style={{ color: 'var(--text-muted)' }}>
         Got trash to clear? Post a pickup…
       </span>
       <span
         className="flex h-7 w-7 items-center justify-center rounded-full"
-        style={{ background: '#fef3e0', color: 'var(--brand-accent)' }}
+        style={{ background: 'var(--brand)', color: 'var(--on-brand)' }}
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 5v14M5 12h14" />
         </svg>
       </span>
     </button>
+  )
+}
+
+function SectionLabel({ children, aside }) {
+  return (
+    <div className="flex items-baseline justify-between">
+      <h2 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+        {children}
+      </h2>
+      {aside && (
+        <span className="text-[10px] font-semibold" style={{ color: 'var(--success)' }}>
+          {aside}
+        </span>
+      )}
+    </div>
   )
 }
 
@@ -55,14 +69,7 @@ export default function HomeFeed({ requests, currentUser, onCompose, onAccept, o
 
       {nearest.length > 0 && (
         <div className="space-y-3">
-          <div className="flex items-baseline justify-between">
-            <h2 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#a8a5a0' }}>
-              Nearest open pickups
-            </h2>
-            <span className="text-[10px] font-semibold" style={{ color: '#2f6b44' }}>
-              Closest to you
-            </span>
-          </div>
+          <SectionLabel aside="Closest to you">Nearest open pickups</SectionLabel>
           {nearest.map((r) => (
             <TrashCard
               key={r.id}
@@ -78,18 +85,15 @@ export default function HomeFeed({ requests, currentUser, onCompose, onAccept, o
       )}
 
       {nearest.length === 0 && rest.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-16 text-center">
-          <span className="text-3xl" style={{ opacity: 0.25 }}>🌱</span>
-          <p className="text-sm font-medium" style={{ color: '#c8c5c0' }}>
-            Nothing here yet. Post the first pickup!
-          </p>
-        </div>
+        <EmptyState
+          icon="🌱"
+          title="No pickups nearby yet"
+          body="Post the first one and a collector will come running."
+        />
       ) : (
         <div className="space-y-3">
           {nearest.length > 0 && rest.length > 0 && (
-            <h2 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#a8a5a0' }}>
-              More in the community
-            </h2>
+            <SectionLabel>More in the community</SectionLabel>
           )}
           {rest.map((r) => (
             <TrashCard

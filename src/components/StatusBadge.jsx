@@ -1,33 +1,32 @@
 import { TAG_COLORS } from '../lib/tagColors'
+import Chip from './ui/Chip'
+
+// Status palettes ride the theme's semantic tokens: a soft tint of the status
+// color for the background, the full color for text — legible on both themes.
+const tint = (token) => `color-mix(in srgb, ${token} 14%, transparent)`
 
 const VARIANT_MAP = {
   ...TAG_COLORS,
-  open:          { label: 'Open',          bg: 'var(--app-bg)', color: '#a8a5a0' },
-  accepted:      { label: 'On the way',   bg: '#fef3e0', color: 'var(--brand-accent)' },
-  collected:     { label: 'Collected',    bg: '#eaf5ec', color: '#2f6b44' },
-  disputed:      { label: 'Needs redo',   bg: '#fce8e6', color: '#b53419' },
-  paid:          { label: 'Paid',         bg: '#e6f0eb', color: 'var(--brand)' },
+  open:      { label: 'Open',        bg: tint('var(--text-secondary)'), color: 'var(--text-secondary)' },
+  accepted:  { label: 'On the way',  bg: tint('var(--warning)'),        color: 'var(--warning)' },
+  collected: { label: 'Collected',   bg: tint('var(--success)'),        color: 'var(--success)' },
+  disputed:  { label: 'Needs redo',  bg: tint('var(--danger)'),         color: 'var(--danger)' },
+  paid:      { label: 'Paid',        bg: tint('var(--brand)'),          color: 'var(--brand)' },
 }
 
 function Badge({ variant }) {
   const config = VARIANT_MAP[variant]
   if (!config) {
     return (
-      <span
-        className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
-        style={{ background: 'var(--app-bg)', color: '#a8a5a0' }}
-      >
+      <Chip bg={tint('var(--text-muted)')} color="var(--text-muted)">
         {variant ?? '—'}
-      </span>
+      </Chip>
     )
   }
   return (
-    <span
-      className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
-      style={{ background: config.bg, color: config.color }}
-    >
+    <Chip bg={config.bg} color={config.color}>
       {config.label}
-    </span>
+    </Chip>
   )
 }
 

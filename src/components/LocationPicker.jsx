@@ -57,7 +57,6 @@ export default function LocationPicker({ onChange }) {
   const [phase, setPhase] = useState('idle') // 'idle' | 'loading' | 'map' | 'denied'
   const [pos, setPos] = useState(null)
   const [label, setLabel] = useState('')
-  const [focused, setFocused] = useState(false)
 
   async function pinMoved(lat, lng) {
     setPos([lat, lng])
@@ -88,8 +87,12 @@ export default function LocationPicker({ onChange }) {
         type="button"
         onClick={detect}
         disabled={phase === 'loading'}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all active:scale-95 disabled:opacity-60"
-        style={{ background: '#f0fdf4', border: '1.5px dashed #2f6b44', color: '#2f6b44' }}
+        className="tt-press flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold disabled:opacity-60"
+        style={{
+          background: 'color-mix(in srgb, var(--success) 10%, transparent)',
+          border: '1.5px dashed var(--success)',
+          color: 'var(--success)',
+        }}
       >
         {phase === 'loading' ? (
           <span>Detecting location…</span>
@@ -109,7 +112,7 @@ export default function LocationPicker({ onChange }) {
   if (phase === 'denied') {
     return (
       <div className="space-y-1.5">
-        <p className="text-[11px] font-medium" style={{ color: '#b53419' }}>
+        <p className="text-[11px] font-medium" style={{ color: 'var(--danger)' }}>
           Location access denied — type your address instead:
         </p>
         <input
@@ -119,15 +122,8 @@ export default function LocationPicker({ onChange }) {
             setLabel(e.target.value)
             onChange({ lat: null, lng: null, label: e.target.value })
           }}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
           placeholder="Barangay / Street"
-          className="w-full text-sm rounded-xl px-3 py-2.5 outline-none"
-          style={{
-            background: '#f8f7f5',
-            border: focused ? '1.5px solid #2f6b44' : '1.5px solid #e2e2e0',
-            color: '#1c1c1e',
-          }}
+          className="tt-input w-full px-3 py-2.5 text-sm"
         />
       </div>
     )
@@ -136,7 +132,7 @@ export default function LocationPicker({ onChange }) {
   // phase === 'map'
   return (
     <div className="space-y-2">
-      <div className="rounded-xl overflow-hidden" style={{ height: 180, border: '1.5px solid #e2e2e0' }}>
+      <div className="overflow-hidden rounded-xl" style={{ height: 180, border: '1.5px solid var(--border)' }}>
         <MapContainer
           center={pos}
           zoom={16}
@@ -152,7 +148,7 @@ export default function LocationPicker({ onChange }) {
         </MapContainer>
       </div>
       {label && (
-        <p className="text-[11px] leading-tight px-1 truncate" style={{ color: '#706d67' }}>
+        <p className="truncate px-1 text-[11px] leading-tight" style={{ color: 'var(--text-secondary)' }}>
           {label}
         </p>
       )}
@@ -160,7 +156,7 @@ export default function LocationPicker({ onChange }) {
         type="button"
         onClick={() => setPhase('idle')}
         className="text-[11px] font-semibold"
-        style={{ color: '#a8a5a0' }}
+        style={{ color: 'var(--text-muted)' }}
       >
         Re-detect location
       </button>

@@ -225,7 +225,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen font-sans" style={{ background: 'var(--app-bg)' }}>
+    <div className="min-h-screen font-sans" style={{ background: 'var(--surface)' }}>
       <TopBar />
 
       <main className="max-w-[430px] mx-auto pb-24">
