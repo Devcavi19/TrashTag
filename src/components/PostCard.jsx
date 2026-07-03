@@ -5,17 +5,25 @@
 //   post  → a neighbor's note (casual, avatar- and photo-forward)
 // You can tell them apart mid-scroll without reading the badge.
 
-const FOREST = 'var(--brand)'
-const INK = '#1c1c1e'
-const BODY = '#3a3a3c'
-const FAINT = '#a8a5a0'
-const LIKE_ON = '#c0392b'
+import Avatar from './ui/Avatar'
 
-const EVENT = { color: '#2f6b44', bg: '#eaf5ec' }
-const NEWS = { color: '#1966b5', bg: '#e8f0fe' }
-const POST = { color: 'var(--brand-accent)', bg: '#fef3e0' }
+const INK = 'var(--text-primary)'
+const BODY = 'var(--text-secondary)'
+const FAINT = 'var(--text-muted)'
+const LIKE_ON = 'var(--danger)'
 
-const CARD_SHADOW = '0 1px 3px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04)'
+const tint = (token) => `color-mix(in srgb, ${token} 14%, transparent)`
+
+const EVENT = { color: 'var(--success)', bg: tint('var(--success)') }
+const NEWS = { color: 'var(--tag-rec-fg)', bg: 'var(--tag-rec-bg)' }
+const POST = { color: 'var(--accent)', bg: tint('var(--accent)') }
+
+const CARD_STYLE = {
+  background: 'var(--surface-card)',
+  borderRadius: 'var(--radius-card)',
+  border: '1px solid var(--border)',
+  boxShadow: 'var(--shadow-card)',
+}
 
 function timeAgo(isoString) {
   const diff = Math.floor((Date.now() - new Date(isoString)) / 1000)
@@ -34,10 +42,6 @@ function eventParts(dateStr) {
   }
 }
 
-function initialsOf(name) {
-  return (name || '?').split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
-}
-
 function PinIcon({ size = 13 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -50,11 +54,11 @@ function HeartButton({ liked, count, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-1.5 text-[13px] font-semibold transition-all active:scale-95"
+      className="tt-press flex items-center gap-1.5 text-[13px] font-semibold"
       style={{ color: liked ? LIKE_ON : FAINT }}
       aria-pressed={liked}
     >
-      <svg width="17" height="17" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg className={liked ? 'tt-pop' : ''} width="17" height="17" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
       </svg>
       <span>{count}</span>
@@ -68,7 +72,7 @@ function ReadMore({ url, color }) {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-1.5 text-[13px] font-semibold transition-all active:scale-95"
+      className="tt-press flex items-center gap-1.5 text-[13px] font-semibold"
       style={{ color }}
     >
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -83,7 +87,7 @@ function ReadMore({ url, color }) {
 function Footer({ post, liked, onLike, currentUserId, linkColor }) {
   const { id, externalUrl, likes = [] } = post
   return (
-    <div className="flex items-center gap-4 px-4 py-2.5" style={{ borderTop: '1px solid #f1f0ec' }}>
+    <div className="flex items-center gap-4 px-4 py-2.5" style={{ borderTop: '1px solid var(--border)' }}>
       <HeartButton liked={liked} count={likes.length} onClick={() => onLike(id, currentUserId)} />
       {externalUrl && <ReadMore url={externalUrl} color={linkColor} />}
     </div>
@@ -98,16 +102,16 @@ function EventCard({ post, liked, onLike, currentUserId }) {
   const parts = eventDate ? eventParts(eventDate) : null
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: CARD_SHADOW }}>
+    <div className="overflow-hidden" style={CARD_STYLE}>
       <div className="flex">
         {/* Date block — the hero */}
         <div
-          className="flex flex-col items-center justify-center flex-shrink-0 px-3 py-4"
+          className="flex flex-shrink-0 flex-col items-center justify-center px-3 py-4"
           style={{
             width: 72,
-            background: EVENT.color,
-            color: '#fff',
-            borderRight: '2px dashed rgba(255,255,255,0.45)',
+            background: 'var(--brand-ink)',
+            color: 'var(--on-brand-ink)',
+            borderRight: '2px dashed color-mix(in srgb, var(--on-brand-ink) 45%, transparent)',
           }}
         >
           {parts ? (
@@ -124,27 +128,27 @@ function EventCard({ post, liked, onLike, currentUserId }) {
         </div>
 
         {/* Details */}
-        <div className="flex-1 min-w-0 px-3.5 py-3">
+        <div className="min-w-0 flex-1 px-3.5 py-3">
           <span className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: EVENT.color }}>
             Community event
           </span>
           {title && (
-            <h3 className="font-display text-[17px] leading-snug mt-0.5" style={{ color: INK, fontWeight: 600 }}>
+            <h3 className="font-display mt-0.5 text-[17px] leading-snug" style={{ color: INK, fontWeight: 600 }}>
               {title}
             </h3>
           )}
           {eventLocation && (
-            <div className="flex items-center gap-1.5 mt-1.5 text-[12px] font-semibold" style={{ color: EVENT.color }}>
+            <div className="mt-1.5 flex items-center gap-1.5 text-[12px] font-semibold" style={{ color: EVENT.color }}>
               <PinIcon />
               <span className="truncate">{eventLocation}</span>
             </div>
           )}
           {body && (
-            <p className="text-[13px] leading-relaxed mt-1.5" style={{ color: BODY, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: BODY, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
               {body}
             </p>
           )}
-          <p className="text-[11px] mt-2" style={{ color: FAINT }}>
+          <p className="mt-2 text-[11px]" style={{ color: FAINT }}>
             Hosted by {authorName} · {timeAgo(createdAt)}
           </p>
         </div>
@@ -163,7 +167,7 @@ function NewsCard({ post, liked, onLike, currentUserId }) {
   const { authorName, title, body, photoUrl, createdAt } = post
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: CARD_SHADOW, borderLeft: `3px solid ${NEWS.color}` }}>
+    <div className="overflow-hidden" style={{ ...CARD_STYLE, borderLeft: `3px solid ${NEWS.color}` }}>
       <div className="px-4 pt-3.5">
         <div className="flex items-center gap-2">
           <span className="flex h-1.5 w-1.5 rounded-full" style={{ background: NEWS.color }} />
@@ -173,20 +177,20 @@ function NewsCard({ post, liked, onLike, currentUserId }) {
         </div>
 
         {title && (
-          <h3 className="font-display text-[19px] leading-tight mt-1.5" style={{ color: INK, fontWeight: 600 }}>
+          <h3 className="font-display mt-1.5 text-[19px] leading-tight" style={{ color: INK, fontWeight: 600 }}>
             {title}
           </h3>
         )}
 
-        <p className="text-[11px] font-medium mt-1.5" style={{ color: FAINT }}>
+        <p className="mt-1.5 text-[11px] font-medium" style={{ color: FAINT }}>
           Reported by {authorName} · {timeAgo(createdAt)}
         </p>
       </div>
 
-      {photoUrl && <img src={photoUrl} alt={title || 'news'} className="w-full object-cover mt-3" style={{ maxHeight: 220 }} />}
+      {photoUrl && <img src={photoUrl} alt={title || 'news'} className="mt-3 w-full object-cover" style={{ maxHeight: 220 }} />}
 
       {body && (
-        <p className="text-[14px] leading-relaxed whitespace-pre-line px-4 pt-3" style={{ color: BODY }}>
+        <p className="whitespace-pre-line px-4 pt-3 text-[14px] leading-relaxed" style={{ color: BODY }}>
           {body}
         </p>
       )}
@@ -204,20 +208,15 @@ function NoteCard({ post, liked, onLike, currentUserId }) {
   const { authorName, title, body, photoUrl, createdAt } = post
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: CARD_SHADOW }}>
+    <div className="overflow-hidden" style={CARD_STYLE}>
       <div className="flex items-center gap-2.5 px-4 pt-3.5">
-        <div
-          className="w-9 h-9 rounded-full flex items-center justify-center text-[12px] font-bold flex-shrink-0"
-          style={{ background: FOREST, color: 'white' }}
-        >
-          {initialsOf(authorName)}
-        </div>
-        <div className="leading-tight min-w-0">
-          <p className="text-[13.5px] font-bold truncate" style={{ color: INK }}>{authorName}</p>
+        <Avatar name={authorName} className="flex-shrink-0" />
+        <div className="min-w-0 leading-tight">
+          <p className="truncate text-[13.5px] font-bold" style={{ color: INK }}>{authorName}</p>
           <p className="text-[11px]" style={{ color: FAINT }}>{timeAgo(createdAt)}</p>
         </div>
         <span
-          className="ml-auto flex h-6 w-6 items-center justify-center rounded-full flex-shrink-0"
+          className="ml-auto flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full"
           style={{ background: POST.bg, color: POST.color }}
           aria-hidden="true"
         >
@@ -226,13 +225,13 @@ function NoteCard({ post, liked, onLike, currentUserId }) {
       </div>
 
       {title && (
-        <h3 className="text-[16px] font-bold leading-snug px-4 mt-2.5" style={{ color: INK }}>{title}</h3>
+        <h3 className="mt-2.5 px-4 text-[16px] font-bold leading-snug" style={{ color: INK }}>{title}</h3>
       )}
       {body && (
-        <p className="text-[14px] leading-relaxed whitespace-pre-line px-4 mt-1.5" style={{ color: BODY }}>{body}</p>
+        <p className="mt-1.5 whitespace-pre-line px-4 text-[14px] leading-relaxed" style={{ color: BODY }}>{body}</p>
       )}
 
-      {photoUrl && <img src={photoUrl} alt={title || 'post'} className="w-full object-cover mt-3" style={{ maxHeight: 240 }} />}
+      {photoUrl && <img src={photoUrl} alt={title || 'post'} className="mt-3 w-full object-cover" style={{ maxHeight: 240 }} />}
 
       <div className="mt-3">
         <Footer post={post} liked={liked} onLike={onLike} currentUserId={currentUserId} linkColor={POST.color} />

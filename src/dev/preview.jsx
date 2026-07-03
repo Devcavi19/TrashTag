@@ -18,6 +18,7 @@ import Sheet from '../components/ui/Sheet'
 import EmptyState from '../components/ui/EmptyState'
 import Avatar from '../components/ui/Avatar'
 import { TAG_COLORS } from '../lib/tagColors'
+import FeedView from '../components/FeedView'
 
 const params = new URLSearchParams(location.search)
 const screen = params.get('screen') || 'shell'
@@ -49,6 +50,42 @@ export const FIXTURE_REQUESTS = [
     likes: [],
     postedBy: 'u-herald',
     collectedBy: 'u-carl',
+  },
+]
+
+export const FIXTURE_POSTS = [
+  {
+    id: 'p1',
+    type: 'event',
+    authorName: 'Carl Avila',
+    title: 'Coastal cleanup drive — Mactan shoreline',
+    body: 'Gloves and sacks provided. Meet at the lighthouse parking lot; barangay truck hauls everything at noon.',
+    photoUrl: null,
+    eventDate: '2026-07-12',
+    eventLocation: 'Punta Engaño, Lapu-Lapu',
+    createdAt: new Date(Date.now() - 5400e3).toISOString(),
+    externalUrl: 'https://example.com',
+    likes: ['u-herald'],
+  },
+  {
+    id: 'p2',
+    type: 'news',
+    authorName: 'Herald',
+    title: 'City doubles MRF capacity in Talamban',
+    body: 'The new materials recovery facility accepts segregated recyclables daily from 7am.',
+    photoUrl: null,
+    createdAt: new Date(Date.now() - 86400e3).toISOString(),
+    likes: [],
+  },
+  {
+    id: 'p3',
+    type: 'post',
+    authorName: 'Juana Reyes',
+    title: null,
+    body: 'Tip: rinse tetra packs before bagging them — collectors get a better rate at the junk shop. 🌱',
+    photoUrl: null,
+    createdAt: new Date(Date.now() - 200e3).toISOString(),
+    likes: ['u-herald', 'u-carl'],
   },
 ]
 
@@ -143,6 +180,15 @@ const SCREENS = {
     </>
   ),
   sheet: <SheetPreview />,
+  feed: (
+    <>
+      <TopBar />
+      <div className="flex-1 pb-24">
+        <FeedView posts={FIXTURE_POSTS} addPost={() => {}} onLike={() => {}} currentUser={FIXTURE_USER} />
+      </div>
+      <BottomNav view="community" setView={() => {}} onOpenMessages={() => {}} />
+    </>
+  ),
 }
 
 createRoot(document.getElementById('root')).render(

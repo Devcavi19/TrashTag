@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import CreatePostForm from './CreatePostForm'
 import PostCard from './PostCard'
+import EmptyState from './ui/EmptyState'
 
 const FILTERS = [
   { key: 'all', label: 'All' },
@@ -26,12 +27,17 @@ function FeedView({ posts, addPost, onLike, currentUser }) {
             <button
               key={key}
               onClick={() => setFilter(key)}
-              className="rounded-full px-4 py-1.5 text-[13px] font-semibold whitespace-nowrap transition-all active:scale-95"
+              className="tt-press whitespace-nowrap rounded-full px-4 py-1.5 text-[13px] font-semibold"
               style={
                 active
-                  ? { background: 'var(--brand)', color: '#ffffff' }
-                  : { background: '#ffffff', color: '#a8a5a0', boxShadow: '0 0 0 1px rgba(0,0,0,0.04)' }
+                  ? { background: 'var(--brand-ink)', color: 'var(--on-brand-ink)' }
+                  : {
+                      background: 'var(--surface-card)',
+                      color: 'var(--text-muted)',
+                      boxShadow: '0 0 0 1px var(--border)',
+                    }
               }
+              aria-pressed={active}
             >
               {label}
             </button>
@@ -41,12 +47,11 @@ function FeedView({ posts, addPost, onLike, currentUser }) {
 
       {/* Post list */}
       {visible.length === 0 ? (
-        <div className="flex flex-col items-center py-12 gap-2 text-center">
-          <span className="text-3xl" style={{ opacity: 0.25 }}>🌱</span>
-          <p className="text-sm font-medium" style={{ color: '#c8c5c0' }}>
-            {filter === 'all' ? 'No posts yet. Be the first to share!' : 'Nothing here yet.'}
-          </p>
-        </div>
+        <EmptyState
+          icon="🌱"
+          title={filter === 'all' ? 'No posts yet' : 'Nothing here yet'}
+          body={filter === 'all' ? 'Be the first to share news, an event, or a note.' : 'Try another filter or share something yourself.'}
+        />
       ) : (
         <div className="space-y-3">
           {visible.map((post) => (

@@ -1,12 +1,23 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { validateImage } from '../lib/validateImage'
+import Button from './ui/Button'
+
+const tint = (token) => `color-mix(in srgb, ${token} 14%, transparent)`
 
 const TYPE_OPTIONS = [
-  { key: 'event', label: 'Event', color: '#2f6b44', bg: '#eaf5ec' },
-  { key: 'news',  label: 'News',  color: '#1966b5', bg: '#e8f0fe' },
-  { key: 'post',  label: 'Post',  color: 'var(--brand-accent)', bg: '#fef3e0' },
+  { key: 'event', label: 'Event', color: 'var(--success)', bg: tint('var(--success)') },
+  { key: 'news',  label: 'News',  color: 'var(--tag-rec-fg)', bg: 'var(--tag-rec-bg)' },
+  { key: 'post',  label: 'Post',  color: 'var(--accent)', bg: tint('var(--accent)') },
 ]
+
+function FieldLabel({ children, optional }) {
+  return (
+    <label className="mb-2 block text-[11px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+      {children} {optional && <span style={{ fontWeight: 500 }}>(optional)</span>}
+    </label>
+  )
+}
 
 function CreatePostForm({ onSubmit }) {
   const [open, setOpen] = useState(false)
@@ -85,46 +96,54 @@ function CreatePostForm({ onSubmit }) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full flex items-center gap-3 bg-white rounded-2xl px-4 py-3.5 text-left transition-all active:scale-[0.99]"
-        style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04)' }}
+        className="tt-press flex w-full items-center gap-3 px-4 py-3.5 text-left"
+        style={{
+          background: 'var(--surface-card)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-card)',
+          boxShadow: 'var(--shadow-card)',
+        }}
       >
         <div
-          className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-          style={{ background: '#eaf5ec', color: '#2f6b44' }}
+          className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full"
+          style={{ background: 'color-mix(in srgb, var(--brand) 12%, transparent)', color: 'var(--brand)' }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
           </svg>
         </div>
-        <span className="text-sm font-medium" style={{ color: '#a8a5a0' }}>
+        <span className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
           Share an event, news, or tip…
         </span>
       </button>
     )
   }
 
-  const inputStyle = {
-    border: '1px solid #e8e8e6',
-    background: '#fafaf9',
-    outline: 'none',
-  }
-
   return (
     <div
-      className="bg-white rounded-2xl overflow-hidden"
-      style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04)' }}
+      className="overflow-hidden"
+      style={{
+        background: 'var(--surface-card)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-card)',
+        boxShadow: 'var(--shadow-card)',
+      }}
     >
-      <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: '1px solid #f0efec' }}>
-        <span className="text-[15px] font-bold" style={{ color: '#1c1c1e' }}>New Post</span>
-        <button onClick={() => { reset(); setOpen(false) }} className="text-[11px] font-bold uppercase tracking-widest" style={{ color: '#b0ada8' }}>
+      <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
+        <span className="text-[15px] font-bold" style={{ color: 'var(--text-primary)' }}>New Post</span>
+        <button
+          onClick={() => { reset(); setOpen(false) }}
+          className="text-[11px] font-bold uppercase tracking-widest"
+          style={{ color: 'var(--text-muted)' }}
+        >
           Cancel
         </button>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="space-y-4 p-4">
         {/* Type selector */}
         <div>
-          <label className="block text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: '#a8a5a0' }}>Type</label>
+          <FieldLabel>Type</FieldLabel>
           <div className="grid grid-cols-3 gap-2">
             {TYPE_OPTIONS.map((opt) => {
               const selected = type === opt.key
@@ -132,13 +151,14 @@ function CreatePostForm({ onSubmit }) {
                 <button
                   key={opt.key}
                   onClick={() => setType(opt.key)}
-                  className="rounded-xl py-2.5 text-center text-[12px] font-bold transition-all active:scale-95"
+                  className="tt-press rounded-xl py-2.5 text-center text-[12px] font-bold"
                   style={{
-                    border: selected ? `2px solid ${opt.color}` : '2px solid #e8e8e6',
-                    background: selected ? opt.bg : '#fafaf9',
-                    color: selected ? opt.color : '#a8a5a0',
+                    border: selected ? `2px solid ${opt.color}` : '2px solid var(--border)',
+                    background: selected ? opt.bg : 'transparent',
+                    color: selected ? opt.color : 'var(--text-muted)',
                     outline: 'none',
                   }}
+                  aria-pressed={selected}
                 >
                   {opt.label}
                 </button>
@@ -149,29 +169,27 @@ function CreatePostForm({ onSubmit }) {
 
         {/* Title */}
         <div>
-          <label className="block text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: '#a8a5a0' }}>Title <span style={{ fontWeight: 500 }}>(optional)</span></label>
+          <FieldLabel optional>Title</FieldLabel>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Give your post a headline"
             maxLength={100}
-            className="w-full rounded-xl px-3 py-2.5 text-sm"
-            style={inputStyle}
+            className="tt-input w-full px-3 py-2.5 text-sm"
           />
         </div>
 
         {/* Body */}
         <div>
-          <label className="block text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: '#a8a5a0' }}>Body</label>
+          <FieldLabel>Body</FieldLabel>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             placeholder="What would you like to share?"
             rows={4}
             maxLength={2000}
-            className="w-full rounded-xl px-3 py-2.5 text-sm resize-none"
-            style={inputStyle}
+            className="tt-input w-full resize-none px-3 py-2.5 text-sm"
           />
         </div>
 
@@ -179,55 +197,55 @@ function CreatePostForm({ onSubmit }) {
         {type === 'event' && (
           <div className="grid grid-cols-1 gap-3">
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: '#a8a5a0' }}>Event Date <span style={{ fontWeight: 500 }}>(optional)</span></label>
-              <input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} className="w-full rounded-xl px-3 py-2.5 text-sm" style={inputStyle} />
+              <FieldLabel optional>Event Date</FieldLabel>
+              <input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} className="tt-input w-full px-3 py-2.5 text-sm" />
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: '#a8a5a0' }}>Event Location <span style={{ fontWeight: 500 }}>(optional)</span></label>
-              <input type="text" value={eventLocation} onChange={(e) => setEventLocation(e.target.value)} placeholder="Where is it happening?" className="w-full rounded-xl px-3 py-2.5 text-sm" style={inputStyle} />
+              <FieldLabel optional>Event Location</FieldLabel>
+              <input type="text" value={eventLocation} onChange={(e) => setEventLocation(e.target.value)} placeholder="Where is it happening?" className="tt-input w-full px-3 py-2.5 text-sm" />
             </div>
           </div>
         )}
 
         {/* External URL */}
         <div>
-          <label className="block text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: '#a8a5a0' }}>Link <span style={{ fontWeight: 500 }}>(optional)</span></label>
-          <input type="url" value={externalUrl} onChange={(e) => setExternalUrl(e.target.value)} placeholder="https://…" className="w-full rounded-xl px-3 py-2.5 text-sm" style={inputStyle} />
+          <FieldLabel optional>Link</FieldLabel>
+          <input type="url" value={externalUrl} onChange={(e) => setExternalUrl(e.target.value)} placeholder="https://…" className="tt-input w-full px-3 py-2.5 text-sm" />
         </div>
 
         {/* Photo */}
         <div>
-          <label className="block text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: '#a8a5a0' }}>Photo <span style={{ fontWeight: 500 }}>(optional)</span></label>
+          <FieldLabel optional>Photo</FieldLabel>
           <label
-            className="flex flex-col items-center justify-center w-full cursor-pointer rounded-xl overflow-hidden transition-colors"
-            style={{ height: 120, border: '2px dashed #dddcda', background: photoPreview ? 'transparent' : '#fafaf9' }}
+            className="flex w-full cursor-pointer flex-col items-center justify-center overflow-hidden transition-colors"
+            style={{
+              height: 120,
+              borderRadius: 'var(--radius-control)',
+              border: '2px dashed var(--border)',
+              background: photoPreview ? 'transparent' : 'color-mix(in srgb, var(--text-primary) 3%, transparent)',
+            }}
           >
             {photoPreview ? (
               <img src={photoPreview} alt="preview" className="h-full w-full object-cover" />
             ) : (
-              <div className="flex flex-col items-center gap-1.5">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c8c5c0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <div className="flex flex-col items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" />
                 </svg>
-                <span className="text-xs font-medium" style={{ color: '#c8c5c0' }}>Add a photo</span>
+                <span className="text-xs font-medium">Add a photo</span>
               </div>
             )}
             <input type="file" accept="image/jpeg,image/png" onChange={handlePhoto} className="sr-only" />
           </label>
           {photoError && (
-            <p className="text-[11px] font-medium mt-1.5" style={{ color: '#b53419' }}>{photoError}</p>
+            <p className="mt-1.5 text-[11px] font-medium" style={{ color: 'var(--danger)' }}>{photoError}</p>
           )}
         </div>
 
         {/* Submit */}
-        <button
-          onClick={handleSubmit}
-          disabled={!body.trim() || submitting}
-          className="w-full text-white text-sm font-semibold py-3 rounded-xl transition-all active:scale-95 disabled:opacity-40"
-          style={{ background: 'var(--brand)' }}
-        >
+        <Button full disabled={!body.trim() || submitting} loading={submitting} onClick={handleSubmit} style={{ paddingBlock: 12 }}>
           {submitting ? 'Posting…' : 'Share Post'}
-        </button>
+        </Button>
       </div>
     </div>
   )
