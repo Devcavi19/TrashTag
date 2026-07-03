@@ -32,7 +32,7 @@ supabase/.branches/
 *.sw?
 
 # plans and agents folder
-plans/
+/plans/
 .agents/
 .claude
 skills-lock.json
