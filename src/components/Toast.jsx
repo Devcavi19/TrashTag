@@ -2,7 +2,10 @@
 export default function Toast({ message, tone = 'error' }) {
   if (!message) return null
 
-  const bg = tone === 'error' ? '#b53419' : 'var(--brand)'
+  const palette =
+    tone === 'error'
+      ? { background: 'var(--danger)', color: '#ffffff' }
+      : { background: 'var(--brand-ink)', color: 'var(--on-brand-ink)' }
 
   return (
     <div
@@ -11,8 +14,8 @@ export default function Toast({ message, tone = 'error' }) {
       aria-live="polite"
     >
       <div
-        className="w-full max-w-[430px] rounded-xl px-4 py-3 text-sm font-semibold text-white flex items-center gap-2"
-        style={{ background: bg, boxShadow: '0 4px 16px rgba(0,0,0,0.25)' }}
+        className="w-full max-w-[430px] rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-2"
+        style={{ ...palette, boxShadow: 'var(--shadow-raised)' }}
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
           <path d="M12 9v4" /><path d="M12 17h.01" /><circle cx="12" cy="12" r="10" />
