@@ -33,6 +33,9 @@ export default function TrashCard({ request, currentUserId, onAccept, onLike, on
           alt="trash"
           className="w-full object-cover"
           style={{ maxHeight: 160 }}
+          onError={(e) => {
+            if (e.currentTarget.src !== sampleTrash) e.currentTarget.src = sampleTrash
+          }}
         />
         <span
           className="absolute left-2.5 top-2.5 inline-flex rounded-full"
