@@ -1,0 +1,150 @@
+// Dev-only component preview harness, served at /preview.html by the dev
+// server (never part of the production build — vite only builds index.html).
+// Renders shell + screens with fixture data so redesigns can be verified
+// visually without a live Supabase backend.
+// Usage: /preview.html?screen=shell&theme=bold-impact
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import '../index.css'
+import { applyTheme } from '../lib/themes'
+import TopBar from '../components/TopBar'
+import BottomNav from '../components/BottomNav'
+import TrashCard from '../components/TrashCard'
+import Button from '../components/ui/Button'
+import Card from '../components/ui/Card'
+import Chip from '../components/ui/Chip'
+import { Input, TextArea } from '../components/ui/Input'
+import Sheet from '../components/ui/Sheet'
+import EmptyState from '../components/ui/EmptyState'
+import Avatar from '../components/ui/Avatar'
+import { TAG_COLORS } from '../lib/tagColors'
+
+const params = new URLSearchParams(location.search)
+const screen = params.get('screen') || 'shell'
+applyTheme(params.get('theme') || 'fresh-canopy')
+
+export const FIXTURE_USER = { id: 'u-herald', name: 'Herald' }
+
+export const FIXTURE_REQUESTS = [
+  {
+    id: 'r1',
+    photo: null,
+    tags: ['Recyclable', 'Mixed'],
+    status: 'open',
+    gps: 'Brgy. Mabolo, Cebu City',
+    price: 150,
+    postedAt: new Date(Date.now() - 3600e3).toISOString(),
+    likes: ['u-carl'],
+    postedBy: 'u-carl',
+    collectedBy: null,
+  },
+  {
+    id: 'r2',
+    photo: null,
+    tags: ['Biodegradable'],
+    status: 'accepted',
+    gps: 'Riverside, Brgy. Talamban',
+    price: 220,
+    postedAt: new Date(Date.now() - 7200e3).toISOString(),
+    likes: [],
+    postedBy: 'u-herald',
+    collectedBy: 'u-carl',
+  },
+]
+
+function Primitives() {
+  return (
+    <div className="flex flex-col gap-4 p-4">
+      <Card className="p-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button>Primary</Button>
+          <Button variant="ink">Ink</Button>
+          <Button variant="secondary">Secondary</Button>
+          <Button variant="ghost">Ghost</Button>
+          <Button variant="danger">Danger</Button>
+          <Button loading>Saving</Button>
+        </div>
+      </Card>
+      <Card className="p-4">
+        <div className="flex flex-wrap gap-1.5">
+          {Object.entries(TAG_COLORS).map(([k, v]) => (
+            <Chip key={k} bg={v.bg} color={v.color}>{v.label}</Chip>
+          ))}
+          <Chip onClick={() => {}} selected>Nearby</Chip>
+          <Chip onClick={() => {}}>Open</Chip>
+        </div>
+      </Card>
+      <Card className="p-4">
+        <div className="flex flex-col gap-3">
+          <Input label="Email" placeholder="you@example.com" />
+          <Input label="Price" error="Enter an amount above ₱0." defaultValue="0" />
+          <TextArea label="Notes" hint="Visible to collectors." placeholder="3 bags near the gate" />
+        </div>
+      </Card>
+      <Card>
+        <EmptyState
+          icon="🧹"
+          title="No pickups nearby yet"
+          body="Post the first one and a collector will come running."
+          action={<Button>Post a pickup</Button>}
+        />
+      </Card>
+      <div className="flex items-center gap-3 px-2">
+        <Avatar name="Herald Carl" size="lg" />
+        <Avatar name="Carl Avila" />
+        <Avatar name="Juana" size="sm" />
+      </div>
+      <div className="tt-skeleton h-24 w-full" />
+    </div>
+  )
+}
+
+function SheetPreview() {
+  return (
+    <Sheet open title="Confirm pickup" onClose={() => {}}>
+      <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+        You commit to collecting this trash and opening a conversation with the poster.
+      </p>
+      <div className="mt-4 flex gap-2">
+        <Button variant="secondary" full>Cancel</Button>
+        <Button full>Accept pickup</Button>
+      </div>
+    </Sheet>
+  )
+}
+
+const SCREENS = {
+  shell: (
+    <>
+      <TopBar />
+      <div className="flex-1 p-4">
+        <Primitives />
+      </div>
+      <BottomNav view="home" setView={() => {}} unreadCount={3} onOpenMessages={() => {}} />
+    </>
+  ),
+  cards: (
+    <>
+      <TopBar />
+      <div className="flex flex-1 flex-col gap-3 p-4 pb-24">
+        {FIXTURE_REQUESTS.map(r => (
+          <TrashCard
+            key={r.id}
+            request={r}
+            currentUserId={FIXTURE_USER.id}
+            onAccept={() => {}}
+            onLike={() => {}}
+            onOpenThread={() => {}}
+            distanceMeters={r.id === 'r1' ? 1200 : 480}
+          />
+        ))}
+      </div>
+      <BottomNav view="home" setView={() => {}} onOpenMessages={() => {}} />
+    </>
+  ),
+  sheet: <SheetPreview />,
+}
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>{SCREENS[screen] ?? SCREENS.shell}</StrictMode>,
+)
