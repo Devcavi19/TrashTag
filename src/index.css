@@ -1,3 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-display: 'Fraunces', Georgia, serif;
+}
+
 /* Theme tokens — forest defaults; overwritten on <html> by lib/themes.js.
    Kept here so first paint is correct even before JS runs. */
 :root {
