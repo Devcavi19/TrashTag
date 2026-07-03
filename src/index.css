@@ -5,23 +5,51 @@
   --font-display: 'Fraunces', Georgia, serif;
 }
 
-/* Theme tokens — forest defaults; overwritten on <html> by lib/themes.js.
-   Kept here so first paint is correct even before JS runs. */
+/* Design tokens — Fresh Canopy defaults; lib/themes.js rewrites these on <html>
+   when the user switches themes. Kept here so first paint is correct before JS
+   runs. Components must never hardcode hex — every color goes through a token. */
 :root {
-  --brand: #0d3320;
-  --brand-accent: #c97f1e;
-  --app-bg: #f3f4f2;
-}
+  --surface: #f7f9f5;
+  --surface-card: #ffffff;
+  --surface-raised: #ffffff;
 
-*, *::before, *::after {
-  box-sizing: border-box;
+  --text-primary: #1c2b22;
+  --text-secondary: #5b6b5f;
+  --text-muted: #8a978d;
+
+  --border: #e6ebe4;
+
+  --brand: #2fa96a;
+  --on-brand: #ffffff;
+  --brand-ink: #173d2b;
+  --on-brand-ink: #ffffff;
+  --accent: #d98b2b;
+
+  --success: #1f7a4d;
+  --warning: #a16b1f;
+  --danger: #c8502e;
+
+  --tag-bio-bg: #eaf5ec; --tag-bio-fg: #22863a;
+  --tag-rec-bg: #e8f0fe; --tag-rec-fg: #1966b5;
+  --tag-res-bg: #fce8e6; --tag-res-fg: #b53419;
+  --tag-mix-bg: #f3f0fb; --tag-mix-fg: #6b46c1;
+
+  /* Legacy aliases — components not yet migrated still read these.
+     Delete in the Step 8 hardcoded-color sweep. */
+  --app-bg: var(--surface);
+  --brand-accent: var(--accent);
+
+  --radius-card: 16px;
+  --radius-control: 12px;
+  --shadow-card: 0 2px 8px rgba(23, 61, 43, 0.07);
+  --shadow-raised: 0 8px 30px rgba(23, 61, 43, 0.16);
 }
 
 body {
   margin: 0;
   font-family: 'DM Sans', system-ui, sans-serif;
-  background: var(--app-bg);
-  color: #1c1c1e;
+  background: var(--surface);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -33,8 +61,8 @@ body {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  background: var(--app-bg);
-  border-inline: 1px solid #e2e2e0;
+  background: var(--surface);
+  border-inline: 1px solid var(--border);
 }
 
 input, select, button, textarea {
