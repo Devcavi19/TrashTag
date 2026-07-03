@@ -34,11 +34,6 @@
   --tag-res-bg: #fce8e6; --tag-res-fg: #b53419;
   --tag-mix-bg: #f3f0fb; --tag-mix-fg: #6b46c1;
 
-  /* Legacy aliases — components not yet migrated still read these.
-     Delete in the Step 8 hardcoded-color sweep. */
-  --app-bg: var(--surface);
-  --brand-accent: var(--accent);
-
   --radius-card: 16px;
   --radius-control: 12px;
   --shadow-card: 0 2px 8px rgba(23, 61, 43, 0.07);
