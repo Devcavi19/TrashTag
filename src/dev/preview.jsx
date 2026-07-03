@@ -19,6 +19,10 @@ import EmptyState from '../components/ui/EmptyState'
 import Avatar from '../components/ui/Avatar'
 import { TAG_COLORS } from '../lib/tagColors'
 import FeedView from '../components/FeedView'
+import ProfileView from '../components/ProfileView'
+import LeaderboardView from '../components/LeaderboardView'
+import Conversations from '../components/Conversations'
+import MessageThread from '../components/MessageThread'
 
 const params = new URLSearchParams(location.search)
 const screen = params.get('screen') || 'shell'
@@ -150,6 +154,60 @@ function SheetPreview() {
   )
 }
 
+const FIXTURE_USERS = [
+  { id: 'u-herald', name: 'Herald' },
+  { id: 'u-carl', name: 'Carl Avila' },
+  { id: 'u-juana', name: 'Juana Reyes' },
+]
+
+const FIXTURE_HISTORY = [
+  ...FIXTURE_REQUESTS,
+  {
+    id: 'r3',
+    photo: null,
+    tags: ['Residual', 'Biodegradable'],
+    status: 'paid',
+    gps: 'Sitio Riverside, Talamban',
+    price: 180,
+    postedAt: new Date(Date.now() - 3 * 86400e3).toISOString(),
+    likes: [],
+    postedBy: 'u-herald',
+    collectedBy: 'u-carl',
+    rating: 5,
+    collectorRating: 4,
+  },
+  {
+    id: 'r4',
+    photo: null,
+    tags: ['Recyclable'],
+    status: 'paid',
+    gps: 'Brgy. Apas, Cebu City',
+    price: 95,
+    postedAt: new Date(Date.now() - 6 * 86400e3).toISOString(),
+    likes: [],
+    postedBy: 'u-juana',
+    collectedBy: 'u-herald',
+    rating: 4,
+  },
+  {
+    id: 'r5',
+    photo: null,
+    tags: ['Mixed'],
+    status: 'collected',
+    gps: 'Brgy. Lahug, Cebu City',
+    price: 260,
+    postedAt: new Date(Date.now() - 86400e3).toISOString(),
+    likes: [],
+    postedBy: 'u-herald',
+    collectedBy: 'u-carl',
+    afterPhoto: null,
+    lat: 10.33,
+    lng: 123.9,
+  },
+]
+
+const FIXTURE_STATS = { posted: 3, collected: 1, ratingCount: 1, rating: 4 }
+
 const SCREENS = {
   shell: (
     <>
@@ -188,6 +246,53 @@ const SCREENS = {
       </div>
       <BottomNav view="community" setView={() => {}} onOpenMessages={() => {}} />
     </>
+  ),
+  profile: (
+    <>
+      <TopBar />
+      <div className="flex-1 pb-24">
+        <ProfileView
+          currentUser={{ ...FIXTURE_USER, email: 'herald@example.com', created_at: '2026-03-14' }}
+          requests={FIXTURE_HISTORY}
+          stats={FIXTURE_STATS}
+          onLogout={() => {}}
+          onNotice={() => {}}
+          theme={new URLSearchParams(location.search).get('theme') || 'fresh-canopy'}
+          onThemeChange={() => {}}
+        />
+      </div>
+      <BottomNav view="you" setView={() => {}} onOpenMessages={() => {}} />
+    </>
+  ),
+  board: (
+    <>
+      <TopBar />
+      <div className="flex-1 pb-24">
+        <LeaderboardView requests={FIXTURE_HISTORY} users={FIXTURE_USERS} currentUser={FIXTURE_USER} />
+      </div>
+      <BottomNav view="leaderboard" setView={() => {}} onOpenMessages={() => {}} />
+    </>
+  ),
+  inbox: (
+    <Conversations
+      requests={FIXTURE_HISTORY}
+      currentUser={FIXTURE_USER}
+      users={FIXTURE_USERS}
+      onClose={() => {}}
+      onOpenThread={() => {}}
+    />
+  ),
+  thread: (
+    <MessageThread
+      request={FIXTURE_HISTORY.find((r) => r.id === 'r5')}
+      currentUser={FIXTURE_USER}
+      users={FIXTURE_USERS}
+      onClose={() => {}}
+      onUpdateStatus={() => {}}
+      onSubmitAfterPhoto={() => {}}
+      onPayment={() => {}}
+      onRate={() => {}}
+    />
   ),
 }
 

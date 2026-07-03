@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { validateImage } from '../lib/validateImage'
 import CollectorTracker from './CollectorTracker'
 import ConfirmModal from './ConfirmModal'
+import Button from './ui/Button'
 import sampleTrash from '../assets/sample_trash.jpg'
 
 function formatTime(iso) {
@@ -14,7 +15,12 @@ function nameOf(users, id, fallback = 'Unknown') {
   return users.find((u) => u.id === id)?.name ?? fallback
 }
 
-const NODE_COLORS = { done: '#2f6b44', active: 'var(--brand-accent)', redo: '#b53419', todo: '#d8d6d2' }
+const NODE_COLORS = {
+  done: 'var(--success)',
+  active: 'var(--accent)',
+  redo: 'var(--danger)',
+  todo: 'var(--border)',
+}
 
 function RailNode({ state, last, title, time, children }) {
   const color = NODE_COLORS[state]
@@ -26,19 +32,19 @@ function RailNode({ state, last, title, time, children }) {
           style={{
             width: 14,
             height: 14,
-            background: state === 'todo' ? '#fff' : color,
+            background: state === 'todo' ? 'var(--surface-card)' : color,
             border: `2px solid ${color}`,
             marginTop: 2,
           }}
         />
-        {!last && <span className="flex-1" style={{ width: 2, background: '#e7e6e2', marginTop: 2 }} />}
+        {!last && <span className="flex-1" style={{ width: 2, background: 'var(--border)', marginTop: 2 }} />}
       </div>
       <div className={`min-w-0 flex-1 ${last ? '' : 'pb-4'}`}>
         <div className="flex items-baseline justify-between gap-2">
-          <p className="text-sm font-bold" style={{ color: state === 'todo' ? '#a8a5a0' : '#1c1c1e' }}>
+          <p className="text-sm font-bold" style={{ color: state === 'todo' ? 'var(--text-muted)' : 'var(--text-primary)' }}>
             {title}
           </p>
-          {time && <span className="text-[10px]" style={{ color: '#c8c5c0' }}>{time}</span>}
+          {time && <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{time}</span>}
         </div>
         {children && <div className="mt-2">{children}</div>}
       </div>
@@ -55,7 +61,7 @@ function Stars({ value, onRate, readOnly }) {
           disabled={readOnly}
           onClick={() => !readOnly && onRate(s)}
           className={`text-xl leading-none transition-colors ${readOnly ? 'cursor-default' : 'active:scale-90'}`}
-          style={{ color: s <= value ? 'var(--brand-accent)' : '#dcdad6' }}
+          style={{ color: s <= value ? 'var(--accent)' : 'var(--border)' }}
           aria-label={`${s} star${s > 1 ? 's' : ''}`}
         >
           ★
@@ -68,7 +74,13 @@ function Stars({ value, onRate, readOnly }) {
 function AfterPhotoUpload({ preview, error, onPick, hint }) {
   return (
     <>
-      <div className="overflow-hidden rounded-xl" style={{ border: '1.5px dashed #2f6b44', background: '#f6fdf8' }}>
+      <div
+        className="overflow-hidden rounded-xl"
+        style={{
+          border: '1.5px dashed var(--success)',
+          background: 'color-mix(in srgb, var(--success) 8%, transparent)',
+        }}
+      >
         {preview ? (
           <div className="relative">
             <img src={preview} alt="after" className="w-full object-cover" style={{ maxHeight: 150 }} />
@@ -80,13 +92,13 @@ function AfterPhotoUpload({ preview, error, onPick, hint }) {
         ) : (
           <label className="flex cursor-pointer flex-col items-center justify-center gap-1 py-5">
             <span className="text-2xl" style={{ opacity: 0.4 }}>📷</span>
-            <span className="text-xs font-semibold" style={{ color: '#2f6b44' }}>Upload after-photo</span>
-            <span className="text-[10px]" style={{ color: '#a8a5a0' }}>{hint}</span>
+            <span className="text-xs font-semibold" style={{ color: 'var(--success)' }}>Upload after-photo</span>
+            <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{hint}</span>
             <input type="file" accept="image/jpeg,image/png" className="hidden" onChange={(e) => onPick(e.target.files[0])} />
           </label>
         )}
       </div>
-      {error && <p className="mt-1 text-[11px] font-medium" style={{ color: '#b53419' }}>{error}</p>}
+      {error && <p className="mt-1 text-[11px] font-medium" style={{ color: 'var(--danger)' }}>{error}</p>}
     </>
   )
 }
@@ -205,32 +217,37 @@ export default function MessageThread({ request, currentUser, users, onClose, on
   const paidState = status === 'paid' ? 'done' : 'todo'
 
   const confirmCopy = {
-    collected: { title: 'Mark as collected?', message: 'Your after-photo will be sent to the poster to confirm payment.', label: 'Mark collected', color: '#2f6b44' },
-    pay: { title: `Pay ₱${price}?`, message: 'Release payment to the collector for this pickup. This cannot be undone.', label: `Pay ₱${price}`, color: 'var(--brand-accent)' },
-    reject: { title: 'Reject this proof?', message: 'The job returns to the collector to re-upload a new after-photo. No payment is sent.', label: 'Reject', color: '#b53419' },
+    collected: { title: 'Mark as collected?', message: 'Your after-photo will be sent to the poster to confirm payment.', label: 'Mark collected', color: 'var(--success)' },
+    pay: { title: `Pay ₱${price}?`, message: 'Release payment to the collector for this pickup. This cannot be undone.', label: `Pay ₱${price}`, color: 'var(--accent)' },
+    reject: { title: 'Reject this proof?', message: 'The job returns to the collector to re-upload a new after-photo. No payment is sent.', label: 'Reject', color: 'var(--danger)' },
   }
   const cc = pending ? confirmCopy[pending] : null
 
   return (
-    <div className="fixed inset-0 z-50 mx-auto flex max-w-[430px] flex-col" style={{ background: 'var(--app-bg)' }}>
+    <div className="fixed inset-0 z-50 mx-auto flex max-w-[430px] flex-col" style={{ background: 'var(--surface)' }}>
       {/* Header */}
-      <div className="flex flex-shrink-0 items-center gap-3 bg-white px-3 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-        <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full transition-all active:scale-95" style={{ background: 'var(--app-bg)', color: '#706d67' }} aria-label="Back">
+      <div className="flex flex-shrink-0 items-center gap-3 px-3 py-3" style={{ background: 'var(--surface-raised)', borderBottom: '1px solid var(--border)' }}>
+        <button
+          onClick={onClose}
+          className="tt-press flex h-8 w-8 items-center justify-center rounded-full"
+          style={{ background: 'color-mix(in srgb, var(--text-primary) 6%, transparent)', color: 'var(--text-secondary)' }}
+          aria-label="Back"
+        >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
         </button>
         <img src={photo || sampleTrash} alt="" className="h-10 w-10 flex-shrink-0 rounded-lg object-cover" />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-bold" style={{ color: '#1c1c1e' }}>{counterpart}</p>
-          <p className="truncate text-xs" style={{ color: '#a8a5a0' }}>{gps} · <span style={{ color: 'var(--brand-accent)', fontWeight: 600 }}>₱{price}</span></p>
+          <p className="truncate text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{counterpart}</p>
+          <p className="truncate text-xs" style={{ color: 'var(--text-muted)' }}>{gps} · <span style={{ color: 'var(--accent)', fontWeight: 600 }}>₱{price}</span></p>
         </div>
       </div>
 
       {/* Journey rail (signature) — own scroll so actions stay reachable */}
-      <div className="flex-shrink-0 overflow-y-auto bg-white px-4 pb-3 pt-4" style={{ maxHeight: '46vh', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+      <div className="flex-shrink-0 overflow-y-auto px-4 pb-3 pt-4" style={{ maxHeight: '46vh', background: 'var(--surface-raised)', borderBottom: '1px solid var(--border)' }}>
         <h2 className="mb-3 font-display text-[15px]" style={{ color: 'var(--brand)', fontWeight: 600 }}>Pickup journey</h2>
 
         <RailNode state={acceptedState} title="Accepted" >
-          <p className="text-xs" style={{ color: '#706d67' }}>{collectorName} is on this pickup.</p>
+          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{collectorName} is on this pickup.</p>
           {status === 'accepted' && <div className="mt-2"><CollectorTracker request={request} /></div>}
         </RailNode>
 
@@ -239,37 +256,39 @@ export default function MessageThread({ request, currentUser, users, onClose, on
           {status === 'accepted' && isCollector && (
             <>
               <AfterPhotoUpload preview={photoPreview} error={photoError} onPick={pickPhoto} hint="Required before marking collected" />
-              <button
-                onClick={() => photoFile && setPending('collected')}
+              <Button
+                full
+                className="mt-2"
                 disabled={!photoFile}
-                className="mt-2 w-full rounded-xl py-2.5 text-sm font-semibold text-white transition-all active:scale-95"
-                style={{ background: photoFile ? '#2f6b44' : '#c8c5c0', cursor: photoFile ? 'pointer' : 'not-allowed' }}
+                onClick={() => photoFile && setPending('collected')}
+                style={{ background: 'var(--success)', color: '#ffffff' }}
               >
                 Mark as collected
-              </button>
+              </Button>
             </>
           )}
           {status === 'accepted' && isOwner && (
-            <p className="text-xs" style={{ color: '#a8a5a0' }}>Waiting for {collectorName} to upload a proof photo…</p>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Waiting for {collectorName} to upload a proof photo…</p>
           )}
 
           {/* disputed: collector re-uploads */}
           {status === 'disputed' && isCollector && (
             <>
-              <p className="mb-2 text-xs font-medium" style={{ color: '#b53419' }}>The poster asked for a clearer photo. Upload a new one.</p>
+              <p className="mb-2 text-xs font-medium" style={{ color: 'var(--danger)' }}>The poster asked for a clearer photo. Upload a new one.</p>
               <AfterPhotoUpload preview={photoPreview} error={photoError} onPick={pickPhoto} hint="Re-submit your after-photo" />
-              <button
-                onClick={() => photoFile && setPending('collected')}
+              <Button
+                full
+                className="mt-2"
                 disabled={!photoFile}
-                className="mt-2 w-full rounded-xl py-2.5 text-sm font-semibold text-white transition-all active:scale-95"
-                style={{ background: photoFile ? '#2f6b44' : '#c8c5c0', cursor: photoFile ? 'pointer' : 'not-allowed' }}
+                onClick={() => photoFile && setPending('collected')}
+                style={{ background: 'var(--success)', color: '#ffffff' }}
               >
                 Re-submit photo
-              </button>
+              </Button>
             </>
           )}
           {status === 'disputed' && isOwner && (
-            <p className="text-xs" style={{ color: '#a8a5a0' }}>You asked for a redo. Waiting for a new photo…</p>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>You asked for a redo. Waiting for a new photo…</p>
           )}
 
           {/* collected / paid: show the before/after reveal */}
@@ -278,16 +297,23 @@ export default function MessageThread({ request, currentUser, users, onClose, on
               <BeforeAfter before={photo} after={afterPhoto} />
               {status === 'collected' && isOwner && (
                 <div className="mt-2 flex gap-2">
-                  <button onClick={() => setPending('reject')} className="flex-1 rounded-xl py-2.5 text-sm font-semibold transition-all active:scale-95" style={{ background: '#fce8e6', color: '#b53419' }}>
+                  <Button
+                    full
+                    onClick={() => setPending('reject')}
+                    style={{
+                      background: 'color-mix(in srgb, var(--danger) 14%, transparent)',
+                      color: 'var(--danger)',
+                    }}
+                  >
                     Reject
-                  </button>
-                  <button onClick={() => setPending('pay')} className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white transition-all active:scale-95" style={{ background: 'var(--brand-accent)' }}>
+                  </Button>
+                  <Button full onClick={() => setPending('pay')} style={{ background: 'var(--accent)', color: '#ffffff' }}>
                     Accept &amp; Pay ₱{price}
-                  </button>
+                  </Button>
                 </div>
               )}
               {status === 'collected' && isCollector && (
-                <p className="mt-2 text-xs" style={{ color: '#a8a5a0' }}>Waiting for the poster to confirm payment…</p>
+                <p className="mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>Waiting for the poster to confirm payment…</p>
               )}
             </>
           )}
@@ -298,25 +324,25 @@ export default function MessageThread({ request, currentUser, users, onClose, on
             <div className="space-y-2.5">
               {/* poster -> collector */}
               <div>
-                <p className="text-[11px] font-medium" style={{ color: '#a8a5a0' }}>Poster → Collector</p>
+                <p className="text-[11px] font-medium" style={{ color: 'var(--text-muted)' }}>Poster → Collector</p>
                 {rating != null
                   ? <Stars value={rating} readOnly />
                   : isOwner
                     ? <Stars value={0} onRate={(s) => onRate(id, s, 'poster')} />
-                    : <p className="text-xs" style={{ color: '#c8c5c0' }}>Not rated yet</p>}
+                    : <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Not rated yet</p>}
               </div>
               {/* collector -> poster */}
               <div>
-                <p className="text-[11px] font-medium" style={{ color: '#a8a5a0' }}>Collector → Poster</p>
+                <p className="text-[11px] font-medium" style={{ color: 'var(--text-muted)' }}>Collector → Poster</p>
                 {collectorRating != null
                   ? <Stars value={collectorRating} readOnly />
                   : isCollector
                     ? <Stars value={0} onRate={(s) => onRate(id, s, 'collector')} />
-                    : <p className="text-xs" style={{ color: '#c8c5c0' }}>Not rated yet</p>}
+                    : <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Not rated yet</p>}
               </div>
             </div>
           ) : (
-            <p className="text-xs" style={{ color: '#a8a5a0' }}>Payment and ratings unlock once the pickup is confirmed.</p>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Payment and ratings unlock once the pickup is confirmed.</p>
           )}
         </RailNode>
       </div>
@@ -324,22 +350,23 @@ export default function MessageThread({ request, currentUser, users, onClose, on
       {/* Chat */}
       <div className="flex-1 space-y-2 overflow-y-auto px-4 py-3">
         {messages.length === 0 && (
-          <p className="pt-6 text-center text-sm" style={{ color: '#c8c5c0' }}>No messages yet. Say hello!</p>
+          <p className="pt-6 text-center text-sm" style={{ color: 'var(--text-muted)' }}>No messages yet. Say hello!</p>
         )}
         {messages.map((m) => {
           const own = m.sender_id === myId
           return (
             <div key={m.id} className={`flex flex-col ${own ? 'items-end' : 'items-start'}`}>
-              <p className="mb-0.5 text-[10px] font-medium" style={{ color: '#a8a5a0' }}>
+              <p className="mb-0.5 text-[10px] font-medium" style={{ color: 'var(--text-muted)' }}>
                 {own ? 'You' : nameOf(users, m.sender_id)} · {formatTime(m.sent_at)}
               </p>
               <div
                 className="max-w-[75%] px-3 py-2 text-sm"
                 style={{
-                  background: own ? 'var(--brand)' : '#fff',
-                  color: own ? '#fff' : '#2d2b27',
+                  background: own ? 'var(--brand)' : 'var(--surface-card)',
+                  color: own ? 'var(--on-brand)' : 'var(--text-primary)',
+                  border: own ? 'none' : '1px solid var(--border)',
                   borderRadius: own ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.07)',
+                  boxShadow: 'var(--shadow-card)',
                   wordBreak: 'break-word',
                 }}
               >
@@ -352,11 +379,10 @@ export default function MessageThread({ request, currentUser, users, onClose, on
       </div>
 
       {/* Input */}
-      <div className="flex flex-shrink-0 items-center gap-2 px-4 py-3" style={{ background: '#fff', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+      <div className="flex flex-shrink-0 items-center gap-2 px-4 py-3" style={{ background: 'var(--surface-raised)', borderTop: '1px solid var(--border)' }}>
         <input
           ref={inputRef}
-          className="flex-1 rounded-xl px-3 py-2.5 text-sm outline-none"
-          style={{ background: 'var(--app-bg)', color: '#2d2b27' }}
+          className="tt-input flex-1 px-3 py-2.5 text-sm"
           placeholder="Type a message…"
           value={text}
           maxLength={500}
@@ -366,8 +392,11 @@ export default function MessageThread({ request, currentUser, users, onClose, on
         <button
           onClick={handleSend}
           disabled={!text.trim()}
-          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl transition-all active:scale-95"
-          style={{ background: text.trim() ? 'var(--brand)' : '#e8e6e1', color: text.trim() ? '#fff' : '#a8a5a0' }}
+          className="tt-press flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl"
+          style={{
+            background: text.trim() ? 'var(--brand)' : 'color-mix(in srgb, var(--text-primary) 8%, transparent)',
+            color: text.trim() ? 'var(--on-brand)' : 'var(--text-muted)',
+          }}
           aria-label="Send"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4 20-7z" /></svg>

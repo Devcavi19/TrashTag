@@ -1,15 +1,17 @@
 // The Leaderboard's own screen, reached from the bottom nav. It opens with the
 // community's real impact (the thesis), then ranks collectors by completed jobs.
+import EmptyState from './ui/EmptyState'
 
-const FOREST = 'var(--brand)'
-const AMBER = 'var(--brand-accent)'
-const FAINT = '#a8a5a0'
-const LINE = '#e9e9e6'
+const AMBER = 'var(--accent)'
+const FAINT = 'var(--text-muted)'
+const LINE = 'var(--border)'
+
+const tint = (token) => `color-mix(in srgb, ${token} 16%, transparent)`
 
 const RANK_BADGES = {
-  0: { emoji: '🥇', bg: '#fbf0d4', color: 'var(--brand-accent)' },
-  1: { emoji: '🥈', bg: '#eef0f1', color: '#7c8a92' },
-  2: { emoji: '🥉', bg: '#f3e6da', color: '#a4632a' },
+  0: { emoji: '🥇', bg: tint('var(--accent)') },
+  1: { emoji: '🥈', bg: tint('var(--text-secondary)') },
+  2: { emoji: '🥉', bg: tint('var(--danger)') },
 }
 
 function computeRanked(requests, users) {
@@ -44,28 +46,28 @@ function Row({ entry, rank, isMe }) {
     <div
       className="flex items-center gap-3 rounded-xl px-3 py-2.5"
       style={{
-        background: isMe ? '#f4faf6' : '#ffffff',
-        border: isMe ? `1px solid ${FOREST}` : `1px solid ${LINE}`,
+        background: isMe ? 'color-mix(in srgb, var(--brand) 8%, var(--surface-card))' : 'var(--surface-card)',
+        border: isMe ? '1px solid var(--brand)' : `1px solid ${LINE}`,
       }}
     >
       <div
-        className="flex items-center justify-center flex-shrink-0 rounded-full text-[13px] font-bold"
+        className="flex flex-shrink-0 items-center justify-center rounded-full text-[13px] font-bold"
         style={{
           width: 32,
           height: 32,
-          background: badge ? badge.bg : 'var(--app-bg)',
-          color: badge ? badge.color : FAINT,
+          background: badge ? badge.bg : 'color-mix(in srgb, var(--text-primary) 6%, transparent)',
+          color: FAINT,
         }}
       >
         {badge ? badge.emoji : `#${rank + 1}`}
       </div>
 
-      <span className="flex-1 min-w-0 truncate text-[14px] font-semibold" style={{ color: FOREST }}>
+      <span className="min-w-0 flex-1 truncate text-[14px] font-semibold" style={{ color: 'var(--text-primary)' }}>
         {entry.name}
         {isMe && <span className="ml-1.5 text-[11px] font-bold" style={{ color: AMBER }}>YOU</span>}
       </span>
 
-      <span className="text-[12px] font-semibold" style={{ color: '#2f6b44' }}>
+      <span className="text-[12px] font-semibold" style={{ color: 'var(--success)' }}>
         {entry.jobs} {entry.jobs === 1 ? 'job' : 'jobs'}
       </span>
       {entry.avgRating > 0 && (
@@ -82,19 +84,26 @@ export default function LeaderboardView({ requests, users, currentUser }) {
   const myId = currentUser?.id
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-4 p-4">
       {/* Hero — the community's real impact is the thesis of this screen */}
-      <div className="rounded-2xl px-5 py-5 text-white" style={{ background: FOREST }}>
-        <p className="text-[10px] font-bold uppercase tracking-[0.22em]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+      <div
+        className="px-5 py-5"
+        style={{
+          background: 'var(--brand-ink)',
+          color: 'var(--on-brand-ink)',
+          borderRadius: 'var(--radius-card)',
+        }}
+      >
+        <p className="text-[10px] font-bold uppercase tracking-[0.22em]" style={{ opacity: 0.5 }}>
           Bayanihan board
         </p>
-        <div className="flex items-baseline gap-2 mt-1.5">
+        <div className="mt-1.5 flex items-baseline gap-2">
           <span className="font-display leading-none" style={{ fontSize: 44, fontWeight: 600 }}>{totalJobs}</span>
-          <span className="text-[14px] font-semibold" style={{ color: 'rgba(255,255,255,0.8)' }}>
+          <span className="text-[14px] font-semibold" style={{ opacity: 0.8 }}>
             pickups cleaned
           </span>
         </div>
-        <p className="text-[12.5px] mt-1.5" style={{ color: 'rgba(255,255,255,0.6)' }}>
+        <p className="mt-1.5 text-[12.5px]" style={{ opacity: 0.6 }}>
           {ranked.length === 0
             ? 'Be the first collector on the board.'
             : `by ${ranked.length} ${ranked.length === 1 ? 'collector' : 'collectors'} across the neighborhood.`}
@@ -111,12 +120,11 @@ export default function LeaderboardView({ requests, users, currentUser }) {
       </div>
 
       {ranked.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-12 text-center">
-          <span className="text-3xl" style={{ opacity: 0.25 }}>🏆</span>
-          <p className="text-sm font-medium" style={{ color: '#c8c5c0' }}>
-            No completed jobs yet. Accept a pickup to climb the board!
-          </p>
-        </div>
+        <EmptyState
+          icon="🏆"
+          title="No completed jobs yet"
+          body="Accept a pickup to climb the board."
+        />
       ) : (
         <div className="space-y-2">
           {ranked.map((entry, i) => (

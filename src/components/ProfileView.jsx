@@ -2,13 +2,19 @@
 // here is derived from live requests; nothing is a vanity number.
 import { TAG_COLORS } from '../lib/tagColors'
 import { THEMES } from '../lib/themes'
+import Avatar from './ui/Avatar'
 
-const FOREST = 'var(--brand)'
-const AMBER = 'var(--brand-accent)'
-const INK = '#1c1c1e'
-const MUTED = '#706d67'
-const FAINT = '#a8a5a0'
-const LINE = '#e7e6e2'
+const INK = 'var(--text-primary)'
+const MUTED = 'var(--text-secondary)'
+const FAINT = 'var(--text-muted)'
+const LINE = 'var(--border)'
+
+const CARD_STYLE = {
+  background: 'var(--surface-card)',
+  borderRadius: 'var(--radius-card)',
+  border: '1px solid var(--border)',
+  boxShadow: 'var(--shadow-card)',
+}
 
 const CATEGORIES = Object.keys(TAG_COLORS) // canonical order: Bio / Recyclable / Residual / Mixed
 
@@ -19,10 +25,6 @@ function deriveTitle({ posted, collected }) {
   return 'New member'
 }
 
-function initialsOf(name) {
-  return name ? name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase() : '?'
-}
-
 function memberSince(iso) {
   if (!iso) return null
   return new Date(iso).toLocaleDateString([], { month: 'long', year: 'numeric' })
@@ -31,7 +33,7 @@ function memberSince(iso) {
 function Stat({ value, label }) {
   return (
     <div className="flex flex-1 flex-col items-center gap-1 py-3.5">
-      <span className="font-display text-[24px] leading-none" style={{ color: FOREST, fontWeight: 600 }}>
+      <span className="font-display text-[24px] leading-none" style={{ color: 'var(--brand)', fontWeight: 600 }}>
         {value}
       </span>
       <span className="text-[9px] font-bold uppercase tracking-[0.18em]" style={{ color: MUTED }}>
@@ -47,22 +49,25 @@ function ActionRow({ icon, label, hint, danger, onClick }) {
       onClick={onClick}
       className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors"
       style={{ background: 'transparent' }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = '#f7f7f6')}
+      onMouseEnter={(e) => (e.currentTarget.style.background = 'color-mix(in srgb, var(--text-primary) 4%, transparent)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
-      <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center" style={{ color: danger ? '#b53419' : MUTED }}>
+      <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center" style={{ color: danger ? 'var(--danger)' : MUTED }}>
         {icon}
       </span>
-      <span className="flex-1 text-[14px] font-semibold" style={{ color: danger ? '#b53419' : INK }}>
+      <span className="flex-1 text-[14px] font-semibold" style={{ color: danger ? 'var(--danger)' : INK }}>
         {label}
       </span>
       {hint && (
-        <span className="rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest" style={{ background: 'var(--app-bg)', color: FAINT }}>
+        <span
+          className="rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest"
+          style={{ background: 'color-mix(in srgb, var(--text-primary) 6%, transparent)', color: FAINT }}
+        >
           {hint}
         </span>
       )}
       {!danger && (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c8c5c0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="m9 18 6-6-6-6" />
         </svg>
       )}
@@ -74,7 +79,7 @@ function ActionRow({ icon, label, hint, danger, onClick }) {
 // reads regardless of which one is active; the active ring uses the live accent.
 function ThemePicker({ current, onChange }) {
   return (
-    <section className="rounded-2xl bg-white p-4" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)' }}>
+    <section className="p-4" style={CARD_STYLE}>
       <div className="flex items-center gap-2">
         <span className="flex h-[18px] w-[18px] items-center justify-center" style={{ color: MUTED }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -83,22 +88,22 @@ function ThemePicker({ current, onChange }) {
             <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.012 17.5 2 12 2z" />
           </svg>
         </span>
-        <h2 className="font-display text-[15px]" style={{ color: FOREST, fontWeight: 600 }}>Appearance</h2>
+        <h2 className="font-display text-[15px]" style={{ color: 'var(--brand)', fontWeight: 600 }}>Appearance</h2>
       </div>
       <p className="mt-1 text-[12px]" style={{ color: FAINT }}>
         Pick the color theme for the whole app.
       </p>
-      <div className="mt-3 grid grid-cols-3 gap-2.5">
+      <div className="mt-3 grid grid-cols-2 gap-2.5">
         {Object.entries(THEMES).map(([id, t]) => {
           const active = id === current
           return (
             <button
               key={id}
               onClick={() => onChange(id)}
-              className="relative flex flex-col items-center gap-2 rounded-xl px-2 py-3 transition-all active:scale-95"
+              className="tt-press relative flex flex-col items-center gap-2 rounded-xl px-2 py-3"
               style={{
-                background: active ? '#f7f7f6' : 'transparent',
-                boxShadow: active ? `0 0 0 2px ${AMBER}` : '0 0 0 1px #e7e6e2',
+                background: active ? 'color-mix(in srgb, var(--text-primary) 4%, transparent)' : 'transparent',
+                boxShadow: active ? '0 0 0 2px var(--accent)' : '0 0 0 1px var(--border)',
               }}
               aria-pressed={active}
               title={t.blurb}
@@ -109,7 +114,7 @@ function ThemePicker({ current, onChange }) {
               </span>
               <span className="text-[11px] font-bold" style={{ color: INK }}>{t.name}</span>
               {active && (
-                <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full text-white" style={{ background: AMBER }}>
+                <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full" style={{ background: 'var(--accent)', color: '#ffffff' }}>
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M20 6 9 17l-5-5" />
                   </svg>
@@ -149,28 +154,25 @@ export default function ProfileView({ currentUser, requests, stats, onLogout, on
 
   return (
     <div className="pb-6">
-      {/* Identity hero — continues the brand's forest green */}
-      <div className="px-4 pb-5 pt-5" style={{ background: FOREST }}>
+      {/* Identity hero — brand ink panel, on-brand text */}
+      <div className="px-4 pb-5 pt-5" style={{ background: 'var(--brand-ink)', color: 'var(--on-brand-ink)' }}>
         <div className="flex items-center gap-4">
-          <div
-            className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full text-xl font-bold text-white"
-            style={{ background: AMBER, boxShadow: '0 4px 14px rgba(201,127,30,0.4)' }}
-          >
-            {initialsOf(currentUser?.name)}
-          </div>
+          <Avatar name={currentUser?.name || 'You'} size="lg" className="flex-shrink-0 text-xl" style={{ boxShadow: '0 4px 14px rgba(0,0,0,0.25)' }} />
           <div className="min-w-0 flex-1">
-            <h1 className="truncate font-display text-[22px] leading-tight text-white" style={{ fontWeight: 600 }}>
+            <h1 className="truncate font-display text-[22px] leading-tight" style={{ fontWeight: 600 }}>
               {currentUser?.name || 'You'}
             </h1>
             <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
               <span
                 className="rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest"
-                style={{ background: 'rgba(201,127,30,0.22)', color: '#e8b878' }}
+                style={{
+                  background: 'color-mix(in srgb, var(--on-brand-ink) 16%, transparent)',
+                }}
               >
                 {title}
               </span>
               {since && (
-                <span className="text-[11px] font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                <span className="text-[11px] font-medium" style={{ opacity: 0.55 }}>
                   Member since {since}
                 </span>
               )}
@@ -178,7 +180,7 @@ export default function ProfileView({ currentUser, requests, stats, onLogout, on
           </div>
         </div>
         {currentUser?.email && (
-          <p className="mt-3 truncate text-[12px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+          <p className="mt-3 truncate text-[12px]" style={{ opacity: 0.5 }}>
             {currentUser.email}
           </p>
         )}
@@ -186,7 +188,7 @@ export default function ProfileView({ currentUser, requests, stats, onLogout, on
 
       <div className="space-y-4 p-4">
         {/* Impact ledger */}
-        <section className="overflow-hidden rounded-2xl bg-white" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)' }}>
+        <section className="overflow-hidden" style={CARD_STYLE}>
           <p className="px-4 pt-3 text-[9px] font-bold uppercase tracking-[0.2em]" style={{ color: FAINT }}>
             Impact ledger
           </p>
@@ -202,8 +204,8 @@ export default function ProfileView({ currentUser, requests, stats, onLogout, on
         </section>
 
         {/* Cleanup record — the signature: real trash categories you've cleared */}
-        <section className="rounded-2xl bg-white p-4" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)' }}>
-          <h2 className="font-display text-[15px]" style={{ color: FOREST, fontWeight: 600 }}>
+        <section className="p-4" style={CARD_STYLE}>
+          <h2 className="font-display text-[15px]" style={{ color: 'var(--brand)', fontWeight: 600 }}>
             What you've helped clear
           </h2>
 
@@ -213,7 +215,10 @@ export default function ProfileView({ currentUser, requests, stats, onLogout, on
             </p>
           ) : (
             <>
-              <div className="mt-3 flex h-3 w-full overflow-hidden rounded-full" style={{ background: 'var(--app-bg)' }}>
+              <div
+                className="mt-3 flex h-3 w-full overflow-hidden rounded-full"
+                style={{ background: 'color-mix(in srgb, var(--text-primary) 6%, transparent)' }}
+              >
                 {segments.map((c) => (
                   <div
                     key={c}
@@ -238,7 +243,7 @@ export default function ProfileView({ currentUser, requests, stats, onLogout, on
         <ThemePicker current={theme} onChange={onThemeChange} />
 
         {/* Account actions */}
-        <section className="overflow-hidden rounded-2xl bg-white" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)' }}>
+        <section className="overflow-hidden" style={CARD_STYLE}>
           <ActionRow
             label="Account settings"
             hint="Soon"
@@ -276,7 +281,7 @@ export default function ProfileView({ currentUser, requests, stats, onLogout, on
           />
         </section>
 
-        <section className="overflow-hidden rounded-2xl bg-white" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)' }}>
+        <section className="overflow-hidden" style={CARD_STYLE}>
           <ActionRow
             danger
             label="Sign out"
@@ -290,7 +295,7 @@ export default function ProfileView({ currentUser, requests, stats, onLogout, on
           />
         </section>
 
-        <p className="pt-1 text-center text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: '#c8c5c0' }}>
+        <p className="pt-1 text-center text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: FAINT }}>
           TrashTag PH
         </p>
       </div>
