@@ -201,13 +201,25 @@ export default function Landing({ onGetStarted, onLogIn }) {
         </div>
       </section>
 
-      {/* Live impact */}
+      {/* Live impact — real numbers; before the first pickup it's a launch call instead of sad zeros */}
       <section style={{ background: 'var(--brand-ink)', color: 'var(--on-brand-ink)' }}>
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-around gap-8 px-5 py-12">
-          <ImpactStat value={stats?.cleaned} label="Pickups cleaned" />
-          <ImpactStat value={stats ? `₱${stats.paidOut}` : null} label="Paid to collectors" />
-          <ImpactStat value={stats?.open} label="Open bounties right now" />
-        </div>
+        {stats && stats.cleaned === 0 && stats.open === 0 ? (
+          <div className="mx-auto max-w-5xl px-5 py-12 text-center">
+            <p className="font-display text-[28px] md:text-[34px]" style={{ fontWeight: 600 }}>
+              The board is clean. For now.
+            </p>
+            <p className="mx-auto mt-2 max-w-md text-[14px]" style={{ opacity: 0.65 }}>
+              Every number here will be real — pickups cleaned, pesos paid out. Post the first
+              bounty in your barangay and start the count.
+            </p>
+          </div>
+        ) : (
+          <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-around gap-8 px-5 py-12">
+            <ImpactStat value={stats?.cleaned} label="Pickups cleaned" />
+            <ImpactStat value={stats ? `₱${stats.paidOut}` : null} label="Paid to collectors" />
+            <ImpactStat value={stats?.open} label="Open bounties right now" />
+          </div>
+        )}
       </section>
 
       {/* Community strip + closing CTA */}
