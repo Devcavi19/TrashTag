@@ -60,6 +60,12 @@ body {
   border-inline: 1px solid var(--border);
 }
 
+/* The landing page breaks out of the 430px app shell (set by Landing.jsx). */
+html[data-page='landing'] #root {
+  max-width: none;
+  border-inline: none;
+}
+
 input, select, button, textarea {
   font-family: inherit;
 }

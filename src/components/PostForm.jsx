@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { supabase } from '../lib/supabase'
 import { TAG_COLORS } from '../lib/tagColors'
 import { validateImage } from '../lib/validateImage'
 import ConfirmModal from './ConfirmModal'
 import SuccessModal from './SuccessModal'
-import LocationPicker from './LocationPicker'
 import Button from './ui/Button'
+
+// Leaflet is heavy; load the picker (and the map with it) only when composing.
+const LocationPicker = lazy(() => import('./LocationPicker'))
 
 const TAG_OPTIONS = ['Biodegradable', 'Recyclable', 'Residual', 'Mixed']
 
@@ -158,7 +160,9 @@ function PostForm({ onSubmit, onSubmitted }) {
         {/* Location */}
         <div>
           <FieldLabel>Location</FieldLabel>
-          <LocationPicker onChange={setLocation} />
+          <Suspense fallback={<div className="tt-skeleton h-12 w-full" />}>
+            <LocationPicker onChange={setLocation} />
+          </Suspense>
         </div>
 
         {/* Trash tags — multi-select pills */}

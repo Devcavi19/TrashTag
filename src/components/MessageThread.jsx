@@ -1,7 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { supabase } from '../lib/supabase'
 import { validateImage } from '../lib/validateImage'
-import CollectorTracker from './CollectorTracker'
+
+// Leaflet is heavy; only load the tracker (and the map with it) when a thread
+// actually shows live tracking.
+const CollectorTracker = lazy(() => import('./CollectorTracker'))
 import ConfirmModal from './ConfirmModal'
 import Button from './ui/Button'
 import { PaySheet, ConfirmPaymentSheet } from './PaymentSheet'
@@ -253,7 +256,13 @@ export default function MessageThread({ request, currentUser, users, onClose, on
 
         <RailNode state={acceptedState} title="Accepted" >
           <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{collectorName} is on this pickup.</p>
-          {status === 'accepted' && <div className="mt-2"><CollectorTracker request={request} /></div>}
+          {status === 'accepted' && (
+            <div className="mt-2">
+              <Suspense fallback={<div className="tt-skeleton h-24 w-full" />}>
+                <CollectorTracker request={request} />
+              </Suspense>
+            </div>
+          )}
         </RailNode>
 
         <RailNode state={collectedState} title={status === 'disputed' ? 'Needs a redo' : 'Collected'}>

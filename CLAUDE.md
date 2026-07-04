@@ -16,6 +16,8 @@ There is no test runner configured. `playwright` is installed as a devDependency
 
 TrashTag is a mobile-first (430px max-width) React 19 + Vite single-page app: a two-sided marketplace where **Posters** create trash-pickup requests and **Collectors** accept and fulfill them, plus a shared **Community** feed. It is backed by **Supabase** (Postgres, Auth, Storage, Realtime); the browser talks to Supabase directly with the anon key, so **Row-Level Security is the authorization boundary**.
 
+It is also an **installable PWA** (`vite-plugin-pwa` in [vite.config.js](vite.config.js): manifest, icons in `public/pwa-*.png`, auto-updating service worker that precaches only the built shell — Supabase traffic is never cached). Signed-out visitors get a full-width marketing **landing page** ([src/components/Landing.jsx](src/components/Landing.jsx)) with live impact stats read anonymously; its CTAs lead into `AuthScreen`, and `Landing` lifts the 430px shell cap via `data-page="landing"` on `<html>` while mounted. Leaflet-bearing components (`LocationPicker`, `CollectorTracker`) are lazy-loaded so maps ship in their own chunk.
+
 ## Environment
 
 The Supabase client ([src/lib/supabase.js](src/lib/supabase.js)) is built from `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (see `.env.example`). Without a `.env` the app cannot authenticate or read data. Privileged scripts read additional secrets from the environment (`SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ACCESS_TOKEN`) and must only run locally. `.env`, `backups/`, and `supabase/.temp/` are gitignored.

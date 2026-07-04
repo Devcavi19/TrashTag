@@ -16,6 +16,7 @@ import TopBar from './components/TopBar'
 import BottomNav from './components/BottomNav'
 import LoadingScreen from './components/LoadingScreen'
 import AuthScreen from './components/AuthScreen'
+import Landing from './components/Landing'
 import Toast from './components/Toast'
 
 function App() {
@@ -29,6 +30,10 @@ function App() {
   const [composerOpen, setComposerOpen] = useState(false)
   const [notice, setNotice] = useState(null)
   const [authNotice, setAuthNotice] = useState(null)
+  // Signed-out visitors see the landing page; the auth form is reached via its
+  // CTAs (or directly after an explicit sign-out, when they already know the app).
+  const [authView, setAuthView] = useState('landing') // 'landing' | 'form'
+  const [authMode, setAuthMode] = useState('login') // initial tab for AuthScreen
   const [theme, setTheme] = useState(getStoredTheme)
 
   const [requests, realtimeStatus] = useRequests()
@@ -94,6 +99,8 @@ function App() {
     await supabase.auth.signOut()
     setCurrentUser(null)
     setProfiles([])
+    setAuthView('form')
+    setAuthMode('login')
     setAppState('auth')
   }
 
@@ -259,7 +266,22 @@ function App() {
   }
 
   if (appState === 'auth') {
-    return <AuthScreen onLogin={handleLogin} notice={authNotice} />
+    if (authView === 'landing') {
+      return (
+        <Landing
+          onGetStarted={() => { setAuthMode('signup'); setAuthView('form') }}
+          onLogIn={() => { setAuthMode('login'); setAuthView('form') }}
+        />
+      )
+    }
+    return (
+      <AuthScreen
+        onLogin={handleLogin}
+        notice={authNotice}
+        initialMode={authMode}
+        onBack={() => setAuthView('landing')}
+      />
+    )
   }
 
   return (
