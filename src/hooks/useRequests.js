@@ -19,6 +19,10 @@ function dbToApp(row) {
     afterPhoto: row.after_photo_url,
     postedBy: row.poster_id,
     collectedBy: row.collected_by,
+    paymentMethod: row.payment_method,
+    paymentReference: row.payment_reference,
+    paymentSentAt: row.payment_sent_at,
+    paymentConfirmedAt: row.payment_confirmed_at,
     likes: (row.request_likes || []).map((l) => l.user_id),
   }
 }

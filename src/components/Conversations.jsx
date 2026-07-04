@@ -3,7 +3,7 @@ import StatusBadge from './StatusBadge'
 import UiAvatar from './ui/Avatar'
 import EmptyState from './ui/EmptyState'
 
-const ACTIVE = ['accepted', 'collected', 'disputed']
+const ACTIVE = ['accepted', 'collected', 'disputed', 'payment_sent']
 
 function roleLine(r, myId) {
   return r.postedBy === myId ? 'You posted' : 'You collect'

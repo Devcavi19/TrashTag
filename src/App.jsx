@@ -39,14 +39,14 @@ function App() {
   async function fetchProfile(userId) {
     const { data } = await supabase
       .from('profiles')
-      .select('id, name')
+      .select('id, name, gcash_number, maya_number')
       .eq('id', userId)
       .single()
     return data
   }
 
   async function fetchAllProfiles() {
-    const { data } = await supabase.from('profiles').select('id, name')
+    const { data } = await supabase.from('profiles').select('id, name, gcash_number, maya_number')
     if (data) setProfiles(data)
   }
 
@@ -128,12 +128,50 @@ function App() {
     await supabase.from('requests').update(updates).eq('id', id)
   }
 
-  // Poster reviews the after-photo: accept → paid, or reject → disputed (photo cleared)
-  async function handlePayment(id, accept) {
-    const updates = accept
-      ? { status: 'paid' }
-      : { status: 'disputed', after_photo_url: null }
-    await supabase.from('requests').update(updates).eq('id', id)
+  // Poster rejects the after-photo: back to the collector for a redo.
+  async function handleRejectProof(id) {
+    await supabase.from('requests').update({ status: 'disputed', after_photo_url: null }).eq('id', id)
+  }
+
+  // Dual-confirmation payment handshake (money moves outside the app).
+  // Poster reports the payment as sent…
+  async function markPaymentSent(id, method, reference) {
+    await supabase.from('requests').update({
+      status: 'payment_sent',
+      payment_method: method,
+      payment_reference: reference?.trim() || null,
+      payment_sent_at: new Date().toISOString(),
+    }).eq('id', id)
+  }
+
+  // …the collector confirms it landed…
+  async function confirmPaymentReceived(id) {
+    await supabase.from('requests').update({
+      status: 'paid',
+      payment_confirmed_at: new Date().toISOString(),
+    }).eq('id', id)
+  }
+
+  // …or reports it missing, which reopens the poster's pay step.
+  async function reportPaymentNotReceived(id) {
+    await supabase.from('requests').update({
+      status: 'collected',
+      payment_method: null,
+      payment_reference: null,
+      payment_sent_at: null,
+    }).eq('id', id)
+  }
+
+  // Collector saves their receiving details (shown to posters in the pay sheet).
+  async function savePaymentDetails({ gcash, maya }) {
+    const myId = currentUser?.id
+    if (!myId) return
+    await supabase.from('profiles').update({
+      gcash_number: gcash?.trim() || null,
+      maya_number: maya?.trim() || null,
+    }).eq('id', myId)
+    await fetchAllProfiles()
+    setNotice('Payment details saved.')
   }
 
   async function handleAfterPhoto(id, file) {
@@ -184,7 +222,7 @@ function App() {
   const activeConvoCount = requests.filter(
     (r) =>
       (r.postedBy === myId || r.collectedBy === myId) &&
-      ['accepted', 'collected', 'disputed'].includes(r.status)
+      ['accepted', 'collected', 'disputed', 'payment_sent'].includes(r.status)
   ).length
 
   // Real impact ledger for the account menu — derived from live requests, no fake numbers.
@@ -257,10 +295,12 @@ function App() {
         {view === 'you' && (
           <ProfileView
             currentUser={currentUser}
+            profile={profiles.find((p) => p.id === myId)}
             requests={requests}
             stats={userStats}
             onLogout={handleLogout}
             onNotice={setNotice}
+            onSavePaymentDetails={savePaymentDetails}
             theme={theme}
             onThemeChange={handleThemeChange}
           />
@@ -296,7 +336,10 @@ function App() {
           onClose={() => setActiveRequestId(null)}
           onUpdateStatus={updateStatus}
           onSubmitAfterPhoto={handleAfterPhoto}
-          onPayment={handlePayment}
+          onRejectProof={handleRejectProof}
+          onMarkPaymentSent={markPaymentSent}
+          onConfirmPaymentReceived={confirmPaymentReceived}
+          onPaymentNotReceived={reportPaymentNotReceived}
           onRate={handleRate}
         />
       )}

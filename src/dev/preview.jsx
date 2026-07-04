@@ -23,14 +23,15 @@ import ProfileView from '../components/ProfileView'
 import LeaderboardView from '../components/LeaderboardView'
 import Conversations from '../components/Conversations'
 import MessageThread from '../components/MessageThread'
+import { PaySheet, ConfirmPaymentSheet } from '../components/PaymentSheet'
 
 const params = new URLSearchParams(location.search)
 const screen = params.get('screen') || 'shell'
 applyTheme(params.get('theme') || 'fresh-canopy')
 
-export const FIXTURE_USER = { id: 'u-herald', name: 'Herald' }
+const FIXTURE_USER = { id: 'u-herald', name: 'Herald' }
 
-export const FIXTURE_REQUESTS = [
+const FIXTURE_REQUESTS = [
   {
     id: 'r1',
     photo: null,
@@ -57,7 +58,7 @@ export const FIXTURE_REQUESTS = [
   },
 ]
 
-export const FIXTURE_POSTS = [
+const FIXTURE_POSTS = [
   {
     id: 'p1',
     type: 'event',
@@ -280,6 +281,30 @@ const SCREENS = {
       users={FIXTURE_USERS}
       onClose={() => {}}
       onOpenThread={() => {}}
+    />
+  ),
+  pay: (
+    <PaySheet
+      open
+      onClose={() => {}}
+      request={FIXTURE_HISTORY.find((r) => r.id === 'r5')}
+      collectorProfile={{ id: 'u-carl', name: 'Carl Avila', gcash_number: '0917 555 0123', maya_number: null }}
+      onMarkSent={() => {}}
+    />
+  ),
+  confirmpay: (
+    <ConfirmPaymentSheet
+      open
+      onClose={() => {}}
+      request={{
+        ...FIXTURE_HISTORY.find((r) => r.id === 'r5'),
+        paymentMethod: 'gcash',
+        paymentReference: '9021 3456 7890',
+        paymentSentAt: new Date().toISOString(),
+      }}
+      posterName="Herald"
+      onConfirm={() => {}}
+      onNotReceived={() => {}}
     />
   ),
   thread: (

@@ -4,6 +4,8 @@ import { validateImage } from '../lib/validateImage'
 import CollectorTracker from './CollectorTracker'
 import ConfirmModal from './ConfirmModal'
 import Button from './ui/Button'
+import { PaySheet, ConfirmPaymentSheet } from './PaymentSheet'
+import { METHOD_LABELS } from '../lib/paymentMethods'
 import sampleTrash from '../assets/sample_trash.jpg'
 
 function formatTime(iso) {
@@ -118,8 +120,8 @@ function BeforeAfter({ before, after }) {
   )
 }
 
-export default function MessageThread({ request, currentUser, users, onClose, onUpdateStatus, onSubmitAfterPhoto, onPayment, onRate }) {
-  const { id, status, photo, afterPhoto, price, gps, postedBy, collectedBy, rating, collectorRating } = request
+export default function MessageThread({ request, currentUser, users, onClose, onUpdateStatus, onSubmitAfterPhoto, onRejectProof, onMarkPaymentSent, onConfirmPaymentReceived, onPaymentNotReceived, onRate }) {
+  const { id, status, photo, afterPhoto, price, gps, postedBy, collectedBy, rating, collectorRating, paymentMethod, paymentReference, paymentSentAt, paymentConfirmedAt } = request
   const myId = currentUser?.id
   const isOwner = postedBy === myId
   const isCollector = collectedBy === myId
@@ -188,18 +190,18 @@ export default function MessageThread({ request, currentUser, users, onClose, on
     setPhotoPreview(URL.createObjectURL(file))
   }
 
-  // --- Confirmations ---
-  const [pending, setPending] = useState(null) // 'collected' | 'pay' | 'reject'
+  // --- Confirmations & payment sheets ---
+  const [pending, setPending] = useState(null) // 'collected' | 'reject'
+  const [paySheetOpen, setPaySheetOpen] = useState(false)
+  const [confirmPayOpen, setConfirmPayOpen] = useState(false)
 
   function runPending() {
     if (pending === 'collected') {
       onSubmitAfterPhoto(id, photoFile)
       onUpdateStatus(id, 'collected')
       setPhotoFile(null); setPhotoPreview(null)
-    } else if (pending === 'pay') {
-      onPayment(id, true)
     } else if (pending === 'reject') {
-      onPayment(id, false)
+      onRejectProof(id)
     }
     setPending(null)
   }
@@ -210,15 +212,18 @@ export default function MessageThread({ request, currentUser, users, onClose, on
   // Node states
   const acceptedState = status === 'accepted' ? 'active' : 'done'
   const collectedState =
-    status === 'paid' ? 'done'
+    status === 'paid' || status === 'payment_sent' ? 'done'
     : status === 'collected' ? 'active'
     : status === 'disputed' ? 'redo'
+    : 'todo'
+  const paymentState =
+    status === 'paid' ? 'done'
+    : status === 'payment_sent' ? 'active'
     : 'todo'
   const paidState = status === 'paid' ? 'done' : 'todo'
 
   const confirmCopy = {
     collected: { title: 'Mark as collected?', message: 'Your after-photo will be sent to the poster to confirm payment.', label: 'Mark collected', color: 'var(--success)' },
-    pay: { title: `Pay ₱${price}?`, message: 'Release payment to the collector for this pickup. This cannot be undone.', label: `Pay ₱${price}`, color: 'var(--accent)' },
     reject: { title: 'Reject this proof?', message: 'The job returns to the collector to re-upload a new after-photo. No payment is sent.', label: 'Reject', color: 'var(--danger)' },
   }
   const cc = pending ? confirmCopy[pending] : null
@@ -291,8 +296,8 @@ export default function MessageThread({ request, currentUser, users, onClose, on
             <p className="text-xs" style={{ color: 'var(--text-muted)' }}>You asked for a redo. Waiting for a new photo…</p>
           )}
 
-          {/* collected / paid: show the before/after reveal */}
-          {(status === 'collected' || status === 'paid') && (
+          {/* collected / payment in motion / paid: show the before/after reveal */}
+          {(status === 'collected' || status === 'payment_sent' || status === 'paid') && (
             <>
               <BeforeAfter before={photo} after={afterPhoto} />
               {status === 'collected' && isOwner && (
@@ -307,15 +312,63 @@ export default function MessageThread({ request, currentUser, users, onClose, on
                   >
                     Reject
                   </Button>
-                  <Button full onClick={() => setPending('pay')} style={{ background: 'var(--accent)', color: '#ffffff' }}>
-                    Accept &amp; Pay ₱{price}
+                  <Button full onClick={() => setPaySheetOpen(true)}>
+                    Accept &amp; pay ₱{price}
                   </Button>
                 </div>
               )}
               {status === 'collected' && isCollector && (
-                <p className="mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>Waiting for the poster to confirm payment…</p>
+                <p className="mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>Waiting for the poster to review the proof and send payment…</p>
               )}
             </>
+          )}
+        </RailNode>
+
+        <RailNode state={paymentState} title="Payment">
+          {status === 'payment_sent' ? (
+            isCollector ? (
+              <>
+                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  {counterpart} reports sending ₱{price} via {METHOD_LABELS[paymentMethod] ?? '—'}.
+                </p>
+                <Button full className="mt-2" onClick={() => setConfirmPayOpen(true)}>
+                  Review payment ₱{price}
+                </Button>
+              </>
+            ) : (
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                You sent ₱{price} via {METHOD_LABELS[paymentMethod] ?? '—'}
+                {paymentReference && <> · Ref {paymentReference}</>}. Waiting for {collectorName} to
+                confirm receipt…
+              </p>
+            )
+          ) : status === 'paid' ? (
+            <div
+              className="rounded-xl px-3 py-2.5 text-[11.5px]"
+              style={{ background: 'color-mix(in srgb, var(--success) 8%, transparent)', color: 'var(--text-secondary)' }}
+            >
+              <div className="flex justify-between">
+                <span>₱{price} · {METHOD_LABELS[paymentMethod] ?? 'Payment'}{paymentReference && <> · Ref {paymentReference}</>}</span>
+              </div>
+              {paymentSentAt && (
+                <div className="mt-0.5 flex justify-between">
+                  <span>Sent</span>
+                  <b style={{ color: 'var(--success)' }}>{new Date(paymentSentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ✓</b>
+                </div>
+              )}
+              {paymentConfirmedAt && (
+                <div className="mt-0.5 flex justify-between">
+                  <span>Received</span>
+                  <b style={{ color: 'var(--success)' }}>{new Date(paymentConfirmedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ✓</b>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              {isOwner
+                ? 'Payment starts once you accept the proof photo.'
+                : 'Payment starts once the poster accepts your proof photo.'}
+            </p>
           )}
         </RailNode>
 
@@ -411,6 +464,23 @@ export default function MessageThread({ request, currentUser, users, onClose, on
         confirmColor={cc?.color}
         onConfirm={runPending}
         onCancel={() => setPending(null)}
+      />
+
+      <PaySheet
+        open={paySheetOpen}
+        onClose={() => setPaySheetOpen(false)}
+        request={request}
+        collectorProfile={users.find((u) => u.id === collectedBy)}
+        onMarkSent={(method, reference) => onMarkPaymentSent(id, method, reference)}
+      />
+
+      <ConfirmPaymentSheet
+        open={confirmPayOpen}
+        onClose={() => setConfirmPayOpen(false)}
+        request={request}
+        posterName={nameOf(users, postedBy, 'The poster')}
+        onConfirm={() => onConfirmPaymentReceived(id)}
+        onNotReceived={() => onPaymentNotReceived(id)}
       />
     </div>
   )

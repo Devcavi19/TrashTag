@@ -11,6 +11,7 @@ const VARIANT_MAP = {
   accepted:  { label: 'On the way',  bg: tint('var(--warning)'),        color: 'var(--warning)' },
   collected: { label: 'Collected',   bg: tint('var(--success)'),        color: 'var(--success)' },
   disputed:  { label: 'Needs redo',  bg: tint('var(--danger)'),         color: 'var(--danger)' },
+  payment_sent: { label: 'Payment sent', bg: tint('var(--accent)'),     color: 'var(--accent)' },
   paid:      { label: 'Paid',        bg: tint('var(--brand)'),          color: 'var(--brand)' },
 }
 
