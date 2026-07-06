@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-const CACHE_KEY = 'trashtag.lastLocation'
+const CACHE_KEY = 'linisa.lastLocation'
 
 function readCache() {
   try {

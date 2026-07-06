@@ -6,6 +6,7 @@ import { validateImage } from '../lib/validateImage'
 // actually shows live tracking.
 const CollectorTracker = lazy(() => import('./CollectorTracker'))
 import ConfirmModal from './ConfirmModal'
+import CollectorCredential from './CollectorCredential'
 import Button from './ui/Button'
 import { PaySheet, ConfirmPaymentSheet } from './PaymentSheet'
 import { METHOD_LABELS } from '../lib/paymentMethods'
@@ -123,7 +124,7 @@ function BeforeAfter({ before, after }) {
   )
 }
 
-export default function MessageThread({ request, currentUser, users, onClose, onUpdateStatus, onSubmitAfterPhoto, onRejectProof, onMarkPaymentSent, onConfirmPaymentReceived, onPaymentNotReceived, onRate }) {
+export default function MessageThread({ request, currentUser, users, onClose, onUpdateStatus, onSubmitAfterPhoto, onRejectProof, onMarkPaymentSent, onConfirmPaymentReceived, onPaymentNotReceived, onRate, credentialFor }) {
   const { id, status, photo, afterPhoto, price, gps, postedBy, collectedBy, rating, collectorRating, paymentMethod, paymentReference, paymentSentAt, paymentConfirmedAt } = request
   const myId = currentUser?.id
   const isOwner = postedBy === myId
@@ -209,8 +210,8 @@ export default function MessageThread({ request, currentUser, users, onClose, on
     setPending(null)
   }
 
-  const counterpart = isOwner ? nameOf(users, collectedBy, 'Collector') : nameOf(users, postedBy, 'Poster')
-  const collectorName = nameOf(users, collectedBy, 'The collector')
+  const counterpart = isOwner ? nameOf(users, collectedBy, 'Green Collector') : nameOf(users, postedBy, 'Poster')
+  const collectorName = nameOf(users, collectedBy, 'Your Green Collector')
 
   // Node states
   const acceptedState = status === 'accepted' ? 'active' : 'done'
@@ -227,7 +228,7 @@ export default function MessageThread({ request, currentUser, users, onClose, on
 
   const confirmCopy = {
     collected: { title: 'Mark as collected?', message: 'Your after-photo will be sent to the poster to confirm payment.', label: 'Mark collected', color: 'var(--success)' },
-    reject: { title: 'Reject this proof?', message: 'The job returns to the collector to re-upload a new after-photo. No payment is sent.', label: 'Reject', color: 'var(--danger)' },
+    reject: { title: 'Reject this proof?', message: 'The job returns to your Green Collector to re-upload a new after-photo. No payment is sent.', label: 'Reject', color: 'var(--danger)' },
   }
   const cc = pending ? confirmCopy[pending] : null
 
@@ -245,7 +246,12 @@ export default function MessageThread({ request, currentUser, users, onClose, on
         </button>
         <img src={photo || sampleTrash} alt="" className="h-10 w-10 flex-shrink-0 rounded-lg object-cover" />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{counterpart}</p>
+          {/* Poster sees the Green Collector's credential, not just a name */}
+          {isOwner && collectedBy && credentialFor?.(collectedBy) ? (
+            <CollectorCredential {...credentialFor(collectedBy)} />
+          ) : (
+            <p className="truncate text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{counterpart}</p>
+          )}
           <p className="truncate text-xs" style={{ color: 'var(--text-muted)' }}>{gps} · <span style={{ color: 'var(--accent)', fontWeight: 600 }}>₱{price}</span></p>
         </div>
       </div>
@@ -386,7 +392,7 @@ export default function MessageThread({ request, currentUser, users, onClose, on
             <div className="space-y-2.5">
               {/* poster -> collector */}
               <div>
-                <p className="text-[11px] font-medium" style={{ color: 'var(--text-muted)' }}>Poster → Collector</p>
+                <p className="text-[11px] font-medium" style={{ color: 'var(--text-muted)' }}>Poster → Green Collector</p>
                 {rating != null
                   ? <Stars value={rating} readOnly />
                   : isOwner
@@ -395,7 +401,7 @@ export default function MessageThread({ request, currentUser, users, onClose, on
               </div>
               {/* collector -> poster */}
               <div>
-                <p className="text-[11px] font-medium" style={{ color: 'var(--text-muted)' }}>Collector → Poster</p>
+                <p className="text-[11px] font-medium" style={{ color: 'var(--text-muted)' }}>Green Collector → Poster</p>
                 {collectorRating != null
                   ? <Stars value={collectorRating} readOnly />
                   : isCollector

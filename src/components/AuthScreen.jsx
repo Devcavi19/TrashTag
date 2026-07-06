@@ -158,11 +158,11 @@ export default function AuthScreen({ onLogin, notice, initialMode = 'login', onB
         </div>
         <div>
           <span className="font-display text-[30px] leading-none" style={{ fontWeight: 600 }}>
-            <span style={{ color: 'var(--text-primary)' }}>Trash</span>
-            <span style={{ color: 'var(--brand)' }}>Tag</span>
+            <span style={{ color: 'var(--text-primary)' }}>Lin</span>
+            <span style={{ color: 'var(--brand)' }}>isa</span>
           </span>
           <p className="mt-1.5 text-[14px]" style={{ color: 'var(--text-secondary)' }}>
-            Trash that pays. Community that cleans.
+            Professional Green Collectors, one trash at a time.
           </p>
         </div>
       </div>

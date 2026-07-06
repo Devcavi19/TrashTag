@@ -4,6 +4,7 @@ import { formatDistance } from '../utils/haversine'
 import ConfirmModal from './ConfirmModal'
 import Card from './ui/Card'
 import Button from './ui/Button'
+import CollectorCredential from './CollectorCredential'
 import sampleTrash from '../assets/sample_trash.jpg'
 
 function timeAgo(isoString) {
@@ -14,7 +15,7 @@ function timeAgo(isoString) {
   return `${Math.floor(diff / 86400)}d ago`
 }
 
-export default function TrashCard({ request, currentUserId, onAccept, onLike, onOpenThread, distanceMeters }) {
+export default function TrashCard({ request, currentUserId, onAccept, onLike, onOpenThread, credentialFor, distanceMeters }) {
   const { id, photo, tags = [], status, gps, price, postedAt, likes = [], postedBy, collectedBy } = request
 
   const [confirmAccept, setConfirmAccept] = useState(false)
@@ -110,8 +111,15 @@ export default function TrashCard({ request, currentUserId, onAccept, onLike, on
 
         {status === 'open' && isOwner && (
           <p className="mt-3.5 text-center text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-            Waiting for a neighbor to accept…
+            Waiting for a Green Collector to accept…
           </p>
+        )}
+
+        {/* Who's coming — the Green Collector's credential, visible to the poster */}
+        {status !== 'open' && isOwner && collectedBy && credentialFor?.(collectedBy) && (
+          <div className="mt-3">
+            <CollectorCredential {...credentialFor(collectedBy)} />
+          </div>
         )}
 
         {status !== 'open' && involved && onOpenThread && (

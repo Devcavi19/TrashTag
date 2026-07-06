@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react'
 // resets the countdown. A cross-tab timestamp in localStorage keeps the
 // idle clock honest across reloads and other tabs.
 const ACTIVITY_EVENTS = ['mousedown', 'keydown', 'scroll', 'touchstart', 'pointerdown']
-const LAST_ACTIVE_KEY = 'trashtag:lastActive'
+const LAST_ACTIVE_KEY = 'linisa:lastActive'
 
 export function useIdleLogout(enabled, onTimeout, timeoutMs = 10 * 60 * 1000) {
   // Keep the latest callback without re-arming the effect on every render.

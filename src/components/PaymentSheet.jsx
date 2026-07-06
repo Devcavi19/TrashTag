@@ -30,7 +30,7 @@ export function PaySheet({ open, onClose, request, collectorProfile, onMarkSent 
   const [reference, setReference] = useState('')
   const [sending, setSending] = useState(false)
 
-  const collectorName = collectorProfile?.name || 'the collector'
+  const collectorName = collectorProfile?.name || 'your Green Collector'
   const numbers = {
     gcash: collectorProfile?.gcash_number,
     maya: collectorProfile?.maya_number,

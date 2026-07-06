@@ -1,4 +1,4 @@
-// Applies the branded TrashTag email templates (email-templates/*.html) to the
+// Applies the branded Linisa email templates (email-templates/*.html) to the
 // Supabase project via the Management API.
 //
 // NOTE: Supabase rejects template customization on the free tier while using the
@@ -19,9 +19,9 @@ const H = { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json'
 const read = (f) => readFileSync(new URL(`../email-templates/${f}`, import.meta.url), 'utf8')
 
 const body = {
-  mailer_subjects_confirmation: 'Confirm your TrashTag account',
+  mailer_subjects_confirmation: 'Confirm your Linisa account',
   mailer_templates_confirmation_content: read('confirmation.html'),
-  mailer_subjects_recovery: 'Reset your TrashTag password',
+  mailer_subjects_recovery: 'Reset your Linisa password',
   mailer_templates_recovery_content: read('recovery.html'),
 }
 

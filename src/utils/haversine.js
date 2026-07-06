@@ -10,9 +10,9 @@ export function haversineDistance(lat1, lon1, lat2, lon2) {
 }
 
 export function proximityLabel(meters) {
-  if (meters < 50) return 'Collector arrived'
-  if (meters < 200) return 'Collector is nearby'
-  return 'Collector on the way'
+  if (meters < 50) return 'Green Collector arrived'
+  if (meters < 200) return 'Green Collector is nearby'
+  return 'Green Collector on the way'
 }
 
 export function formatDistance(meters) {

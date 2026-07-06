@@ -3,6 +3,7 @@
 // Renders shell + screens with fixture data so redesigns can be verified
 // visually without a live Supabase backend.
 // Usage: /preview.html?screen=shell&theme=bold-impact
+// Screens: shell|cards|sheet|feed|profile|board|inbox|pay|confirmpay|thread|credential
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import '../index.css'
@@ -24,6 +25,9 @@ import LeaderboardView from '../components/LeaderboardView'
 import Conversations from '../components/Conversations'
 import MessageThread from '../components/MessageThread'
 import { PaySheet, ConfirmPaymentSheet } from '../components/PaymentSheet'
+import CollectorCredential from '../components/CollectorCredential'
+import CredentialSheet from '../components/CredentialSheet'
+import { deriveCredential } from '../lib/collectorCred'
 
 const params = new URLSearchParams(location.search)
 const screen = params.get('screen') || 'shell'
@@ -127,7 +131,7 @@ function Primitives() {
         <EmptyState
           icon="🧹"
           title="No pickups nearby yet"
-          body="Post the first one and a collector will come running."
+          body="Post the first one and a Green Collector will come running."
           action={<Button>Post a pickup</Button>}
         />
       </Card>
@@ -156,10 +160,27 @@ function SheetPreview() {
 }
 
 const FIXTURE_USERS = [
-  { id: 'u-herald', name: 'Herald' },
-  { id: 'u-carl', name: 'Carl Avila' },
-  { id: 'u-juana', name: 'Juana Reyes' },
+  { id: 'u-herald', name: 'Herald', verified_at: '2026-05-02T08:00:00Z', created_at: '2026-03-14T08:00:00Z' },
+  { id: 'u-carl', name: 'Carl Avila', verified_at: '2026-04-11T08:00:00Z', created_at: '2026-02-02T08:00:00Z' },
+  { id: 'u-juana', name: 'Juana Reyes', verified_at: null, created_at: '2026-06-20T08:00:00Z' },
+  { id: 'u-ramon', name: 'Mang Ramon', verified_at: '2025-12-01T08:00:00Z', created_at: '2025-11-20T08:00:00Z' },
 ]
+
+// Mang Ramon's settled jobs — enough paid pickups at a high rating to earn
+// the Top-Rated rung, so the ladder renders fully lit in previews.
+const RAMON_JOBS = Array.from({ length: 24 }, (_, i) => ({
+  id: `ramon-${i}`,
+  photo: null,
+  tags: ['Mixed'],
+  status: 'paid',
+  gps: 'Brgy. Mabolo, Cebu City',
+  price: 120,
+  postedAt: new Date(Date.now() - (i + 10) * 86400e3).toISOString(),
+  likes: [],
+  postedBy: 'u-juana',
+  collectedBy: 'u-ramon',
+  rating: i % 8 === 0 ? 4 : 5,
+}))
 
 const FIXTURE_HISTORY = [
   ...FIXTURE_REQUESTS,
@@ -209,6 +230,13 @@ const FIXTURE_HISTORY = [
 
 const FIXTURE_STATS = { posted: 3, collected: 1, ratingCount: 1, rating: 4 }
 
+// Same lookup App provides: profile row + derived Green Collector credential.
+const CRED_REQUESTS = [...FIXTURE_HISTORY, ...RAMON_JOBS]
+function credentialFor(userId) {
+  const profile = FIXTURE_USERS.find((u) => u.id === userId)
+  return profile ? { profile, credential: deriveCredential(CRED_REQUESTS, profile) } : null
+}
+
 const SCREENS = {
   shell: (
     <>
@@ -231,6 +259,7 @@ const SCREENS = {
             onAccept={() => {}}
             onLike={() => {}}
             onOpenThread={() => {}}
+            credentialFor={credentialFor}
             distanceMeters={r.id === 'r1' ? 1200 : 480}
           />
         ))}
@@ -258,6 +287,7 @@ const SCREENS = {
           stats={FIXTURE_STATS}
           onLogout={() => {}}
           onNotice={() => {}}
+          credentialFor={credentialFor}
           theme={new URLSearchParams(location.search).get('theme') || 'fresh-canopy'}
           onThemeChange={() => {}}
         />
@@ -317,7 +347,23 @@ const SCREENS = {
       onSubmitAfterPhoto={() => {}}
       onPayment={() => {}}
       onRate={() => {}}
+      credentialFor={credentialFor}
     />
+  ),
+  credential: (
+    <>
+      <TopBar />
+      <div className="flex flex-1 flex-col gap-3 p-4 pb-24">
+        <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+          Trust lines — top-rated / verified / unverified
+        </p>
+        <CollectorCredential {...credentialFor('u-ramon')} />
+        <CollectorCredential {...credentialFor('u-carl')} />
+        <CollectorCredential {...credentialFor('u-juana')} />
+        <CredentialSheet open onClose={() => {}} {...credentialFor('u-ramon')} />
+      </div>
+      <BottomNav view="home" setView={() => {}} onOpenMessages={() => {}} />
+    </>
   ),
 }
 

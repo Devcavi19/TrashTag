@@ -4,9 +4,9 @@ import MapView from './MapView'
 import { haversineDistance, proximityLabel, formatDistance } from '../utils/haversine'
 
 const STATUS_COLORS = {
-  'Collector arrived': 'var(--success)',
-  'Collector is nearby': 'var(--accent)',
-  'Collector on the way': 'var(--text-secondary)',
+  'Green Collector arrived': 'var(--success)',
+  'Green Collector is nearby': 'var(--accent)',
+  'Green Collector on the way': 'var(--text-secondary)',
 }
 
 export default function CollectorTracker({ request }) {
@@ -54,7 +54,7 @@ export default function CollectorTracker({ request }) {
       ? haversineDistance(request.lat, request.lng, collectorLocation.lat, collectorLocation.lng)
       : null
 
-  const label = distance != null ? proximityLabel(distance) : 'Waiting for collector…'
+  const label = distance != null ? proximityLabel(distance) : 'Waiting for your Green Collector…'
   const labelColor = STATUS_COLORS[label] ?? 'var(--text-secondary)'
 
   return (

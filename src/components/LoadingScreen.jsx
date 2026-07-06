@@ -37,11 +37,10 @@ export default function LoadingScreen({ onDone }) {
 
         <div className="text-center">
           <h1 className="font-display text-3xl tracking-tight" style={{ fontWeight: 600 }}>
-            TrashTag
-            <span className="ml-1 text-lg font-medium" style={{ opacity: 0.6 }}>PH</span>
+            Linisa
           </h1>
           <p className="mt-1 text-sm" style={{ opacity: 0.55 }}>
-            Trash that pays. Community that cleans.
+            Professional Green Collectors, one trash at a time.
           </p>
         </div>
       </div>

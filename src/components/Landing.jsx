@@ -44,8 +44,8 @@ function useImpactStats() {
 function Wordmark({ size = 24 }) {
   return (
     <span className="font-display leading-none" style={{ fontSize: size, fontWeight: 600 }}>
-      <span style={{ color: 'var(--text-primary)' }}>Trash</span>
-      <span style={{ color: 'var(--brand)' }}>Tag</span>
+      <span style={{ color: 'var(--text-primary)' }}>Lin</span>
+      <span style={{ color: 'var(--brand)' }}>isa</span>
     </span>
   )
 }
@@ -84,6 +84,26 @@ function Track({ label, steps }) {
       <div className="flex flex-col gap-5">
         {steps.map((s, i) => <Step key={s.title} n={i + 1} {...s} />)}
       </div>
+    </div>
+  )
+}
+
+function Audience({ label, title, body }) {
+  return (
+    <div
+      className="flex-1 p-6"
+      style={{
+        background: 'var(--surface-card)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-card)',
+        boxShadow: 'var(--shadow-card)',
+      }}
+    >
+      <p className="text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: 'var(--brand)' }}>
+        {label}
+      </p>
+      <p className="mt-3 text-[17px] font-bold" style={{ color: 'var(--text-primary)' }}>{title}</p>
+      <p className="mt-1.5 text-[13.5px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{body}</p>
     </div>
   )
 }
@@ -128,13 +148,13 @@ export default function Landing({ onGetStarted, onLogIn }) {
             className="font-display text-[38px] leading-[1.08] md:text-[52px]"
             style={{ color: 'var(--text-primary)', fontWeight: 600 }}
           >
-            Trash that <span style={{ color: 'var(--brand)' }}>pays</span>.<br />
-            Community that cleans.
+            Professional Green Collectors,<br />
+            <span style={{ color: 'var(--brand)' }}>one trash at a time</span>.
           </h1>
           <p className="mt-4 max-w-md text-[16px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-            Post the mess you can't deal with and put a peso bounty on it — or be the neighbor who
-            clears it, proves it with a photo, and gets paid. GCash, Maya, or cash, confirmed by
-            both sides.
+            Malinis na barangay, powered by neighbors. Post the mess you can't deal with and a
+            verified, rated Green Collector clears it, proves it with a photo, and gets paid —
+            GCash, Maya, or cash, confirmed by both sides.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button onClick={onGetStarted} style={{ paddingBlock: 12, paddingInline: 22 }}>
@@ -186,8 +206,8 @@ export default function Landing({ onGetStarted, onLogIn }) {
             label="If you're posting"
             steps={[
               { title: 'Snap the mess', body: 'A photo, the spot on the map, what kind of trash it is.' },
-              { title: 'Put a bounty on it', body: 'Name your price in pesos. Nearby collectors see it instantly.' },
-              { title: 'Review proof, then pay', body: 'Compare before/after photos, send GCash / Maya / cash, and mark it sent.' },
+              { title: 'Put a bounty on it', body: 'Name your price in pesos. Nearby Green Collectors see it instantly.' },
+              { title: 'Review proof, then pay', body: 'See who accepted — verified, rated, with their pickups on record. Compare before/after photos, send GCash / Maya / cash, and mark it sent.' },
             ]}
           />
           <Track
@@ -195,8 +215,32 @@ export default function Landing({ onGetStarted, onLogIn }) {
             steps={[
               { title: 'Accept a pickup nearby', body: 'The feed ranks open bounties by distance, freshness, and payout.' },
               { title: 'Clean it and prove it', body: 'Live location sharing on the way; an after-photo when it’s done.' },
-              { title: 'Confirm you got paid', body: 'The pickup only closes when you confirm the money landed. Both sides rate each other.' },
+              { title: 'Build your credential', body: 'Every job and every star builds your Green Collector ID — get paid, get rated, climb the ladder.' },
             ]}
+          />
+        </div>
+      </section>
+
+      {/* Who Linisa serves — the workforce is the product */}
+      <section className="mx-auto max-w-5xl px-5 pb-16">
+        <h2 className="font-display mb-6 text-[26px]" style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
+          A workforce, not just an app
+        </h2>
+        <div className="flex flex-col gap-4 md:flex-row">
+          <Audience
+            label="For Green Collectors"
+            title="A profession with a ladder"
+            body="Dignified, flexible income with a real career path — Verified → Certified → Top-Rated → Team Lead → Barangay Coordinator. Status and progression, not just piece-rate pay."
+          />
+          <Audience
+            label="For homeowners"
+            title="A professional at your gate"
+            body="Not a stranger on a motorbike — an identity-verified neighbor, rated on every job, with a credential you can see before they arrive."
+          />
+          <Audience
+            label="For your barangay"
+            title="A green-jobs corps"
+            body="A certified, uniformed collection workforce that fills the gap without expanding the municipal budget — plus the waste-hotspot picture to govern with."
           />
         </div>
       </section>
@@ -216,7 +260,7 @@ export default function Landing({ onGetStarted, onLogIn }) {
         ) : (
           <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-around gap-8 px-5 py-12">
             <ImpactStat value={stats?.cleaned} label="Pickups cleaned" />
-            <ImpactStat value={stats ? `₱${stats.paidOut}` : null} label="Paid to collectors" />
+            <ImpactStat value={stats ? `₱${stats.paidOut}` : null} label="Paid to Green Collectors" />
             <ImpactStat value={stats?.open} label="Open bounties right now" />
           </div>
         )}
@@ -229,10 +273,11 @@ export default function Landing({ onGetStarted, onLogIn }) {
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-[15px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
           A community feed for cleanup events and local news, a leaderboard for the neighborhood's
-          top collectors, live tracking while your collector is on the way, and chat on every pickup.
+          top Green Collectors, live tracking while your collector is on the way, and chat on every
+          pickup.
         </p>
         <Button className="mt-7" onClick={onGetStarted} style={{ paddingBlock: 13, paddingInline: 28 }}>
-          Join TrashTag PH
+          Join Linisa
         </Button>
       </section>
 
@@ -241,7 +286,7 @@ export default function Landing({ onGetStarted, onLogIn }) {
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-6">
           <Wordmark size={18} />
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--text-muted)' }}>
-            Trash that pays · TrashTag PH
+            Malinis na barangay, powered by neighbors
           </p>
         </div>
       </footer>

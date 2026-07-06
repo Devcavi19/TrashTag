@@ -6,6 +6,7 @@ import { THEMES } from '../lib/themes'
 import Avatar from './ui/Avatar'
 import Button from './ui/Button'
 import { Input } from './ui/Input'
+import CredentialSheet, { VerifiedBadge } from './CredentialSheet'
 
 const INK = 'var(--text-primary)'
 const MUTED = 'var(--text-secondary)'
@@ -21,9 +22,11 @@ const CARD_STYLE = {
 
 const CATEGORIES = Object.keys(TAG_COLORS) // canonical order: Bio / Recyclable / Residual / Mixed
 
-// Your title is what you've done, not a setting.
-function deriveTitle({ posted, collected }) {
-  if (collected > 0 && collected >= posted) return 'Collector'
+// Your title is what you've done, not a setting — and once you're verified,
+// it's your credential.
+function deriveTitle({ posted, collected }, credential) {
+  if (credential?.verified) return `${credential.tierLabel} Green Collector`
+  if (collected > 0 && collected >= posted) return 'Green Collector'
   if (posted > 0) return 'Poster'
   return 'New member'
 }
@@ -185,11 +188,13 @@ function ThemePicker({ current, onChange }) {
   )
 }
 
-export default function ProfileView({ currentUser, profile, requests, stats, onLogout, onNotice, onSavePaymentDetails, theme, onThemeChange }) {
+export default function ProfileView({ currentUser, profile, requests, stats, onLogout, onNotice, onSavePaymentDetails, credentialFor, theme, onThemeChange }) {
   const myId = currentUser?.id
-  const title = deriveTitle(stats)
+  const myCred = credentialFor?.(myId) ?? null
+  const title = deriveTitle(stats, myCred?.credential)
   const rating = stats.ratingCount > 0 ? stats.rating.toFixed(1) : '—'
   const since = memberSince(currentUser?.created_at)
+  const [idOpen, setIdOpen] = useState(false)
 
   // Real money moved: what you've paid out as a poster + earned as a collector.
   const completedMine = requests.filter(
@@ -216,8 +221,9 @@ export default function ProfileView({ currentUser, profile, requests, stats, onL
         <div className="flex items-center gap-4">
           <Avatar name={currentUser?.name || 'You'} size="lg" className="flex-shrink-0 text-xl" style={{ boxShadow: '0 4px 14px rgba(0,0,0,0.25)' }} />
           <div className="min-w-0 flex-1">
-            <h1 className="truncate font-display text-[22px] leading-tight" style={{ fontWeight: 600 }}>
-              {currentUser?.name || 'You'}
+            <h1 className="flex items-center gap-2 truncate font-display text-[22px] leading-tight" style={{ fontWeight: 600 }}>
+              <span className="truncate">{currentUser?.name || 'You'}</span>
+              {myCred?.credential?.verified && <VerifiedBadge size={17} />}
             </h1>
             <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
               <span
@@ -305,6 +311,19 @@ export default function ProfileView({ currentUser, profile, requests, stats, onL
         {/* Account actions */}
         <section className="overflow-hidden" style={CARD_STYLE}>
           <ActionRow
+            label="My Green Collector ID"
+            hint={myCred?.credential?.verified ? 'Verified' : undefined}
+            onClick={() => setIdOpen(true)}
+            icon={
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="16" rx="2" />
+                <circle cx="9" cy="10" r="2" />
+                <path d="M15 8h4" /><path d="M15 12h4" /><path d="M5.5 16.5c.5-1.5 2-2.5 3.5-2.5s3 1 3.5 2.5" />
+              </svg>
+            }
+          />
+          <div className="h-px" style={{ background: LINE }} />
+          <ActionRow
             label="Account settings"
             hint="Soon"
             onClick={() => onNotice('Account settings are coming soon.')}
@@ -356,9 +375,13 @@ export default function ProfileView({ currentUser, profile, requests, stats, onL
         </section>
 
         <p className="pt-1 text-center text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: FAINT }}>
-          TrashTag PH
+          Linisa
         </p>
       </div>
+
+      {myCred && (
+        <CredentialSheet open={idOpen} onClose={() => setIdOpen(false)} profile={myCred.profile} credential={myCred.credential} />
+      )}
     </div>
   )
 }

@@ -47,7 +47,7 @@ function SectionLabel({ children, aside }) {
   )
 }
 
-export default function HomeFeed({ requests, currentUser, onCompose, onAccept, onLike, onOpenThread }) {
+export default function HomeFeed({ requests, currentUser, onCompose, onAccept, onLike, onOpenThread, credentialFor }) {
   const myId = currentUser?.id
   const { location } = useViewerLocation()
 
@@ -78,6 +78,7 @@ export default function HomeFeed({ requests, currentUser, onCompose, onAccept, o
               onAccept={onAccept}
               onLike={onLike}
               onOpenThread={onOpenThread}
+              credentialFor={credentialFor}
               distanceMeters={r.distanceMeters}
             />
           ))}
@@ -88,7 +89,7 @@ export default function HomeFeed({ requests, currentUser, onCompose, onAccept, o
         <EmptyState
           icon="🌱"
           title="No pickups nearby yet"
-          body="Post the first one and a collector will come running."
+          body="Post the first one and a Green Collector will come running."
         />
       ) : (
         <div className="space-y-3">
@@ -103,6 +104,7 @@ export default function HomeFeed({ requests, currentUser, onCompose, onAccept, o
               onAccept={onAccept}
               onLike={onLike}
               onOpenThread={onOpenThread}
+              credentialFor={credentialFor}
             />
           ))}
         </div>

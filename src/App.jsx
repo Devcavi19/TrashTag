@@ -5,6 +5,7 @@ import { useFeed } from './hooks/useFeed'
 import { useIdleLogout } from './hooks/useIdleLogout'
 import { supabase } from './lib/supabase'
 import { getStoredTheme, applyTheme, setStoredTheme } from './lib/themes'
+import { deriveCredential } from './lib/collectorCred'
 import HomeFeed from './components/HomeFeed'
 import FeedView from './components/FeedView'
 import LeaderboardView from './components/LeaderboardView'
@@ -44,14 +45,14 @@ function App() {
   async function fetchProfile(userId) {
     const { data } = await supabase
       .from('profiles')
-      .select('id, name, gcash_number, maya_number')
+      .select('id, name, gcash_number, maya_number, verified_at, avatar_url, created_at')
       .eq('id', userId)
       .single()
     return data
   }
 
   async function fetchAllProfiles() {
-    const { data } = await supabase.from('profiles').select('id, name, gcash_number, maya_number')
+    const { data } = await supabase.from('profiles').select('id, name, gcash_number, maya_number, verified_at, avatar_url, created_at')
     if (data) setProfiles(data)
   }
 
@@ -247,6 +248,12 @@ function App() {
       : 0,
   }
 
+  // Green Collector credential lookup — one derivation, every trust surface.
+  function credentialFor(userId) {
+    const profile = profiles.find((p) => p.id === userId)
+    return profile ? { profile, credential: deriveCredential(requests, profile) } : null
+  }
+
   function handleThemeChange(id) {
     setTheme(id)
     applyTheme(id)
@@ -297,6 +304,7 @@ function App() {
             onAccept={(id) => updateStatus(id, 'accepted')}
             onLike={handleLike}
             onOpenThread={openThread}
+            credentialFor={credentialFor}
           />
         )}
         {view === 'community' && (
@@ -323,6 +331,7 @@ function App() {
             onLogout={handleLogout}
             onNotice={setNotice}
             onSavePaymentDetails={savePaymentDetails}
+            credentialFor={credentialFor}
             theme={theme}
             onThemeChange={handleThemeChange}
           />
@@ -363,6 +372,7 @@ function App() {
           onConfirmPaymentReceived={confirmPaymentReceived}
           onPaymentNotReceived={reportPaymentNotReceived}
           onRate={handleRate}
+          credentialFor={credentialFor}
         />
       )}
 

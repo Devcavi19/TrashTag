@@ -1,6 +1,8 @@
-# TrashTag ♻️
+# Linisa ♻️
 
-A mobile-first, two-sided marketplace for trash pickup. **Posters** photograph and post trash-pickup requests; **Collectors** find nearby jobs, clean up, and upload proof; a shared **Community** feed surfaces events and news. Everything syncs live across devices.
+**Professional Green Collectors, one trash at a time.** *Malinis na barangay, powered by neighbors.*
+
+A mobile-first platform for a professional green-collector workforce. **Posters** photograph and post trash-pickup requests with a peso bounty; verified, rated **Green Collectors** find nearby jobs, clean up, upload proof, and get paid; a shared **Community** feed surfaces events and news. Every collector carries a derived, tamper-proof credential — verified badge, rating, pickups completed, and a career ladder (Verified → Certified → Top-Rated → Team Lead → Barangay Coordinator). Everything syncs live across devices.
 
 Built with **React 19** + **Vite**, styled with **Tailwind CSS** (via CDN), with maps from **Leaflet / react-leaflet** and a full **Supabase** backend (Postgres, Auth, Storage, Realtime). Designed for a 430px max-width mobile viewport.
 

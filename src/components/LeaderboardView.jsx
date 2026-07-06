@@ -31,7 +31,7 @@ function computeRanked(requests, users) {
   const ranked = Object.entries(statsById)
     .map(([userId, s]) => ({
       userId,
-      name: users.find((u) => u.id === userId)?.name || 'Unknown Collector',
+      name: users.find((u) => u.id === userId)?.name || 'Unknown Green Collector',
       jobs: s.jobs,
       avgRating: s.ratingCount > 0 ? s.ratingSum / s.ratingCount : 0,
     }))
@@ -105,14 +105,14 @@ export default function LeaderboardView({ requests, users, currentUser }) {
         </div>
         <p className="mt-1.5 text-[12.5px]" style={{ opacity: 0.6 }}>
           {ranked.length === 0
-            ? 'Be the first collector on the board.'
-            : `by ${ranked.length} ${ranked.length === 1 ? 'collector' : 'collectors'} across the neighborhood.`}
+            ? 'Be the first Green Collector on the board.'
+            : `by ${ranked.length} Green Collector${ranked.length === 1 ? '' : 's'} across the neighborhood.`}
         </p>
       </div>
 
       <div className="flex items-center justify-between">
         <h2 className="text-[10px] font-bold uppercase tracking-widest" style={{ color: AMBER }}>
-          🏆 Top collectors
+          🏆 Top Green Collectors
         </h2>
         <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: FAINT }}>
           All time
