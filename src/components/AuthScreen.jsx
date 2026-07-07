@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import Button from './ui/Button'
 import Card from './ui/Card'
 import { Input } from './ui/Input'
+import BrandMark from './BrandMark'
 
 function getLoginErrorMessage(error) {
   if (!error) return 'Login failed. Please try again.'
@@ -151,10 +152,7 @@ export default function AuthScreen({ onLogin, notice, initialMode = 'login', onB
           className="flex h-14 w-14 items-center justify-center rounded-2xl"
           style={{ background: 'var(--brand-ink)', color: 'var(--on-brand-ink)' }}
         >
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
-            <path d="M10 11v5M14 11v5" />
-          </svg>
+          <BrandMark size={30} />
         </div>
         <div>
           <span className="font-display text-[30px] leading-none" style={{ fontWeight: 600 }}>

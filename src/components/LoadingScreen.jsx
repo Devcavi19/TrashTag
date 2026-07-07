@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import BrandMark from './BrandMark'
 
 export default function LoadingScreen({ onDone }) {
   const [fading, setFading] = useState(false)
@@ -29,10 +30,7 @@ export default function LoadingScreen({ onDone }) {
           className="flex h-20 w-20 items-center justify-center rounded-2xl"
           style={{ background: 'color-mix(in srgb, var(--on-brand-ink) 14%, transparent)' }}
         >
-          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
-            <path d="M10 11v5M14 11v5" />
-          </svg>
+          <BrandMark size={44} />
         </div>
 
         <div className="text-center">
