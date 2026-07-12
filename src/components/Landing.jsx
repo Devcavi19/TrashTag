@@ -44,8 +44,8 @@ function useImpactStats() {
 function Wordmark({ size = 24 }) {
   return (
     <span className="font-display leading-none" style={{ fontSize: size, fontWeight: 600 }}>
-      <span style={{ color: 'var(--text-primary)' }}>Lin</span>
-      <span style={{ color: 'var(--brand)' }}>isa</span>
+      <span style={{ color: 'var(--text-primary)' }}>Ko</span>
+      <span style={{ color: 'var(--brand)' }}>lek</span>
     </span>
   )
 }

@@ -10,8 +10,8 @@ function TopBar() {
       <div className="mx-auto flex max-w-[430px] items-center justify-between px-4 py-3">
         <div className="flex items-baseline gap-1.5">
           <span className="font-display text-[21px] leading-none" style={{ fontWeight: 600 }}>
-            <span style={{ color: 'var(--text-primary)' }}>Lin</span>
-            <span style={{ color: 'var(--brand)' }}>isa</span>
+            <span style={{ color: 'var(--text-primary)' }}>Ko</span>
+            <span style={{ color: 'var(--brand)' }}>lek</span>
           </span>
         </div>
       </div>

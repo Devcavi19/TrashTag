@@ -156,8 +156,8 @@ export default function AuthScreen({ onLogin, notice, initialMode = 'login', onB
         </div>
         <div>
           <span className="font-display text-[30px] leading-none" style={{ fontWeight: 600 }}>
-            <span style={{ color: 'var(--text-primary)' }}>Lin</span>
-            <span style={{ color: 'var(--brand)' }}>isa</span>
+            <span style={{ color: 'var(--text-primary)' }}>Ko</span>
+            <span style={{ color: 'var(--brand)' }}>lek</span>
           </span>
           <p className="mt-1.5 text-[14px]" style={{ color: 'var(--text-secondary)' }}>
             Professional Green Collectors, one trash at a time.
