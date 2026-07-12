@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-const CACHE_KEY = 'linisa.lastLocation'
+const CACHE_KEY = 'kolek.lastLocation'
 
 function readCache() {
   try {

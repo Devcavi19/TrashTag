@@ -65,7 +65,7 @@ export const THEMES = {
 
 export const DEFAULT_THEME = 'fresh-canopy'
 
-const STORAGE_KEY = 'linisa-theme'
+const STORAGE_KEY = 'kolek-theme'
 
 export function applyTheme(id) {
   const theme = THEMES[id] || THEMES[DEFAULT_THEME]

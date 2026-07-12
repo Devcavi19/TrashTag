@@ -139,8 +139,8 @@ in both themes.
 - **Copy sweep:** user-facing "collector" → "Green Collector" (TrashCard actions,
   MessageThread, StatusBadge labels, empty states). **Code identifiers and DB
   columns (`collected_by`, `collectorRating`, …) do not change.**
-- **Internals:** `package.json` name → `linisa`; storage keys `trashtag:*` /
-  `trashtag.*` / `trashtag-*` → `linisa:*` equivalents (one-time theme/idle reset
+- **Internals:** `package.json` name → `kolek`; storage keys `trashtag:*` /
+  `trashtag.*` / `trashtag-*` → `kolek:*` equivalents (one-time theme/idle reset
   for existing sessions — acceptable pre-launch); CLAUDE.md updated to describe the
   new positioning and credential model.
 

@@ -6,7 +6,7 @@ Final copy for the incubator showcase deck. Speaker notes in *italics*. Brand: F
 
 ## Slide 1 — Title
 
-**LINISA**
+**KOLEK**
 Professional Green Collectors, one trash at a time.
 *Malinis na barangay, powered by neighbors.*
 
