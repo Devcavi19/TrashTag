@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import ngeohash from 'ngeohash'
 import { useRequests } from './hooks/useRequests'
 import { useFeed } from './hooks/useFeed'
@@ -283,6 +283,75 @@ function App() {
   // Jobs I'm part of that are still in motion — drives the Messages badge.
   const myId = currentUser?.id
   const myPrefs = prefsOf(profiles.find((p) => p.id === myId))
+
+  // --- In-app alerts (gated by notification prefs) ---
+  // Latest alert context in a ref so the realtime channel below never needs
+  // to resubscribe when prefs, profiles, or the open thread change.
+  const alertCtxRef = useRef({ prefs: myPrefs, openPeer: null, profiles: [] })
+  useEffect(() => {
+    alertCtxRef.current = { prefs: myPrefs, openPeer: activeThreadPeer, profiles }
+  })
+
+  // Last seen status per request, seeded fill-only from fetched state (the
+  // realtime handler's own records win) — alerts fire on transitions only.
+  const jobStatusRef = useRef(new Map())
+  useEffect(() => {
+    const seen = jobStatusRef.current
+    for (const r of requests) {
+      if (!seen.has(r.id)) seen.set(r.id, r.status)
+    }
+  }, [requests])
+
+  useEffect(() => {
+    if (!myId) return
+    const channel = supabase
+      .channel('app-alerts')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'requests' },
+        (payload) => {
+          const row = payload.new
+          const before = jobStatusRef.current.get(row.id)
+          jobStatusRef.current.set(row.id, row.status)
+          if (!alertCtxRef.current.prefs.jobUpdates) return
+          if (before === undefined || before === row.status) return
+          if (row.poster_id === myId) {
+            if (row.status === 'accepted') setNotice('A Green Collector accepted your pickup — say hi in Messages.')
+            if (row.status === 'collected' && before === 'payment_sent') setNotice("The Green Collector hasn't received your payment — please resend.")
+            else if (row.status === 'collected') setNotice('Cleanup proof uploaded — review it in Messages.')
+            if (row.status === 'paid') setNotice('Payment confirmed — pickup complete. 🎉')
+          }
+          if (row.collected_by === myId) {
+            if (row.status === 'payment_sent') setNotice('Payment sent — confirm receipt in Messages.')
+            if (row.status === 'disputed') setNotice('Your cleanup proof was rejected — please re-upload.')
+          }
+        }
+      )
+      // RLS limits messages to requests I'm part of, so this table-wide
+      // subscription only ever delivers my own conversations.
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        (payload) => {
+          const { sender_id } = payload.new
+          const { prefs, openPeer, profiles: people } = alertCtxRef.current
+          if (!prefs.messages || sender_id === myId || sender_id === openPeer) return
+          const sender = people.find((p) => p.id === sender_id)
+          setNotice(`New message from ${sender?.name ?? 'your pickup partner'}.`)
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'posts' },
+        (payload) => {
+          if (!alertCtxRef.current.prefs.community) return
+          if (payload.new.author_id === myId) return
+          setNotice('New in Community — take a look.')
+        }
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [myId])
   const activeConvoCount = requests.filter(
     (r) =>
       (r.postedBy === myId || r.collectedBy === myId) &&
