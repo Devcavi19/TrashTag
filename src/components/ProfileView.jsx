@@ -7,6 +7,7 @@ import Avatar from './ui/Avatar'
 import Button from './ui/Button'
 import { Input } from './ui/Input'
 import CredentialSheet, { VerifiedBadge } from './CredentialSheet'
+import GuidelinesSheet from './GuidelinesSheet'
 
 const INK = 'var(--text-primary)'
 const MUTED = 'var(--text-secondary)'
@@ -195,6 +196,7 @@ export default function ProfileView({ currentUser, profile, requests, stats, onL
   const rating = stats.ratingCount > 0 ? stats.rating.toFixed(1) : '—'
   const since = memberSince(currentUser?.created_at)
   const [idOpen, setIdOpen] = useState(false)
+  const [guideOpen, setGuideOpen] = useState(false)
 
   // Real money moved: what you've paid out as a poster + earned as a collector.
   const completedMine = requests.filter(
@@ -349,8 +351,7 @@ export default function ProfileView({ currentUser, profile, requests, stats, onL
           <div className="h-px" style={{ background: LINE }} />
           <ActionRow
             label="Community guidelines"
-            hint="Soon"
-            onClick={() => onNotice('Community guidelines are coming soon.')}
+            onClick={() => setGuideOpen(true)}
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
@@ -382,6 +383,8 @@ export default function ProfileView({ currentUser, profile, requests, stats, onL
       {myCred && (
         <CredentialSheet open={idOpen} onClose={() => setIdOpen(false)} profile={myCred.profile} credential={myCred.credential} />
       )}
+
+      <GuidelinesSheet open={guideOpen} onClose={() => setGuideOpen(false)} />
     </div>
   )
 }

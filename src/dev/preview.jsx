@@ -3,7 +3,7 @@
 // Renders shell + screens with fixture data so redesigns can be verified
 // visually without a live Supabase backend.
 // Usage: /preview.html?screen=shell&theme=bold-impact
-// Screens: shell|cards|sheet|feed|profile|board|inbox|pay|confirmpay|thread|credential
+// Screens: shell|cards|sheet|feed|profile|board|inbox|pay|confirmpay|thread|credential|settings|notifprefs|guidelines
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import '../index.css'
@@ -25,6 +25,7 @@ import LeaderboardView from '../components/LeaderboardView'
 import Conversations from '../components/Conversations'
 import MessageThread from '../components/MessageThread'
 import { PaySheet, ConfirmPaymentSheet } from '../components/PaymentSheet'
+import GuidelinesSheet from '../components/GuidelinesSheet'
 import CollectorCredential from '../components/CollectorCredential'
 import CredentialSheet from '../components/CredentialSheet'
 import { deriveCredential } from '../lib/collectorCred'
@@ -359,6 +360,7 @@ const SCREENS = {
       credentialFor={credentialFor}
     />
   ),
+  guidelines: <GuidelinesSheet open onClose={() => {}} />,
   credential: (
     <>
       <TopBar />
