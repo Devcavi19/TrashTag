@@ -26,6 +26,7 @@ import Conversations from '../components/Conversations'
 import MessageThread from '../components/MessageThread'
 import { PaySheet, ConfirmPaymentSheet } from '../components/PaymentSheet'
 import GuidelinesSheet from '../components/GuidelinesSheet'
+import AccountSheet from '../components/AccountSheet'
 import CollectorCredential from '../components/CollectorCredential'
 import CredentialSheet from '../components/CredentialSheet'
 import { deriveCredential } from '../lib/collectorCred'
@@ -361,6 +362,18 @@ const SCREENS = {
     />
   ),
   guidelines: <GuidelinesSheet open onClose={() => {}} />,
+  settings: (
+    <AccountSheet
+      open
+      onClose={() => {}}
+      currentUser={{ ...FIXTURE_USER, email: 'herald@example.com' }}
+      profile={{ id: 'u-herald', name: 'Herald', avatar_url: null }}
+      onUploadAvatar={async () => {}}
+      onSaveName={async () => {}}
+      onChangeEmail={async () => {}}
+      onChangePassword={async () => {}}
+    />
+  ),
   credential: (
     <>
       <TopBar />

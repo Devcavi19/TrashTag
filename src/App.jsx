@@ -4,6 +4,7 @@ import { useRequests } from './hooks/useRequests'
 import { useFeed } from './hooks/useFeed'
 import { useIdleLogout } from './hooks/useIdleLogout'
 import { supabase } from './lib/supabase'
+import { validateImage } from './lib/validateImage'
 import { getStoredTheme, applyTheme, setStoredTheme } from './lib/themes'
 import { deriveCredential } from './lib/collectorCred'
 import HomeFeed from './components/HomeFeed'
@@ -182,6 +183,49 @@ function App() {
     setNotice('Payment details saved.')
   }
 
+  // --- Account settings (sheet in ProfileView) ---
+
+  async function uploadAvatar(file) {
+    const uid = currentUser?.id
+    if (!uid || !file) return
+    const invalid = validateImage(file)
+    if (invalid) { setNotice(invalid); return }
+    const ext = file.name.split('.').pop() || 'jpg'
+    const path = `${uid}/${Date.now()}.${ext}`
+    const { data: uploadData, error } = await supabase.storage.from('avatars').upload(path, file)
+    if (error || !uploadData) { setNotice('Avatar upload failed — try again.'); return }
+    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(uploadData.path)
+    const { error: saveError } = await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', uid)
+    if (saveError) { setNotice('Could not save your avatar.'); return }
+    await fetchAllProfiles()
+    setNotice('Avatar updated.')
+  }
+
+  async function saveAccountName(name) {
+    const uid = currentUser?.id
+    const trimmed = name?.trim()
+    if (!uid || !trimmed) return
+    const { error } = await supabase.from('profiles').update({ name: trimmed }).eq('id', uid)
+    if (error) { setNotice('Could not save your name.'); return }
+    // Sign-up stores the name in auth metadata too — keep them in sync.
+    await supabase.auth.updateUser({ data: { name: trimmed } })
+    setCurrentUser((u) => ({ ...u, name: trimmed }))
+    await fetchAllProfiles()
+    setNotice('Name updated.')
+  }
+
+  async function changeEmail(email) {
+    const { error } = await supabase.auth.updateUser({ email })
+    if (error) { setNotice(error.message); return }
+    setNotice('Check your inbox to confirm the email change.')
+  }
+
+  async function changePassword(password) {
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) { setNotice(error.message); return }
+    setNotice('Password updated.')
+  }
+
   async function handleAfterPhoto(id, file) {
     if (!file) return
     const ext = file.name.split('.').pop() || 'jpg'
@@ -343,6 +387,10 @@ function App() {
             onLogout={handleLogout}
             onNotice={setNotice}
             onSavePaymentDetails={savePaymentDetails}
+            onUploadAvatar={uploadAvatar}
+            onSaveName={saveAccountName}
+            onChangeEmail={changeEmail}
+            onChangePassword={changePassword}
             credentialFor={credentialFor}
             theme={theme}
             onThemeChange={handleThemeChange}

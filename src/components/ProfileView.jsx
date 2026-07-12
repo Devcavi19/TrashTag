@@ -8,6 +8,7 @@ import Button from './ui/Button'
 import { Input } from './ui/Input'
 import CredentialSheet, { VerifiedBadge } from './CredentialSheet'
 import GuidelinesSheet from './GuidelinesSheet'
+import AccountSheet from './AccountSheet'
 
 const INK = 'var(--text-primary)'
 const MUTED = 'var(--text-secondary)'
@@ -189,7 +190,7 @@ function ThemePicker({ current, onChange }) {
   )
 }
 
-export default function ProfileView({ currentUser, profile, requests, stats, onLogout, onNotice, onSavePaymentDetails, credentialFor, theme, onThemeChange }) {
+export default function ProfileView({ currentUser, profile, requests, stats, onLogout, onNotice, onSavePaymentDetails, onUploadAvatar, onSaveName, onChangeEmail, onChangePassword, credentialFor, theme, onThemeChange }) {
   const myId = currentUser?.id
   const myCred = credentialFor?.(myId) ?? null
   const title = deriveTitle(stats, myCred?.credential)
@@ -197,6 +198,7 @@ export default function ProfileView({ currentUser, profile, requests, stats, onL
   const since = memberSince(currentUser?.created_at)
   const [idOpen, setIdOpen] = useState(false)
   const [guideOpen, setGuideOpen] = useState(false)
+  const [acctOpen, setAcctOpen] = useState(false)
 
   // Real money moved: what you've paid out as a poster + earned as a collector.
   const completedMine = requests.filter(
@@ -221,7 +223,7 @@ export default function ProfileView({ currentUser, profile, requests, stats, onL
       {/* Identity hero — brand ink panel, on-brand text */}
       <div className="px-4 pb-5 pt-5" style={{ background: 'var(--brand-ink)', color: 'var(--on-brand-ink)' }}>
         <div className="flex items-center gap-4">
-          <Avatar name={currentUser?.name || 'You'} size="lg" className="flex-shrink-0 text-xl" style={{ boxShadow: '0 4px 14px rgba(0,0,0,0.25)' }} />
+          <Avatar name={currentUser?.name || 'You'} src={profile?.avatar_url} size="lg" className="flex-shrink-0 text-xl" style={{ boxShadow: '0 4px 14px rgba(0,0,0,0.25)' }} />
           <div className="min-w-0 flex-1">
             <h1 className="flex items-center gap-2 truncate font-display text-[22px] leading-tight" style={{ fontWeight: 600 }}>
               <span className="truncate">{currentUser?.name || 'You'}</span>
@@ -327,8 +329,7 @@ export default function ProfileView({ currentUser, profile, requests, stats, onL
           <div className="h-px" style={{ background: LINE }} />
           <ActionRow
             label="Account settings"
-            hint="Soon"
-            onClick={() => onNotice('Account settings are coming soon.')}
+            onClick={() => setAcctOpen(true)}
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="3" />
@@ -385,6 +386,17 @@ export default function ProfileView({ currentUser, profile, requests, stats, onL
       )}
 
       <GuidelinesSheet open={guideOpen} onClose={() => setGuideOpen(false)} />
+
+      <AccountSheet
+        open={acctOpen}
+        onClose={() => setAcctOpen(false)}
+        currentUser={currentUser}
+        profile={profile}
+        onUploadAvatar={onUploadAvatar}
+        onSaveName={onSaveName}
+        onChangeEmail={onChangeEmail}
+        onChangePassword={onChangePassword}
+      />
     </div>
   )
 }
