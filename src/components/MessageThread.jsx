@@ -7,13 +7,20 @@ import { validateImage } from '../lib/validateImage'
 const CollectorTracker = lazy(() => import('./CollectorTracker'))
 import ConfirmModal from './ConfirmModal'
 import CollectorCredential from './CollectorCredential'
+import StatusBadge from './StatusBadge'
 import Button from './ui/Button'
 import { PaySheet, ConfirmPaymentSheet } from './PaymentSheet'
 import { METHOD_LABELS } from '../lib/paymentMethods'
 import sampleTrash from '../assets/sample_trash.jpg'
 
+const ACTIVE_STATUSES = ['accepted', 'collected', 'disputed', 'payment_sent']
+
 function formatTime(iso) {
   return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+function formatDay(iso) {
+  return new Date(iso).toLocaleDateString([], { month: 'short', day: 'numeric' })
 }
 
 function nameOf(users, id, fallback = 'Unknown') {
@@ -124,61 +131,17 @@ function BeforeAfter({ before, after }) {
   )
 }
 
-export default function MessageThread({ request, currentUser, users, onClose, onUpdateStatus, onSubmitAfterPhoto, onRejectProof, onMarkPaymentSent, onConfirmPaymentReceived, onPaymentNotReceived, onRate, credentialFor }) {
-  const { id, status, photo, afterPhoto, price, gps, postedBy, collectedBy, rating, collectorRating, paymentMethod, paymentReference, paymentSentAt, paymentConfirmedAt } = request
+// One pickup collection inside a person's thread. Active pickups render open and
+// highlighted; a completed (paid) pickup collapses to a summary line the user
+// can expand to review its history.
+function PickupCard({ request, currentUser, users, onUpdateStatus, onSubmitAfterPhoto, onRejectProof, onMarkPaymentSent, onConfirmPaymentReceived, onPaymentNotReceived, onRate, defaultExpanded }) {
+  const { id, status, photo, afterPhoto, price, gps, postedBy, collectedBy, rating, collectorRating, paymentMethod, paymentReference, paymentSentAt, paymentConfirmedAt, postedAt } = request
   const myId = currentUser?.id
   const isOwner = postedBy === myId
   const isCollector = collectedBy === myId
+  const isActive = ACTIVE_STATUSES.includes(status)
 
-  // --- Chat (lifted from ChatDrawer) ---
-  const [messages, setMessages] = useState([])
-  const [text, setText] = useState('')
-  const bottomRef = useRef(null)
-  const inputRef = useRef(null)
-
-  useEffect(() => {
-    if (!id) return
-    let channel
-    let cancelled = false
-    supabase.from('messages').select('*').eq('request_id', id).order('sent_at').then(({ data }) => {
-      if (cancelled) return
-      setMessages(data ?? [])
-      channel = supabase
-        .channel(`messages:${id}`)
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `request_id=eq.${id}` }, (payload) => {
-          setMessages((prev) => (prev.some((m) => m.id === payload.new.id) ? prev : [...prev, payload.new]))
-        })
-        .subscribe()
-    })
-    return () => { cancelled = true; if (channel) supabase.removeChannel(channel) }
-  }, [id])
-
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
-  useEffect(() => { setTimeout(() => inputRef.current?.focus(), 200) }, [])
-
-  async function handleSend() {
-    const trimmed = text.trim()
-    if (!trimmed || !myId) return
-    setText('')
-    const { error } = await supabase.from('messages').insert({ request_id: id, sender_id: myId, text: trimmed })
-    if (error) setText(trimmed)
-  }
-
-  // --- Collector location broadcast (lifted from CollectorView) ---
-  useEffect(() => {
-    if (!isCollector || status !== 'accepted' || !myId || !navigator.geolocation) return
-    function broadcast() {
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        await supabase.from('collector_locations').upsert(
-          { collector_id: myId, request_id: id, lat: pos.coords.latitude, lng: pos.coords.longitude, updated_at: new Date().toISOString() },
-          { onConflict: 'collector_id' }
-        )
-      })
-    }
-    broadcast()
-    const interval = setInterval(broadcast, 5000)
-    return () => clearInterval(interval)
-  }, [isCollector, status, myId, id])
+  const [expanded, setExpanded] = useState(defaultExpanded)
 
   // --- After-photo staging ---
   const [photoFile, setPhotoFile] = useState(null)
@@ -210,8 +173,24 @@ export default function MessageThread({ request, currentUser, users, onClose, on
     setPending(null)
   }
 
-  const counterpart = isOwner ? nameOf(users, collectedBy, 'Green Collector') : nameOf(users, postedBy, 'Poster')
+  // --- Collector location broadcast (only while actively en route) ---
+  useEffect(() => {
+    if (!isCollector || status !== 'accepted' || !myId || !navigator.geolocation) return
+    function broadcast() {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        await supabase.from('collector_locations').upsert(
+          { collector_id: myId, request_id: id, lat: pos.coords.latitude, lng: pos.coords.longitude, updated_at: new Date().toISOString() },
+          { onConflict: 'collector_id' }
+        )
+      })
+    }
+    broadcast()
+    const interval = setInterval(broadcast, 5000)
+    return () => clearInterval(interval)
+  }, [isCollector, status, myId, id])
+
   const collectorName = nameOf(users, collectedBy, 'Your Green Collector')
+  const counterpart = isOwner ? nameOf(users, collectedBy, 'Green Collector') : nameOf(users, postedBy, 'Poster')
 
   // Node states
   const acceptedState = status === 'accepted' ? 'active' : 'done'
@@ -233,6 +212,278 @@ export default function MessageThread({ request, currentUser, users, onClose, on
   const cc = pending ? confirmCopy[pending] : null
 
   return (
+    <div
+      className="overflow-hidden rounded-xl"
+      style={{
+        border: isActive ? '1.5px solid color-mix(in srgb, var(--brand) 55%, var(--border))' : '1px solid var(--border)',
+        background: isActive ? 'color-mix(in srgb, var(--brand) 6%, var(--surface-card))' : 'var(--surface-card)',
+      }}
+    >
+      {/* Summary bar — always visible; toggles the journey below */}
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className="tt-press flex w-full items-center gap-2.5 px-3 py-2.5 text-left"
+        aria-expanded={expanded}
+      >
+        <img src={photo || sampleTrash} alt="" className="h-9 w-9 flex-shrink-0 rounded-lg object-cover" />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[13px] font-semibold" style={{ color: 'var(--text-primary)' }}>{gps}</p>
+          <p className="truncate text-[11px]" style={{ color: 'var(--text-muted)' }}>
+            {isOwner ? 'You posted' : 'You collect'} · <span style={{ color: 'var(--accent)', fontWeight: 600 }}>₱{price}</span>
+            {postedAt && <> · {formatDay(postedAt)}</>}
+          </p>
+        </div>
+        <StatusBadge variant={status} />
+        <svg
+          width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+          style={{ transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s', flexShrink: 0 }}
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+
+      {expanded && (
+        <div className="px-3 pb-3 pt-1" style={{ borderTop: '1px solid var(--border)' }}>
+          <RailNode state={acceptedState} title="Accepted">
+            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{collectorName} is on this pickup.</p>
+            {status === 'accepted' && (
+              <div className="mt-2">
+                <Suspense fallback={<div className="tt-skeleton h-24 w-full" />}>
+                  <CollectorTracker request={request} />
+                </Suspense>
+              </div>
+            )}
+          </RailNode>
+
+          <RailNode state={collectedState} title={status === 'disputed' ? 'Needs a redo' : 'Collected'}>
+            {status === 'accepted' && isCollector && (
+              <>
+                <AfterPhotoUpload preview={photoPreview} error={photoError} onPick={pickPhoto} hint="Required before marking collected" />
+                <Button
+                  full
+                  className="mt-2"
+                  disabled={!photoFile}
+                  onClick={() => photoFile && setPending('collected')}
+                  style={{ background: 'var(--success)', color: '#ffffff' }}
+                >
+                  Mark as collected
+                </Button>
+              </>
+            )}
+            {status === 'accepted' && isOwner && (
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Waiting for {collectorName} to upload a proof photo…</p>
+            )}
+
+            {status === 'disputed' && isCollector && (
+              <>
+                <p className="mb-2 text-xs font-medium" style={{ color: 'var(--danger)' }}>The poster asked for a clearer photo. Upload a new one.</p>
+                <AfterPhotoUpload preview={photoPreview} error={photoError} onPick={pickPhoto} hint="Re-submit your after-photo" />
+                <Button
+                  full
+                  className="mt-2"
+                  disabled={!photoFile}
+                  onClick={() => photoFile && setPending('collected')}
+                  style={{ background: 'var(--success)', color: '#ffffff' }}
+                >
+                  Re-submit photo
+                </Button>
+              </>
+            )}
+            {status === 'disputed' && isOwner && (
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>You asked for a redo. Waiting for a new photo…</p>
+            )}
+
+            {(status === 'collected' || status === 'payment_sent' || status === 'paid') && (
+              <>
+                <BeforeAfter before={photo} after={afterPhoto} />
+                {status === 'collected' && isOwner && (
+                  <div className="mt-2 flex gap-2">
+                    <Button
+                      full
+                      onClick={() => setPending('reject')}
+                      style={{
+                        background: 'color-mix(in srgb, var(--danger) 14%, transparent)',
+                        color: 'var(--danger)',
+                      }}
+                    >
+                      Reject
+                    </Button>
+                    <Button full onClick={() => setPaySheetOpen(true)}>
+                      Accept &amp; pay ₱{price}
+                    </Button>
+                  </div>
+                )}
+                {status === 'collected' && isCollector && (
+                  <p className="mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>Waiting for the poster to review the proof and send payment…</p>
+                )}
+              </>
+            )}
+          </RailNode>
+
+          <RailNode state={paymentState} title="Payment">
+            {status === 'payment_sent' ? (
+              isCollector ? (
+                <>
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                    {counterpart} reports sending ₱{price} via {METHOD_LABELS[paymentMethod] ?? '—'}.
+                  </p>
+                  <Button full className="mt-2" onClick={() => setConfirmPayOpen(true)}>
+                    Review payment ₱{price}
+                  </Button>
+                </>
+              ) : (
+                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  You sent ₱{price} via {METHOD_LABELS[paymentMethod] ?? '—'}
+                  {paymentReference && <> · Ref {paymentReference}</>}. Waiting for {collectorName} to
+                  confirm receipt…
+                </p>
+              )
+            ) : status === 'paid' ? (
+              <div
+                className="rounded-xl px-3 py-2.5 text-[11.5px]"
+                style={{ background: 'color-mix(in srgb, var(--success) 8%, transparent)', color: 'var(--text-secondary)' }}
+              >
+                <div className="flex justify-between">
+                  <span>₱{price} · {METHOD_LABELS[paymentMethod] ?? 'Payment'}{paymentReference && <> · Ref {paymentReference}</>}</span>
+                </div>
+                {paymentSentAt && (
+                  <div className="mt-0.5 flex justify-between">
+                    <span>Sent</span>
+                    <b style={{ color: 'var(--success)' }}>{formatTime(paymentSentAt)} ✓</b>
+                  </div>
+                )}
+                {paymentConfirmedAt && (
+                  <div className="mt-0.5 flex justify-between">
+                    <span>Received</span>
+                    <b style={{ color: 'var(--success)' }}>{formatTime(paymentConfirmedAt)} ✓</b>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                {isOwner
+                  ? 'Payment starts once you accept the proof photo.'
+                  : 'Payment starts once the poster accepts your proof photo.'}
+              </p>
+            )}
+          </RailNode>
+
+          <RailNode state={paidState} title="Paid" last>
+            {status === 'paid' ? (
+              <div className="space-y-2.5">
+                <div>
+                  <p className="text-[11px] font-medium" style={{ color: 'var(--text-muted)' }}>Poster → Green Collector</p>
+                  {rating != null
+                    ? <Stars value={rating} readOnly />
+                    : isOwner
+                      ? <Stars value={0} onRate={(s) => onRate(id, s, 'poster')} />
+                      : <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Not rated yet</p>}
+                </div>
+                <div>
+                  <p className="text-[11px] font-medium" style={{ color: 'var(--text-muted)' }}>Green Collector → Poster</p>
+                  {collectorRating != null
+                    ? <Stars value={collectorRating} readOnly />
+                    : isCollector
+                      ? <Stars value={0} onRate={(s) => onRate(id, s, 'collector')} />
+                      : <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Not rated yet</p>}
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Payment and ratings unlock once the pickup is confirmed.</p>
+            )}
+          </RailNode>
+        </div>
+      )}
+
+      <ConfirmModal
+        open={!!pending}
+        title={cc?.title}
+        message={cc?.message}
+        confirmLabel={cc?.label}
+        confirmColor={cc?.color}
+        onConfirm={runPending}
+        onCancel={() => setPending(null)}
+      />
+
+      <PaySheet
+        open={paySheetOpen}
+        onClose={() => setPaySheetOpen(false)}
+        request={request}
+        collectorProfile={users.find((u) => u.id === collectedBy)}
+        onMarkSent={(method, reference) => onMarkPaymentSent(id, method, reference)}
+      />
+
+      <ConfirmPaymentSheet
+        open={confirmPayOpen}
+        onClose={() => setConfirmPayOpen(false)}
+        request={request}
+        posterName={nameOf(users, postedBy, 'The poster')}
+        onConfirm={() => onConfirmPaymentReceived(id)}
+        onNotReceived={() => onPaymentNotReceived(id)}
+      />
+    </div>
+  )
+}
+
+export default function MessageThread({ requests, counterpartId, currentUser, users, onClose, onUpdateStatus, onSubmitAfterPhoto, onRejectProof, onMarkPaymentSent, onConfirmPaymentReceived, onPaymentNotReceived, onRate, credentialFor }) {
+  const myId = currentUser?.id
+
+  // The pickup new chat messages attach to: the newest still-in-motion one, or
+  // failing that the most recent pickup with this person.
+  const activeReq = requests.find((r) => r.status !== 'paid') ?? requests[0]
+  const activeCount = requests.filter((r) => ACTIVE_STATUSES.includes(r.status)).length
+
+  // --- Unified chat across every pickup shared with this person ---
+  const [messages, setMessages] = useState([])
+  const [text, setText] = useState('')
+  const bottomRef = useRef(null)
+  const inputRef = useRef(null)
+
+  // Keep the live set of request ids the subscription should accept.
+  const idsKey = requests.map((r) => r.id).join(',')
+  const idSetRef = useRef(new Set())
+  useEffect(() => {
+    idSetRef.current = new Set(idsKey ? idsKey.split(',') : [])
+  }, [idsKey])
+
+  useEffect(() => {
+    const ids = idsKey ? idsKey.split(',') : []
+    if (ids.length === 0) return
+    let channel
+    let cancelled = false
+    supabase.from('messages').select('*').in('request_id', ids).order('sent_at').then(({ data }) => {
+      if (cancelled) return
+      setMessages(data ?? [])
+      // RLS already limits realtime to rows I'm party to; we still match on the
+      // current id set so only this person's pickups land in this thread.
+      channel = supabase
+        .channel(`messages:peer:${counterpartId}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+          if (!idSetRef.current.has(payload.new.request_id)) return
+          setMessages((prev) => (prev.some((m) => m.id === payload.new.id) ? prev : [...prev, payload.new]))
+        })
+        .subscribe()
+    })
+    return () => { cancelled = true; if (channel) supabase.removeChannel(channel) }
+  }, [idsKey, counterpartId])
+
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
+  useEffect(() => { setTimeout(() => inputRef.current?.focus(), 200) }, [])
+
+  async function handleSend() {
+    const trimmed = text.trim()
+    if (!trimmed || !myId || !activeReq) return
+    setText('')
+    const { error } = await supabase.from('messages').insert({ request_id: activeReq.id, sender_id: myId, text: trimmed })
+    if (error) setText(trimmed)
+  }
+
+  const counterpartName = nameOf(users, counterpartId, 'Green Collector')
+  // Show the credential trust line when this person is my Green Collector.
+  const iAmPoster = requests.some((r) => r.postedBy === myId && r.collectedBy === counterpartId)
+  const cred = iAmPoster ? credentialFor?.(counterpartId) : null
+
+  return (
     <div className="fixed inset-0 z-50 mx-auto flex max-w-[430px] flex-col" style={{ background: 'var(--surface)' }}>
       {/* Header */}
       <div className="flex flex-shrink-0 items-center gap-3 px-3 py-3" style={{ background: 'var(--surface-raised)', borderBottom: '1px solid var(--border)' }}>
@@ -244,175 +495,37 @@ export default function MessageThread({ request, currentUser, users, onClose, on
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
         </button>
-        <img src={photo || sampleTrash} alt="" className="h-10 w-10 flex-shrink-0 rounded-lg object-cover" />
         <div className="min-w-0 flex-1">
-          {/* Poster sees the Green Collector's credential, not just a name */}
-          {isOwner && collectedBy && credentialFor?.(collectedBy) ? (
-            <CollectorCredential {...credentialFor(collectedBy)} />
+          {cred ? (
+            <CollectorCredential {...cred} />
           ) : (
-            <p className="truncate text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{counterpart}</p>
+            <p className="truncate text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{counterpartName}</p>
           )}
-          <p className="truncate text-xs" style={{ color: 'var(--text-muted)' }}>{gps} · <span style={{ color: 'var(--accent)', fontWeight: 600 }}>₱{price}</span></p>
+          <p className="truncate text-xs" style={{ color: 'var(--text-muted)' }}>
+            {requests.length} pickup{requests.length === 1 ? '' : 's'}
+            {activeCount > 0 && <> · <span style={{ color: 'var(--warning)', fontWeight: 600 }}>{activeCount} active</span></>}
+          </p>
         </div>
       </div>
 
-      {/* Journey rail (signature) — own scroll so actions stay reachable */}
-      <div className="flex-shrink-0 overflow-y-auto px-4 pb-3 pt-4" style={{ maxHeight: '46vh', background: 'var(--surface-raised)', borderBottom: '1px solid var(--border)' }}>
-        <h2 className="mb-3 font-display text-[15px]" style={{ color: 'var(--brand)', fontWeight: 600 }}>Pickup journey</h2>
-
-        <RailNode state={acceptedState} title="Accepted" >
-          <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{collectorName} is on this pickup.</p>
-          {status === 'accepted' && (
-            <div className="mt-2">
-              <Suspense fallback={<div className="tt-skeleton h-24 w-full" />}>
-                <CollectorTracker request={request} />
-              </Suspense>
-            </div>
-          )}
-        </RailNode>
-
-        <RailNode state={collectedState} title={status === 'disputed' ? 'Needs a redo' : 'Collected'}>
-          {/* collector uploads proof */}
-          {status === 'accepted' && isCollector && (
-            <>
-              <AfterPhotoUpload preview={photoPreview} error={photoError} onPick={pickPhoto} hint="Required before marking collected" />
-              <Button
-                full
-                className="mt-2"
-                disabled={!photoFile}
-                onClick={() => photoFile && setPending('collected')}
-                style={{ background: 'var(--success)', color: '#ffffff' }}
-              >
-                Mark as collected
-              </Button>
-            </>
-          )}
-          {status === 'accepted' && isOwner && (
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Waiting for {collectorName} to upload a proof photo…</p>
-          )}
-
-          {/* disputed: collector re-uploads */}
-          {status === 'disputed' && isCollector && (
-            <>
-              <p className="mb-2 text-xs font-medium" style={{ color: 'var(--danger)' }}>The poster asked for a clearer photo. Upload a new one.</p>
-              <AfterPhotoUpload preview={photoPreview} error={photoError} onPick={pickPhoto} hint="Re-submit your after-photo" />
-              <Button
-                full
-                className="mt-2"
-                disabled={!photoFile}
-                onClick={() => photoFile && setPending('collected')}
-                style={{ background: 'var(--success)', color: '#ffffff' }}
-              >
-                Re-submit photo
-              </Button>
-            </>
-          )}
-          {status === 'disputed' && isOwner && (
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>You asked for a redo. Waiting for a new photo…</p>
-          )}
-
-          {/* collected / payment in motion / paid: show the before/after reveal */}
-          {(status === 'collected' || status === 'payment_sent' || status === 'paid') && (
-            <>
-              <BeforeAfter before={photo} after={afterPhoto} />
-              {status === 'collected' && isOwner && (
-                <div className="mt-2 flex gap-2">
-                  <Button
-                    full
-                    onClick={() => setPending('reject')}
-                    style={{
-                      background: 'color-mix(in srgb, var(--danger) 14%, transparent)',
-                      color: 'var(--danger)',
-                    }}
-                  >
-                    Reject
-                  </Button>
-                  <Button full onClick={() => setPaySheetOpen(true)}>
-                    Accept &amp; pay ₱{price}
-                  </Button>
-                </div>
-              )}
-              {status === 'collected' && isCollector && (
-                <p className="mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>Waiting for the poster to review the proof and send payment…</p>
-              )}
-            </>
-          )}
-        </RailNode>
-
-        <RailNode state={paymentState} title="Payment">
-          {status === 'payment_sent' ? (
-            isCollector ? (
-              <>
-                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                  {counterpart} reports sending ₱{price} via {METHOD_LABELS[paymentMethod] ?? '—'}.
-                </p>
-                <Button full className="mt-2" onClick={() => setConfirmPayOpen(true)}>
-                  Review payment ₱{price}
-                </Button>
-              </>
-            ) : (
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                You sent ₱{price} via {METHOD_LABELS[paymentMethod] ?? '—'}
-                {paymentReference && <> · Ref {paymentReference}</>}. Waiting for {collectorName} to
-                confirm receipt…
-              </p>
-            )
-          ) : status === 'paid' ? (
-            <div
-              className="rounded-xl px-3 py-2.5 text-[11.5px]"
-              style={{ background: 'color-mix(in srgb, var(--success) 8%, transparent)', color: 'var(--text-secondary)' }}
-            >
-              <div className="flex justify-between">
-                <span>₱{price} · {METHOD_LABELS[paymentMethod] ?? 'Payment'}{paymentReference && <> · Ref {paymentReference}</>}</span>
-              </div>
-              {paymentSentAt && (
-                <div className="mt-0.5 flex justify-between">
-                  <span>Sent</span>
-                  <b style={{ color: 'var(--success)' }}>{new Date(paymentSentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ✓</b>
-                </div>
-              )}
-              {paymentConfirmedAt && (
-                <div className="mt-0.5 flex justify-between">
-                  <span>Received</span>
-                  <b style={{ color: 'var(--success)' }}>{new Date(paymentConfirmedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ✓</b>
-                </div>
-              )}
-            </div>
-          ) : (
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              {isOwner
-                ? 'Payment starts once you accept the proof photo.'
-                : 'Payment starts once the poster accepts your proof photo.'}
-            </p>
-          )}
-        </RailNode>
-
-        <RailNode state={paidState} title="Paid" last>
-          {status === 'paid' ? (
-            <div className="space-y-2.5">
-              {/* poster -> collector */}
-              <div>
-                <p className="text-[11px] font-medium" style={{ color: 'var(--text-muted)' }}>Poster → Green Collector</p>
-                {rating != null
-                  ? <Stars value={rating} readOnly />
-                  : isOwner
-                    ? <Stars value={0} onRate={(s) => onRate(id, s, 'poster')} />
-                    : <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Not rated yet</p>}
-              </div>
-              {/* collector -> poster */}
-              <div>
-                <p className="text-[11px] font-medium" style={{ color: 'var(--text-muted)' }}>Green Collector → Poster</p>
-                {collectorRating != null
-                  ? <Stars value={collectorRating} readOnly />
-                  : isCollector
-                    ? <Stars value={0} onRate={(s) => onRate(id, s, 'collector')} />
-                    : <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Not rated yet</p>}
-              </div>
-            </div>
-          ) : (
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Payment and ratings unlock once the pickup is confirmed.</p>
-          )}
-        </RailNode>
+      {/* Pickup collections — own scroll so the chat stays reachable */}
+      <div className="flex-shrink-0 space-y-2 overflow-y-auto px-3 py-3" style={{ maxHeight: '48vh', background: 'var(--surface-raised)', borderBottom: '1px solid var(--border)' }}>
+        {requests.map((r) => (
+          <PickupCard
+            key={r.id}
+            request={r}
+            currentUser={currentUser}
+            users={users}
+            onUpdateStatus={onUpdateStatus}
+            onSubmitAfterPhoto={onSubmitAfterPhoto}
+            onRejectProof={onRejectProof}
+            onMarkPaymentSent={onMarkPaymentSent}
+            onConfirmPaymentReceived={onConfirmPaymentReceived}
+            onPaymentNotReceived={onPaymentNotReceived}
+            onRate={onRate}
+            defaultExpanded={r.status !== 'paid'}
+          />
+        ))}
       </div>
 
       {/* Chat */}
@@ -470,33 +583,6 @@ export default function MessageThread({ request, currentUser, users, onClose, on
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4 20-7z" /></svg>
         </button>
       </div>
-
-      <ConfirmModal
-        open={!!pending}
-        title={cc?.title}
-        message={cc?.message}
-        confirmLabel={cc?.label}
-        confirmColor={cc?.color}
-        onConfirm={runPending}
-        onCancel={() => setPending(null)}
-      />
-
-      <PaySheet
-        open={paySheetOpen}
-        onClose={() => setPaySheetOpen(false)}
-        request={request}
-        collectorProfile={users.find((u) => u.id === collectedBy)}
-        onMarkSent={(method, reference) => onMarkPaymentSent(id, method, reference)}
-      />
-
-      <ConfirmPaymentSheet
-        open={confirmPayOpen}
-        onClose={() => setConfirmPayOpen(false)}
-        request={request}
-        posterName={nameOf(users, postedBy, 'The poster')}
-        onConfirm={() => onConfirmPaymentReceived(id)}
-        onNotReceived={() => onPaymentNotReceived(id)}
-      />
     </div>
   )
 }

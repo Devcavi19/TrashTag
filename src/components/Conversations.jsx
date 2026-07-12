@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import StatusBadge from './StatusBadge'
 import UiAvatar from './ui/Avatar'
 import EmptyState from './ui/EmptyState'
@@ -76,7 +75,6 @@ function Header({ title, onBack }) {
 
 export default function Conversations({ requests, currentUser, users, onClose, onOpenThread }) {
   const myId = currentUser?.id
-  const [openPersonId, setOpenPersonId] = useState(null)
 
   const nameOf = (id) => users.find((u) => u.id === id)?.name ?? 'Unknown'
 
@@ -100,42 +98,6 @@ export default function Conversations({ requests, currentUser, users, onClose, o
   }
   // threads is already newest-first, so each group's first job is its latest.
 
-  // --- Drill-down: every pickup shared with one person ---
-  const person = openPersonId != null ? groups.find((g) => g.id === openPersonId) : null
-  if (person) {
-    return (
-      <div className="fixed inset-0 z-50 mx-auto flex max-w-[430px] flex-col" style={{ background: 'var(--surface)' }}>
-        <Header title={nameOf(person.id)} onBack={() => setOpenPersonId(null)} />
-        <div className="flex-1 overflow-y-auto p-3">
-          <p className="px-1 pb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
-            {person.jobs.length} pickups together
-          </p>
-          <div className="space-y-2">
-            {person.jobs.map((r) => (
-              <Row key={r.id} onClick={() => onOpenThread(r)}>
-                <span
-                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-base"
-                  style={{ background: 'color-mix(in srgb, var(--text-primary) 6%, transparent)' }}
-                >
-                  {r.postedBy === myId ? '📤' : '🧹'}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                    {r.gps}
-                  </p>
-                  <p className="truncate text-xs" style={{ color: 'var(--text-muted)' }}>
-                    {roleLine(r, myId)} · ₱{r.price}
-                  </p>
-                </div>
-                <StatusBadge variant={r.status} />
-              </Row>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   // --- Inbox: one row per person ---
   return (
     <div className="fixed inset-0 z-50 mx-auto flex max-w-[430px] flex-col" style={{ background: 'var(--surface)' }}>
@@ -154,10 +116,9 @@ export default function Conversations({ requests, currentUser, users, onClose, o
               const latest = g.jobs[0]
               const multi = g.jobs.length > 1
               const activeCount = g.jobs.filter((r) => ACTIVE.includes(r.status)).length
-              const open = () => (multi ? setOpenPersonId(g.id) : onOpenThread(latest))
 
               return (
-                <Row key={g.id} onClick={open}>
+                <Row key={g.id} onClick={() => onOpenThread(latest)}>
                   <StackedAvatar name={nameOf(g.id)} stacked={multi} />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>

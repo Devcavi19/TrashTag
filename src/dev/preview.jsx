@@ -339,13 +339,22 @@ const SCREENS = {
   ),
   thread: (
     <MessageThread
-      request={FIXTURE_HISTORY.find((r) => r.id === 'r5')}
+      requests={FIXTURE_HISTORY.filter(
+        (r) =>
+          r.status !== 'open' &&
+          ((r.postedBy === 'u-herald' && r.collectedBy === 'u-carl') ||
+            (r.collectedBy === 'u-herald' && r.postedBy === 'u-carl'))
+      )}
+      counterpartId="u-carl"
       currentUser={FIXTURE_USER}
       users={FIXTURE_USERS}
       onClose={() => {}}
       onUpdateStatus={() => {}}
       onSubmitAfterPhoto={() => {}}
-      onPayment={() => {}}
+      onRejectProof={() => {}}
+      onMarkPaymentSent={() => {}}
+      onConfirmPaymentReceived={() => {}}
+      onPaymentNotReceived={() => {}}
       onRate={() => {}}
       credentialFor={credentialFor}
     />

@@ -27,7 +27,7 @@ function App() {
 
   const [view, setView] = useState('home') // 'home' | 'community' | 'leaderboard' | 'you'
   const [messagesOpen, setMessagesOpen] = useState(false)
-  const [activeRequestId, setActiveRequestId] = useState(null)
+  const [activeThreadPeer, setActiveThreadPeer] = useState(null)
   const [composerOpen, setComposerOpen] = useState(false)
   const [notice, setNotice] = useState(null)
   const [authNotice, setAuthNotice] = useState(null)
@@ -260,13 +260,25 @@ function App() {
     setStoredTheme(id)
   }
 
+  // A conversation is a person, not a pickup. Opening any pickup with someone
+  // opens the single shared thread with that person.
   function openThread(request) {
-    setActiveRequestId(request.id)
+    const peer = request.postedBy === myId ? request.collectedBy : request.postedBy
+    if (peer) setActiveThreadPeer(peer)
   }
 
-  const activeRequest = activeRequestId
-    ? requests.find((r) => r.id === activeRequestId) ?? null
-    : null
+  // Every non-open pickup I share with the active counterpart, newest first —
+  // one chat, many pickup collections.
+  const activeThreadRequests = activeThreadPeer
+    ? requests
+        .filter(
+          (r) =>
+            r.status !== 'open' &&
+            ((r.postedBy === myId && r.collectedBy === activeThreadPeer) ||
+              (r.collectedBy === myId && r.postedBy === activeThreadPeer))
+        )
+        .sort((a, b) => new Date(b.postedAt) - new Date(a.postedAt))
+    : []
 
   if (appState === 'loading') {
     return <LoadingScreen onDone={handleLoadingDone} />
@@ -349,7 +361,7 @@ function App() {
         <ComposerModal onClose={() => setComposerOpen(false)} onSubmit={addRequest} />
       )}
 
-      {messagesOpen && !activeRequest && (
+      {messagesOpen && !activeThreadPeer && (
         <Conversations
           requests={requests}
           currentUser={currentUser}
@@ -359,12 +371,13 @@ function App() {
         />
       )}
 
-      {activeRequest && (
+      {activeThreadPeer && activeThreadRequests.length > 0 && (
         <MessageThread
-          request={activeRequest}
+          requests={activeThreadRequests}
+          counterpartId={activeThreadPeer}
           currentUser={currentUser}
           users={profiles}
-          onClose={() => setActiveRequestId(null)}
+          onClose={() => setActiveThreadPeer(null)}
           onUpdateStatus={updateStatus}
           onSubmitAfterPhoto={handleAfterPhoto}
           onRejectProof={handleRejectProof}
