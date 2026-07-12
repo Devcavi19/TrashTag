@@ -9,6 +9,7 @@ import { Input } from './ui/Input'
 import CredentialSheet, { VerifiedBadge } from './CredentialSheet'
 import GuidelinesSheet from './GuidelinesSheet'
 import AccountSheet from './AccountSheet'
+import NotificationsSheet from './NotificationsSheet'
 
 const INK = 'var(--text-primary)'
 const MUTED = 'var(--text-secondary)'
@@ -190,7 +191,7 @@ function ThemePicker({ current, onChange }) {
   )
 }
 
-export default function ProfileView({ currentUser, profile, requests, stats, onLogout, onNotice, onSavePaymentDetails, onUploadAvatar, onSaveName, onChangeEmail, onChangePassword, credentialFor, theme, onThemeChange }) {
+export default function ProfileView({ currentUser, profile, requests, stats, onLogout, onSavePaymentDetails, onUploadAvatar, onSaveName, onChangeEmail, onChangePassword, notificationPrefs, onSaveNotificationPrefs, credentialFor, theme, onThemeChange }) {
   const myId = currentUser?.id
   const myCred = credentialFor?.(myId) ?? null
   const title = deriveTitle(stats, myCred?.credential)
@@ -199,6 +200,7 @@ export default function ProfileView({ currentUser, profile, requests, stats, onL
   const [idOpen, setIdOpen] = useState(false)
   const [guideOpen, setGuideOpen] = useState(false)
   const [acctOpen, setAcctOpen] = useState(false)
+  const [notifOpen, setNotifOpen] = useState(false)
 
   // Real money moved: what you've paid out as a poster + earned as a collector.
   const completedMine = requests.filter(
@@ -340,8 +342,7 @@ export default function ProfileView({ currentUser, profile, requests, stats, onL
           <div className="h-px" style={{ background: LINE }} />
           <ActionRow
             label="Notifications"
-            hint="Soon"
-            onClick={() => onNotice('Notification settings are coming soon.')}
+            onClick={() => setNotifOpen(true)}
             icon={
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -396,6 +397,16 @@ export default function ProfileView({ currentUser, profile, requests, stats, onL
         onSaveName={onSaveName}
         onChangeEmail={onChangeEmail}
         onChangePassword={onChangePassword}
+      />
+
+      {/* key remounts the sheet when saved prefs round-trip, keeping local
+          state in sync (same pattern as PaymentDetails) */}
+      <NotificationsSheet
+        key={JSON.stringify(notificationPrefs)}
+        open={notifOpen}
+        onClose={() => setNotifOpen(false)}
+        prefs={notificationPrefs}
+        onSave={onSaveNotificationPrefs}
       />
     </div>
   )

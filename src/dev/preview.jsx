@@ -27,6 +27,7 @@ import MessageThread from '../components/MessageThread'
 import { PaySheet, ConfirmPaymentSheet } from '../components/PaymentSheet'
 import GuidelinesSheet from '../components/GuidelinesSheet'
 import AccountSheet from '../components/AccountSheet'
+import NotificationsSheet from '../components/NotificationsSheet'
 import CollectorCredential from '../components/CollectorCredential'
 import CredentialSheet from '../components/CredentialSheet'
 import { deriveCredential } from '../lib/collectorCred'
@@ -288,7 +289,12 @@ const SCREENS = {
           requests={FIXTURE_HISTORY}
           stats={FIXTURE_STATS}
           onLogout={() => {}}
-          onNotice={() => {}}
+          onUploadAvatar={async () => {}}
+          onSaveName={async () => {}}
+          onChangeEmail={async () => {}}
+          onChangePassword={async () => {}}
+          notificationPrefs={{ jobUpdates: true, messages: true, community: true }}
+          onSaveNotificationPrefs={async () => true}
           credentialFor={credentialFor}
           theme={new URLSearchParams(location.search).get('theme') || 'fresh-canopy'}
           onThemeChange={() => {}}
@@ -362,6 +368,14 @@ const SCREENS = {
     />
   ),
   guidelines: <GuidelinesSheet open onClose={() => {}} />,
+  notifprefs: (
+    <NotificationsSheet
+      open
+      onClose={() => {}}
+      prefs={{ jobUpdates: true, messages: true, community: false }}
+      onSave={async () => true}
+    />
+  ),
   settings: (
     <AccountSheet
       open

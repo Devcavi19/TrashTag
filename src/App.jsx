@@ -5,6 +5,7 @@ import { useFeed } from './hooks/useFeed'
 import { useIdleLogout } from './hooks/useIdleLogout'
 import { supabase } from './lib/supabase'
 import { validateImage } from './lib/validateImage'
+import { prefsOf } from './lib/notificationPrefs'
 import { getStoredTheme, applyTheme, setStoredTheme } from './lib/themes'
 import { deriveCredential } from './lib/collectorCred'
 import HomeFeed from './components/HomeFeed'
@@ -46,14 +47,14 @@ function App() {
   async function fetchProfile(userId) {
     const { data } = await supabase
       .from('profiles')
-      .select('id, name, gcash_number, maya_number, verified_at, avatar_url, created_at')
+      .select('id, name, gcash_number, maya_number, verified_at, avatar_url, created_at, notification_prefs')
       .eq('id', userId)
       .single()
     return data
   }
 
   async function fetchAllProfiles() {
-    const { data } = await supabase.from('profiles').select('id, name, gcash_number, maya_number, verified_at, avatar_url, created_at')
+    const { data } = await supabase.from('profiles').select('id, name, gcash_number, maya_number, verified_at, avatar_url, created_at, notification_prefs')
     if (data) setProfiles(data)
   }
 
@@ -226,6 +227,16 @@ function App() {
     setNotice('Password updated.')
   }
 
+  // Returns success so the sheet can revert its optimistic flip on failure.
+  async function saveNotificationPrefs(prefs) {
+    const uid = currentUser?.id
+    if (!uid) return false
+    const { error } = await supabase.from('profiles').update({ notification_prefs: prefs }).eq('id', uid)
+    if (error) { setNotice('Could not save notification settings.'); return false }
+    await fetchAllProfiles()
+    return true
+  }
+
   async function handleAfterPhoto(id, file) {
     if (!file) return
     const ext = file.name.split('.').pop() || 'jpg'
@@ -271,6 +282,7 @@ function App() {
 
   // Jobs I'm part of that are still in motion — drives the Messages badge.
   const myId = currentUser?.id
+  const myPrefs = prefsOf(profiles.find((p) => p.id === myId))
   const activeConvoCount = requests.filter(
     (r) =>
       (r.postedBy === myId || r.collectedBy === myId) &&
@@ -385,12 +397,13 @@ function App() {
             requests={requests}
             stats={userStats}
             onLogout={handleLogout}
-            onNotice={setNotice}
             onSavePaymentDetails={savePaymentDetails}
             onUploadAvatar={uploadAvatar}
             onSaveName={saveAccountName}
             onChangeEmail={changeEmail}
             onChangePassword={changePassword}
+            notificationPrefs={myPrefs}
+            onSaveNotificationPrefs={saveNotificationPrefs}
             credentialFor={credentialFor}
             theme={theme}
             onThemeChange={handleThemeChange}
