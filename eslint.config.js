@@ -18,4 +18,10 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  {
+    // Dev-only preview harness — not part of the app bundle, Fast Refresh
+    // export rules don't apply.
+    files: ['src/dev/**'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
 ])
