@@ -1,9 +1,9 @@
-// The Linisa app mark — the same drop glyph as public/favicon.svg (and
+// The Kolek app mark — the same drop glyph as public/favicon.svg (and
 // public/icons.svg), minus the gradient tile so it can sit inside any
 // container and inherit its color. The drop fills with currentColor; the
 // subtle vein tracks --brand-ink to match the favicon. Geometry (viewBox +
 // transform) is copied verbatim from the favicon so the two never drift.
-export default function BrandMark({ size = 44, className, style, title = 'Linisa' }) {
+export default function BrandMark({ size = 44, className, style, title = 'Kolek' }) {
   return (
     <svg
       width={size}

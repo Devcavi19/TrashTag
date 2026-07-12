@@ -221,7 +221,7 @@ export default function Landing({ onGetStarted, onLogIn }) {
         </div>
       </section>
 
-      {/* Who Linisa serves — the workforce is the product */}
+      {/* Who Kolek serves — the workforce is the product */}
       <section className="mx-auto max-w-5xl px-5 pb-16">
         <h2 className="font-display mb-6 text-[26px]" style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
           A workforce, not just an app
@@ -277,7 +277,7 @@ export default function Landing({ onGetStarted, onLogIn }) {
           pickup.
         </p>
         <Button className="mt-7" onClick={onGetStarted} style={{ paddingBlock: 13, paddingInline: 28 }}>
-          Join Linisa
+          Join Kolek
         </Button>
       </section>
 

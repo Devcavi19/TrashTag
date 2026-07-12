@@ -95,7 +95,7 @@ welcoming second-person tone.
 
 Content (final copy may be polished during implementation, structure is fixed):
 
-> **Intro:** Linisa works because strangers trust each other with real money
+> **Intro:** Kolek works because strangers trust each other with real money
 > and real work. These guidelines keep that trust.
 >
 > 1. **Respect every member.** Green Collectors are professionals. No

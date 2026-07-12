@@ -108,7 +108,7 @@ function Ladder({ credential }) {
 const GUIDE_STEPS = [
   {
     title: 'Join and get verified',
-    body: 'Sign up, complete your profile, and get your identity confirmed by Linisa. Verification is granted — never self-service — so the badge means something at the gate.',
+    body: 'Sign up, complete your profile, and get your identity confirmed by Kolek. Verification is granted — never self-service — so the badge means something at the gate.',
   },
   {
     title: 'Do the work, keep your rating',
@@ -116,7 +116,7 @@ const GUIDE_STEPS = [
   },
   {
     title: 'Train in safety & segregation',
-    body: 'Basic safety and waste-segregation training in Linisa colors — so homeowners see a professional, and you work like one.',
+    body: 'Basic safety and waste-segregation training in Kolek colors — so homeowners see a professional, and you work like one.',
   },
   {
     title: 'Earn your TESDA certificate',
@@ -164,7 +164,7 @@ function CertificationGuide({ onBack }) {
         ))}
       </ol>
       <p className="mt-4 rounded-xl px-3.5 py-3 text-[11px] leading-relaxed" style={{ background: 'color-mix(in srgb, var(--brand) 8%, transparent)', color: MUTED }}>
-        Training and TESDA certification onboarding open as Linisa grows in your barangay. Keep collecting — your record counts from day one.
+        Training and TESDA certification onboarding open as Kolek grows in your barangay. Keep collecting — your record counts from day one.
       </p>
     </div>
   )

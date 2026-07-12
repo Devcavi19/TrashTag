@@ -9,7 +9,7 @@ import { TAG_TOKENS } from './tagColors'
 export const THEMES = {
   'fresh-canopy': {
     name: 'Fresh Canopy',
-    blurb: 'Airy greens, soft cards — the Linisa look',
+    blurb: 'Airy greens, soft cards — the Kolek look',
     dark: false,
     swatch: ['#2fa96a', '#173d2b'],
     tokens: {

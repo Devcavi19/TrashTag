@@ -228,7 +228,7 @@ export default function GuidelinesSheet({ open, onClose }) {
   return (
     <Sheet open={open} title="Community guidelines" onClose={onClose}>
       <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-        Linisa works because strangers trust each other with real money and real work.
+        Kolek works because strangers trust each other with real money and real work.
         These guidelines keep that trust.
       </p>
 
@@ -260,7 +260,7 @@ export default function GuidelinesSheet({ open, onClose }) {
 
       <Footnote heading="Reporting">
         For a job gone wrong, use the review and dispute steps in the pickup chat.
-        For behavior that breaks these guidelines, contact the Linisa team.
+        For behavior that breaks these guidelines, contact the Kolek team.
       </Footnote>
 
       <Footnote heading="Enforcement">

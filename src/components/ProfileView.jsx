@@ -378,7 +378,7 @@ export default function ProfileView({ currentUser, profile, requests, stats, onL
         </section>
 
         <p className="pt-1 text-center text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: FAINT }}>
-          Linisa
+          Kolek
         </p>
       </div>
 

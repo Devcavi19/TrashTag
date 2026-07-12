@@ -1,4 +1,4 @@
-# Linisa — Live Demo Script & Demo-Day Checklist
+# Kolek — Live Demo Script & Demo-Day Checklist
 
 Target: **3–5 minutes**, slotted at Slide 4 of the deck. The demo's job is to prove one sentence: *"this is not a mockup — the marketplace, the payments handshake, and the credential are real."*
 
@@ -31,7 +31,7 @@ On the collector's phone, accept the job. Switch to the poster: "Before this per
 Show the poster's live map: collector position, proximity label ("Green Collector on the way → nearby"). Then on the pre-staged `accepted` request, upload the **after-photo** as the collector. (Pre-staging avoids waiting for real GPS movement on stage.)
 
 **Beat 4 — The payment handshake (~60s)**
-Poster reviews the before/after proof → accepts → pay sheet → GCash, reference number → **payment sent**. Collector's phone pops the confirmation → **confirms receipt** → status flips to *paid*. "Money moved on GCash rails; Linisa recorded a dual-confirmed, auditable handshake. That record is what the 12% take rate and the LGU dashboard are built on."
+Poster reviews the before/after proof → accepts → pay sheet → GCash, reference number → **payment sent**. Collector's phone pops the confirmation → **confirms receipt** → status flips to *paid*. "Money moved on GCash rails; Kolek recorded a dual-confirmed, auditable handshake. That record is what the 12% take rate and the LGU dashboard are built on."
 
 **Beat 5 — Close the loop (~30s)**
 Both sides rate each other. Flash the **leaderboard** and the landing page's **live impact counters** — "the numbers in my deck and the numbers in the app are the same numbers." Back to slides.

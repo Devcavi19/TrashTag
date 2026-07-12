@@ -1,4 +1,4 @@
-# Linisa ♻️
+# Kolek ♻️
 
 **Professional Green Collectors, one trash at a time.** *Malinis na barangay, powered by neighbors.*
 

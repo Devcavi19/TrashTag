@@ -1,19 +1,19 @@
-# Linisa Rebrand & Green Collector Identity — Design
+# Kolek Rebrand & Green Collector Identity — Design
 
 **Date:** 2026-07-06
 **Status:** Approved
 
 ## Vision
 
-TrashTag becomes **Linisa** — no longer "an app that lets you pay a neighbor to haul
+TrashTag becomes **Kolek** — no longer "an app that lets you pay a neighbor to haul
 your trash" but the platform that turns informal waste-picking into a recognized
 profession. The transaction loop already built (Post → Accept → Collect → Pay) is the
 skeleton and does not change. What changes is the identity of one actor inside it: the
 collector goes from an anonymous nearby neighbor to a **verified, rated, credentialed
-member of the Linisa workforce** — a Green Collector. The app is the coordination
+member of the Kolek workforce** — a Green Collector. The app is the coordination
 layer; the professionalized collector is the product.
 
-**Brand:** product name is **Linisa**; tagline is
+**Brand:** product name is **Kolek**; tagline is
 **"Professional Green Collectors, one trash at a time."**
 
 **Hard constraint:** the poster experience gains **zero taps**. Professionalization is
@@ -27,7 +27,7 @@ This pass delivers:
 2. A poster-side trust surface (credential line + tappable credential sheet).
 3. A collector-side dignity view (badge, tier, "My Green Collector ID").
 4. A static certification guide (the career ladder made actionable).
-5. The full rename/copy sweep to Linisa and Green Collector language.
+5. The full rename/copy sweep to Kolek and Green Collector language.
 
 Explicitly **out of scope** (shown in UI as "coming", not built): the verification
 pipeline (gov ID + selfie), TESDA certification with real teeth, QR-ID scanning,
@@ -128,8 +128,8 @@ in both themes.
 
 ## 3. Rename sweep
 
-- **Brand:** `TrashTag` / `TrashTag PH` → **Linisa** everywhere user-facing —
-  `index.html` title/OG ("Linisa — Professional Green Collectors, one trash at a
+- **Brand:** `TrashTag` / `TrashTag PH` → **Kolek** everywhere user-facing —
+  `index.html` title/OG ("Kolek — Professional Green Collectors, one trash at a
   time"), PWA manifest name/short_name in `vite.config.js`, LoadingScreen wordmark,
   Landing, ProfileView footer, email templates, `themes.js` blurb, README.
 - **Landing page copy** rewritten to the workforce positioning: hero leads with the
@@ -163,6 +163,6 @@ No test runner exists. Verify via:
    poster side at `accepted`/`collected`/`paid`.
 3. Confirm the guard: attempt to set `verified_at` with the anon key as the profile
    owner — must be rejected.
-4. `npm run build` + `npm run preview` — PWA manifest carries the Linisa name.
+4. `npm run build` + `npm run preview` — PWA manifest carries the Kolek name.
    (Icon artwork in `public/pwa-*.png` is unchanged in this pass — a new logo is a
    separate design task.)

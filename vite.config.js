@@ -12,8 +12,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Linisa',
-        short_name: 'Linisa',
+        name: 'Kolek',
+        short_name: 'Kolek',
         description:
           'Professional Green Collectors, one trash at a time. Post a pickup with a peso bounty and a verified Green Collector handles it — GCash, Maya, or cash, confirmed by both sides.',
         theme_color: '#173d2b',

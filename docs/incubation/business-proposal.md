@@ -1,4 +1,4 @@
-# Linisa — Business Proposal
+# Kolek — Business Proposal
 
 **Professional Green Collectors, one trash at a time.**
 *Malinis na barangay, powered by neighbors.*
@@ -10,9 +10,9 @@ Proponent: **[FILL IN — your name, course/affiliation, contact details]**
 
 ## 1. Executive Summary
 
-Linisa is a working two-sided marketplace that turns informal waste-picking into a **credentialed green profession**. Residents ("Posters") post trash-pickup requests with a peso bounty; verified, rated **Green Collectors** accept the job, clean up, prove it with a before/after photo, and get paid via GCash, Maya, or cash — confirmed by both sides in the app.
+Kolek is a working two-sided marketplace that turns informal waste-picking into a **credentialed green profession**. Residents ("Posters") post trash-pickup requests with a peso bounty; verified, rated **Green Collectors** accept the job, clean up, prove it with a before/after photo, and get paid via GCash, Maya, or cash — confirmed by both sides in the app.
 
-The insight is that the Philippines already has the workforce: **more than 100,000 informal waste workers** keep our cities functioning, invisibly and often for less than a dollar a day. What they lack is not willingness but **trust infrastructure** — identity, ratings, proof of work, and a career ladder. Linisa is that infrastructure. The professionalized collector is the product; the app is the coordination layer.
+The insight is that the Philippines already has the workforce: **more than 100,000 informal waste workers** keep our cities functioning, invisibly and often for less than a dollar a day. What they lack is not willingness but **trust infrastructure** — identity, ratings, proof of work, and a career ladder. Kolek is that infrastructure. The professionalized collector is the product; the app is the coordination layer.
 
 **Status today:** a live, security-audited web app (installable PWA) with the full request lifecycle, real payments handshake, live GPS tracking, in-app chat, a derived tamper-proof credential system, community feed, and leaderboard — built on React + Supabase with row-level security as the authorization boundary.
 
@@ -38,7 +38,7 @@ The gap is not equipment or willingness. It is **coordination and trust**: no me
 
 ## 3. The Solution
 
-Linisa is a mobile-first marketplace plus a professional credential system.
+Kolek is a mobile-first marketplace plus a professional credential system.
 
 **The transactional loop (built and working):**
 
@@ -63,7 +63,7 @@ The first two tiers are live and computed from real job data (Top-Rated requires
 *All figures below are estimates from cited public data; assumptions are stated explicitly.*
 
 - **TAM (nationwide, both revenue lines):** The Philippines has **~26–28M households** and **42,046 barangays** ([PSA](https://psa.gov.ph/classification/psgc/barangays)). If 10% of households commission just one ₱150 pickup per month, that is ~₱4.7B/yr in gross marketplace volume → **~₱560M/yr platform revenue at a 12% take rate**. A dashboard subscription averaging ₱2,500/mo across all barangays is a further **~₱1.26B/yr B2G ceiling**.
-- **SAM (urban Philippines):** Metro Manila plus the 30 largest cities — where waste density, e-wallet adoption, and disposable income concentrate. Digital payments already account for **57.4% of retail transaction volume** nationally; GCash reports **94M registered users**, Maya **50M+** ([DigitalInAsia](https://digitalinasia.com/gcash-vs-paymaya-vs-maya/), [Fintech News PH](https://fintechnews.ph/67153/e-wallets/top-ewallets-in-the-philippines-2025/)) — the payment behavior Linisa depends on is mainstream.
+- **SAM (urban Philippines):** Metro Manila plus the 30 largest cities — where waste density, e-wallet adoption, and disposable income concentrate. Digital payments already account for **57.4% of retail transaction volume** nationally; GCash reports **94M registered users**, Maya **50M+** ([DigitalInAsia](https://digitalinasia.com/gcash-vs-paymaya-vs-maya/), [Fintech News PH](https://fintechnews.ph/67153/e-wallets/top-ewallets-in-the-philippines-2025/)) — the payment behavior Kolek depends on is mainstream.
 - **SOM (18-month pilot):** one pilot city, ~50 active barangays, ~200 active Green Collectors, ~8,000 paid pickups, and 20 barangay dashboard subscriptions. At the unit economics below this is a proof-of-model, not a profit engine — the goal of this phase is validated retention and LGU willingness-to-pay.
 
 **Why now:**
@@ -92,7 +92,7 @@ The first two tiers are live and computed from real job data (Top-Rated requires
 
 ## 6. Business Model
 
-Linisa currently charges nothing — by design, to remove friction while proving the loop. The commercialization plan has two reinforcing lines:
+Kolek currently charges nothing — by design, to remove friction while proving the loop. The commercialization plan has two reinforcing lines:
 
 **Line 1 — Marketplace take rate (C2C).** Integrate PayMongo/GCash so bounties are paid *through* the app, and take **12% per completed pickup**. At an average ₱150 bounty that is **₱18/pickup**. The take rate is earned, not extracted: in-app payment removes the poster's "did they really pay?" and the collector's "will I really get paid?" risk, adds instant payout, and funds the credential/insurance layer. Off-app payment remains possible early on — the take rate lands only when the rails add real value.
 
@@ -120,7 +120,7 @@ Linisa currently charges nothing — by design, to remove friction while proving
 
 ## 8. Social Impact & SDG Alignment
 
-Linisa is an impact venture with a commercial engine, aligned with the incubator's and DOST's development mandates:
+Kolek is an impact venture with a commercial engine, aligned with the incubator's and DOST's development mandates:
 
 - **SDG 8 — Decent Work and Economic Growth:** converts sub-$1/day invisible labor into rated, credentialed, better-paid work with a progression ladder; the TESDA-certification rung creates a formal skills pathway.
 - **SDG 11 — Sustainable Cities and Communities:** cleaner barangays through demand-driven collection that reaches what municipal routes miss.
@@ -130,11 +130,11 @@ Linisa is an impact venture with a commercial engine, aligned with the incubator
 
 ## 9. Competitive Landscape
 
-| Player | What they do | How Linisa differs |
+| Player | What they do | How Kolek differs |
 |---|---|---|
-| **Status quo** (junk shops, walk-in *magbobote/magbabakal*, informal haulers) | Buy recyclables of value; general waste is ignored | Linisa pays for *removal* of any waste (poster-funded bounty), not just resale value — and adds trust, proof, and tracking |
-| **Municipal collection** | Scheduled routes, barangay-dependent | Complementary, not competitive: Linisa handles what routes miss and feeds LGUs the hotspot data |
-| **Trash Panda** (Circula Recoon) | On-demand *recyclables* collection in select Metro Manila cities ([BusinessWorld](https://www.bworldonline.com/technology/2021/07/19/383337/recyclable-waste-collection-app-expands-service-to-muntinlupa-and-las-pinas/)) | Recyclables-only, company-managed collectors; Linisa is an open two-sided marketplace covering all waste types, with the credential ladder as the moat |
+| **Status quo** (junk shops, walk-in *magbobote/magbabakal*, informal haulers) | Buy recyclables of value; general waste is ignored | Kolek pays for *removal* of any waste (poster-funded bounty), not just resale value — and adds trust, proof, and tracking |
+| **Municipal collection** | Scheduled routes, barangay-dependent | Complementary, not competitive: Kolek handles what routes miss and feeds LGUs the hotspot data |
+| **Trash Panda** (Circula Recoon) | On-demand *recyclables* collection in select Metro Manila cities ([BusinessWorld](https://www.bworldonline.com/technology/2021/07/19/383337/recyclable-waste-collection-app-expands-service-to-muntinlupa-and-las-pinas/)) | Recyclables-only, company-managed collectors; Kolek is an open two-sided marketplace covering all waste types, with the credential ladder as the moat |
 | **My Basurero / Trash Cash PH / ScrapCycle** | Recyclables-for-points/cash schemes | Incentive programs, not a labor marketplace; no professionalization layer |
 | **Generic gig platforms** (e.g., errand apps) | Could list hauling as a task | No waste-specific trust artifacts (before/after proof, waste-type tagging, credential), no LGU data product |
 

@@ -1,4 +1,4 @@
-# Linisa — Pitch Deck Content (12 slides)
+# Kolek — Pitch Deck Content (12 slides)
 
 Final copy for the incubator showcase deck. Speaker notes in *italics*. Brand: Fresh Canopy palette (deep green primary, warm off-white surface), DM Sans body / Fraunces display to match the app.
 
@@ -12,7 +12,7 @@ Professional Green Collectors, one trash at a time.
 
 [FILL IN — your name · program/school · date] · [FILL IN — production URL]
 
-> *Open with the tagline in Filipino. One sentence: "Linisa turns informal waste-picking into a credentialed profession — and I'll show you the working app."*
+> *Open with the tagline in Filipino. One sentence: "Kolek turns informal waste-picking into a credentialed profession — and I'll show you the working app."*
 
 ---
 
@@ -97,7 +97,7 @@ Pickups generate the data → the data sells the dashboard → the dashboard leg
 
 **Everyone else buys recyclables. We professionalize the workforce.**
 
-| | Recyclables apps (Trash Panda, My Basurero) | Junk shops / informal | **Linisa** |
+| | Recyclables apps (Trash Panda, My Basurero) | Junk shops / informal | **Kolek** |
 |---|---|---|---|
 | Any waste type | ✗ | ✗ | ✓ (poster-funded bounty) |
 | Open marketplace | ✗ | ✗ | ✓ |

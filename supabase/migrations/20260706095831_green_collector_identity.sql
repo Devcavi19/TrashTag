@@ -16,7 +16,7 @@ begin
   -- Only constrain authenticated end-users; service-role/admin (auth.uid() null) bypasses.
   if auth.uid() is not null then
     if new.verified_at is distinct from old.verified_at then
-      raise exception 'verification is granted by Linisa, not self-service';
+      raise exception 'verification is granted by Kolek, not self-service';
     end if;
   end if;
   return new;

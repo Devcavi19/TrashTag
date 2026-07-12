@@ -1,5 +1,5 @@
 // Green Collector credential — derived, not stored. The only stored fact is
-// profiles.verified_at (granted by Linisa, guarded by profiles_guard);
+// profiles.verified_at (granted by Kolek, guarded by profiles_guard);
 // everything else is computed from live requests so the credential can never
 // contradict the visible record.
 
@@ -9,7 +9,7 @@ export const TOP_RATED_MIN_RATING = 4.8
 // The career ladder, in display order. `locked` rungs are the roadmap —
 // visible ambition with no progression logic behind them yet.
 export const TIER_LADDER = [
-  { id: 'verified', label: 'Verified', detail: 'Identity confirmed by Linisa' },
+  { id: 'verified', label: 'Verified', detail: 'Identity confirmed by Kolek' },
   { id: 'certified', label: 'Certified', detail: 'TESDA solid waste management', locked: true },
   { id: 'top-rated', label: 'Top-Rated', detail: `${TOP_RATED_MIN_PICKUPS}+ pickups at ★${TOP_RATED_MIN_RATING}+` },
   { id: 'team-lead', label: 'Team Lead', detail: 'Leads a collector team', locked: true },
