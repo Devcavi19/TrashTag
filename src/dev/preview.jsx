@@ -474,13 +474,13 @@ const SCREENS = {
   ),
   offer: (
     <IncomingOffer
-      request={FIXTURE_REQUESTS[0]}
-      poster={FIXTURE_USERS.find(u => u.id === FIXTURE_REQUESTS[0].postedBy)}
-      credentialFor={credentialFor}
+      request={{ ...FIXTURE_REQUESTS[0], lat: 10.3199, lng: 123.8931 }}
+      poster={{ name: 'Carl Avila', avatar_url: null }}
       distanceMeters={1200}
       onAccept={() => {}}
       onPass={() => {}}
       onCounter={() => {}}
+      onDismiss={() => {}}
     />
   ),
   bottomsheet: <BottomSheetDemo />,

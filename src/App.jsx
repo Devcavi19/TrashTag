@@ -677,14 +677,13 @@ function App() {
 
       {(() => {
         const offerReq = incomingOfferReqId ? requests.find(r => r.id === incomingOfferReqId) : null
-        if (!offerReq) return null
+        if (!offerReq || offerReq.status !== 'open') return null
         const offerPoster = profiles.find(p => p.id === offerReq.postedBy)
         const offerDist = location && offerReq.lat ? haversineDistance(location.lat, location.lng, offerReq.lat, offerReq.lng) : null
         return (
           <IncomingOffer
             request={offerReq}
             poster={offerPoster}
-            credentialFor={credentialFor}
             distanceMeters={offerDist}
             onAccept={(id) => updateStatus(id, 'accepted')}
             onPass={(id) => {
@@ -693,6 +692,7 @@ function App() {
               setIncomingOfferReqId(null)
             }}
             onCounter={submitPriceOffer}
+            onDismiss={() => setIncomingOfferReqId(null)}
           />
         )
       })()}
