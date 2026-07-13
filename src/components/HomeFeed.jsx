@@ -1,4 +1,5 @@
 import TrashCard from './TrashCard'
+import { haversineDistance } from '../utils/haversine'
 import { rankRequests } from '../utils/rankRequests'
 import Avatar from './ui/Avatar'
 import EmptyState from './ui/EmptyState'
@@ -86,7 +87,7 @@ export default function HomeFeed({ requests, currentUser, onCompose, onAccept, o
                 onLike={onLike}
                 onOpenThread={onOpenThread}
                 credentialFor={credentialFor}
-                distanceMeters={location && r.lat && r.lng ? null : null} // distance to my own might not be needed
+                distanceMeters={location && r.lat && r.lng ? haversineDistance(location.lat, location.lng, r.lat, r.lng) : null}
               />
               {/* Overlay button for poster to open Dispatch Radar on their own OPEN requests */}
               {r.postedBy === myId && r.status === 'open' && (

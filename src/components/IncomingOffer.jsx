@@ -44,7 +44,7 @@ export default function IncomingOffer({ request, poster, credentialFor, distance
           <div className="flex-1">
             <div className="font-semibold text-[15px]">{poster?.name || 'Someone'}</div>
             <div className="text-xs text-[var(--text-muted)] flex items-center gap-1 mt-0.5">
-              {request.location_label || request.gps} 
+              {request.location_label || 'Nearby pickup'} 
               {distanceMeters != null && <span>· {formatDistance(distanceMeters)}</span>}
             </div>
           </div>
@@ -73,6 +73,9 @@ export default function IncomingOffer({ request, poster, credentialFor, distance
                 onChange={e => setCounterPrice(e.target.value)}
                 className="tt-input flex-1 p-3 font-bold text-lg"
                 placeholder={request.price.toString()}
+                min="1"
+                max="99999"
+                step="1"
                 autoFocus
               />
             </div>

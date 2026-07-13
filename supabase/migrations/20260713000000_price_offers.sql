@@ -47,6 +47,7 @@ CREATE OR REPLACE FUNCTION accept_price_offer(offer_id UUID)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_request_id UUID;

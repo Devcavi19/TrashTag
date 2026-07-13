@@ -129,8 +129,8 @@ function App() {
     let interval
     if (online) {
       const updatePresence = async () => {
-        const lat = location?.latitude || 0
-        const lng = location?.longitude || 0
+        const lat = location?.lat || 0
+        const lng = location?.lng || 0
         await supabase.from('collector_presence').upsert({
           collector_id: currentUser.id, lat, lng, online: true, updated_at: new Date().toISOString()
         })
@@ -185,7 +185,7 @@ function App() {
         const req = payload.new
         if (req.status !== 'open' || req.poster_id === currentUser.id) return
         if (req.location_lat != null && req.location_lng != null) {
-          const dist = haversineDistance(location.latitude, location.longitude, req.location_lat, req.location_lng)
+          const dist = haversineDistance(location.lat, location.lng, req.location_lat, req.location_lng)
           if (dist <= 5000) {
             const passed = JSON.parse(localStorage.getItem('passed_requests') || '[]')
             if (!passed.includes(req.id)) {
@@ -675,21 +675,27 @@ function App() {
         </div>
       )}
 
-      {incomingOfferReqId && requests.find(r => r.id === incomingOfferReqId) && (
-        <IncomingOffer
-          request={requests.find(r => r.id === incomingOfferReqId)}
-          poster={profiles.find(p => p.id === requests.find(r => r.id === incomingOfferReqId)?.postedBy)}
-          credentialFor={credentialFor}
-          distanceMeters={location && requests.find(r => r.id === incomingOfferReqId)?.lat ? haversineDistance(location.latitude, location.longitude, requests.find(r => r.id === incomingOfferReqId).lat, requests.find(r => r.id === incomingOfferReqId).lng) : null}
-          onAccept={(id) => updateStatus(id, 'accepted')}
-          onPass={(id) => {
-            const passed = JSON.parse(localStorage.getItem('passed_requests') || '[]')
-            localStorage.setItem('passed_requests', JSON.stringify([...passed, id]))
-            setIncomingOfferReqId(null)
-          }}
-          onCounter={submitPriceOffer}
-        />
-      )}
+      {(() => {
+        const offerReq = incomingOfferReqId ? requests.find(r => r.id === incomingOfferReqId) : null
+        if (!offerReq) return null
+        const offerPoster = profiles.find(p => p.id === offerReq.postedBy)
+        const offerDist = location && offerReq.lat ? haversineDistance(location.lat, location.lng, offerReq.lat, offerReq.lng) : null
+        return (
+          <IncomingOffer
+            request={offerReq}
+            poster={offerPoster}
+            credentialFor={credentialFor}
+            distanceMeters={offerDist}
+            onAccept={(id) => updateStatus(id, 'accepted')}
+            onPass={(id) => {
+              const passed = JSON.parse(localStorage.getItem('passed_requests') || '[]')
+              localStorage.setItem('passed_requests', JSON.stringify([...passed, id]))
+              setIncomingOfferReqId(null)
+            }}
+            onCounter={submitPriceOffer}
+          />
+        )
+      })()}
 
       <Toast message={realtimeDown ? 'Connection lost — reconnecting…' : null} />
       <Toast message={!realtimeDown ? notice : null} tone="info" />

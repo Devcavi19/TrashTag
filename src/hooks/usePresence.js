@@ -84,26 +84,45 @@ export function usePresence(userId) {
     }
   }, [])
 
-  // Flip online = false on beforeunload
+  // Flip online = false on beforeunload + visibilitychange (mobile)
   useEffect(() => {
-    const handleUnload = () => {
-      if (isOnline && userId) {
-        const payload = {
-          collector_id: userId,
-          online: false,
-          updated_at: new Date().toISOString()
-        };
-        if (lastPosRef.current) {
-          payload.lat = lastPosRef.current.lat;
-          payload.lng = lastPosRef.current.lng;
+    const markOffline = () => {
+      if (!isOnline || !userId) return;
+      // sendBeacon is more reliable than fetch in beforeunload
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      if (supabaseUrl && supabaseKey) {
+        const url = `${supabaseUrl}/rest/v1/collector_presence?collector_id=eq.${userId}`;
+        const body = JSON.stringify({ online: false, updated_at: new Date().toISOString() });
+        // fetch with keepalive survives page close like sendBeacon but supports custom headers
+        try {
+          fetch(url, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': supabaseKey,
+              'Authorization': `Bearer ${supabaseKey}`,
+              'Prefer': 'return=minimal',
+            },
+            body,
+            keepalive: true, // survives page close like sendBeacon
+          });
+        } catch {
+          // last resort
         }
-        // Fire and forget
-        supabase.from('collector_presence').upsert(payload, { onConflict: 'collector_id' }).then();
       }
     };
-    
-    window.addEventListener('beforeunload', handleUnload);
-    return () => window.removeEventListener('beforeunload', handleUnload);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') markOffline();
+    };
+
+    window.addEventListener('beforeunload', markOffline);
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      window.removeEventListener('beforeunload', markOffline);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [isOnline, userId]);
 
   return { isOnline, goOnline, goOffline };
