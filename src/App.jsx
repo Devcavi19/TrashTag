@@ -682,6 +682,7 @@ function App() {
         const offerDist = location && offerReq.lat ? haversineDistance(location.lat, location.lng, offerReq.lat, offerReq.lng) : null
         return (
           <IncomingOffer
+            key={offerReq.id}
             request={offerReq}
             poster={offerPoster}
             distanceMeters={offerDist}

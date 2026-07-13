@@ -86,6 +86,7 @@ export default function DispatchHome({
             collectors={nearbyCollectors}
             selectedJobId={selectedJobId}
             onSelectJob={(j) => { setSelectedJobId(j.id); setDetent('half') }}
+            follow={Boolean(location)}
           />
         </Suspense>
       </div>

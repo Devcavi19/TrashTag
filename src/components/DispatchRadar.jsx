@@ -19,18 +19,27 @@ function MapSkeleton() {
 // presence arrive via props (useOffers / useNearbyPresence in App.jsx).
 export default function DispatchRadar({ request, collectors, offers, onCancel, onAcceptOffer, onDeclineOffer }) {
   const online = collectors.length
+  const hasCoords = request.lat != null && request.lng != null
 
   return (
     <div className="flex h-full flex-col" style={{ background: 'var(--surface)' }}>
-      <div className="relative min-h-[240px] flex-1">
-        <Suspense fallback={<MapSkeleton />}>
-          <DispatchMap
-            center={{ lat: request.lat, lng: request.lng }}
-            zoom={13}
-            collectors={collectors}
-            radar={{ lat: request.lat, lng: request.lng, radiusMeters: BROADCAST_RADIUS_METERS }}
-          />
-        </Suspense>
+      {/* z-0 makes this div its own stacking context (mirrors DispatchHome's
+          map layer) so Leaflet's internal panes/controls — z-index up to 1000
+          in leaflet.css — stay contained below the cream panel's rounded top
+          corner instead of painting over it. */}
+      <div className="relative z-0 min-h-[240px] flex-1">
+        {hasCoords ? (
+          <Suspense fallback={<MapSkeleton />}>
+            <DispatchMap
+              center={{ lat: request.lat, lng: request.lng }}
+              zoom={13}
+              collectors={collectors}
+              radar={{ lat: request.lat, lng: request.lng, radiusMeters: BROADCAST_RADIUS_METERS }}
+            />
+          </Suspense>
+        ) : (
+          <MapSkeleton />
+        )}
 
         {/* Live broadcast pill */}
         <div className="pointer-events-none absolute inset-x-0 top-4 z-[1000] flex justify-center">
