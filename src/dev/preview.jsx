@@ -37,7 +37,7 @@ import IncomingOffer from '../components/IncomingOffer'
 
 const params = new URLSearchParams(location.search)
 const screen = params.get('screen') || 'shell'
-applyTheme(params.get('theme') || 'fresh-canopy')
+applyTheme(params.get('theme') || 'eco-premium')
 
 const FIXTURE_USER = { id: 'u-herald', name: 'Herald' }
 

@@ -13,10 +13,10 @@ export const TAG_COLORS = {
 // themes; translucent tints with bright text on dark ones.
 export const TAG_TOKENS = {
   light: {
-    '--tag-bio-bg': '#eaf5ec', '--tag-bio-fg': '#22863a',
-    '--tag-rec-bg': '#e8f0fe', '--tag-rec-fg': '#1966b5',
-    '--tag-res-bg': '#fce8e6', '--tag-res-fg': '#b53419',
-    '--tag-mix-bg': '#f3f0fb', '--tag-mix-fg': '#6b46c1',
+    '--tag-bio-bg': '#e6efdd', '--tag-bio-fg': '#3d6b2f',
+    '--tag-rec-bg': '#e3ecf3', '--tag-rec-fg': '#2b6187',
+    '--tag-res-bg': '#f6e3da', '--tag-res-fg': '#a04b2e',
+    '--tag-mix-bg': '#ece5f3', '--tag-mix-fg': '#6d51a1',
   },
   dark: {
     '--tag-bio-bg': 'rgba(123, 227, 164, 0.14)', '--tag-bio-fg': '#7be3a4',

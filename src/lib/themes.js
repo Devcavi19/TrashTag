@@ -1,69 +1,49 @@
-// App-wide themes. Each preset defines the full design-token set as CSS
-// variables; switching a theme rewrites them on <html>, so every token-driven
-// style re-skins at once. Themes carry a `dark` flag so consumers that can't
-// use tokens directly (Leaflet tiles, photo overlays, tag chips) can adapt —
-// applyTheme mirrors it as a `data-dark` attribute on <html>.
+// App-wide themes — currently a single theme. The mechanism stays in place so
+// a night variant can return later. Each preset defines the full design-token
+// set as CSS variables; switching a theme rewrites them on <html>, so every
+// token-driven style re-skins at once. Themes carry a `dark` flag so consumers
+// that can't use tokens directly (Leaflet tiles, photo overlays, tag chips)
+// can adapt — applyTheme mirrors it as a `data-dark` attribute on <html>.
 
 import { TAG_TOKENS } from './tagColors'
 
 export const THEMES = {
-  'fresh-canopy': {
-    name: 'Fresh Canopy',
-    blurb: 'Airy greens, soft cards — the Kolek look',
+  'eco-premium': {
+    name: 'Eco-Premium',
+    blurb: 'Forest ink, warm cream, gold — the Kolek look',
     dark: false,
-    swatch: ['#2fa96a', '#173d2b'],
+    swatch: ['#12291c', '#e9c46a'],
     tokens: {
-      '--surface': '#f7f9f5',
-      '--surface-card': '#ffffff',
-      '--surface-raised': '#ffffff',
-      '--text-primary': '#1c2b22',
-      '--text-secondary': '#5b6b5f',
-      '--text-muted': '#8a978d',
-      '--border': '#e6ebe4',
-      '--brand': '#2fa96a',
-      '--on-brand': '#ffffff',
-      '--brand-ink': '#173d2b',
-      '--on-brand-ink': '#ffffff',
-      '--accent': '#d98b2b',
-      '--success': '#1f7a4d',
-      '--warning': '#a16b1f',
-      '--danger': '#c8502e',
+      '--surface': '#f4efe6',
+      '--surface-card': '#fffdf7',
+      '--surface-raised': '#fffdf7',
+      '--surface-ink': '#0e2016',
+      '--text-primary': '#12291c',
+      '--text-secondary': '#5d6b60',
+      '--text-muted': '#8a8371',
+      '--text-on-ink': '#f4efe6',
+      '--text-on-ink-muted': '#9db8a6',
+      '--border': '#e3dccb',
+      '--border-ink': '#2a5238',
+      '--brand': '#1f5136',
+      '--on-brand': '#f4efe6',
+      '--brand-ink': '#12291c',
+      '--on-brand-ink': '#f4efe6',
+      '--accent': '#e9c46a',
+      '--on-accent': '#12291c',
+      '--live-dot': '#7dd6a0',
+      '--success': '#2a7a4b',
+      '--warning': '#c98a1b',
+      '--danger': '#b3423a',
       '--radius-card': '16px',
       '--radius-control': '12px',
-      '--shadow-card': '0 2px 8px rgba(23, 61, 43, 0.07)',
-      '--shadow-raised': '0 8px 30px rgba(23, 61, 43, 0.16)',
-    },
-  },
-  'bold-impact': {
-    name: 'Bold Impact',
-    blurb: 'Dark forest, electric lime',
-    dark: true,
-    swatch: ['#a3ff6b', '#101613'],
-    tokens: {
-      '--surface': '#101613',
-      '--surface-card': '#1a231d',
-      '--surface-raised': '#161e19',
-      '--text-primary': '#eaffe9',
-      '--text-secondary': '#8fa397',
-      '--text-muted': '#67786d',
-      '--border': '#26332a',
-      '--brand': '#a3ff6b',
-      '--on-brand': '#101613',
-      '--brand-ink': '#a3ff6b',
-      '--on-brand-ink': '#101613',
-      '--accent': '#e3c67b',
-      '--success': '#7be3a4',
-      '--warning': '#e3c67b',
-      '--danger': '#ff7a5c',
-      '--radius-card': '14px',
-      '--radius-control': '8px',
-      '--shadow-card': 'none',
-      '--shadow-raised': '0 8px 30px rgba(0, 0, 0, 0.5)',
+      '--shadow-card': '0 2px 10px rgba(18, 41, 28, 0.08)',
+      '--shadow-raised': '0 10px 34px rgba(18, 41, 28, 0.18)',
     },
   },
 }
 
-export const DEFAULT_THEME = 'fresh-canopy'
+export const DEFAULT_THEME = 'eco-premium'
 
 const STORAGE_KEY = 'kolek-theme'
 

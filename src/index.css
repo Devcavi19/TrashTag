@@ -5,39 +5,45 @@
   --font-display: 'Fraunces', Georgia, serif;
 }
 
-/* Design tokens — Fresh Canopy defaults; lib/themes.js rewrites these on <html>
+/* Design tokens — Eco-Premium defaults; lib/themes.js rewrites these on <html>
    when the user switches themes. Kept here so first paint is correct before JS
    runs. Components must never hardcode hex — every color goes through a token. */
 :root {
-  --surface: #f7f9f5;
-  --surface-card: #ffffff;
-  --surface-raised: #ffffff;
+  --surface: #f4efe6;
+  --surface-card: #fffdf7;
+  --surface-raised: #fffdf7;
+  --surface-ink: #0e2016;
 
-  --text-primary: #1c2b22;
-  --text-secondary: #5b6b5f;
-  --text-muted: #8a978d;
+  --text-primary: #12291c;
+  --text-secondary: #5d6b60;
+  --text-muted: #8a8371;
+  --text-on-ink: #f4efe6;
+  --text-on-ink-muted: #9db8a6;
 
-  --border: #e6ebe4;
+  --border: #e3dccb;
+  --border-ink: #2a5238;
 
-  --brand: #2fa96a;
-  --on-brand: #ffffff;
-  --brand-ink: #173d2b;
-  --on-brand-ink: #ffffff;
-  --accent: #d98b2b;
+  --brand: #1f5136;
+  --on-brand: #f4efe6;
+  --brand-ink: #12291c;
+  --on-brand-ink: #f4efe6;
+  --accent: #e9c46a;
+  --on-accent: #12291c;
+  --live-dot: #7dd6a0;
 
-  --success: #1f7a4d;
-  --warning: #a16b1f;
-  --danger: #c8502e;
+  --success: #2a7a4b;
+  --warning: #c98a1b;
+  --danger: #b3423a;
 
-  --tag-bio-bg: #eaf5ec; --tag-bio-fg: #22863a;
-  --tag-rec-bg: #e8f0fe; --tag-rec-fg: #1966b5;
-  --tag-res-bg: #fce8e6; --tag-res-fg: #b53419;
-  --tag-mix-bg: #f3f0fb; --tag-mix-fg: #6b46c1;
+  --tag-bio-bg: #e6efdd; --tag-bio-fg: #3d6b2f;
+  --tag-rec-bg: #e3ecf3; --tag-rec-fg: #2b6187;
+  --tag-res-bg: #f6e3da; --tag-res-fg: #a04b2e;
+  --tag-mix-bg: #ece5f3; --tag-mix-fg: #6d51a1;
 
   --radius-card: 16px;
   --radius-control: 12px;
-  --shadow-card: 0 2px 8px rgba(23, 61, 43, 0.07);
-  --shadow-raised: 0 8px 30px rgba(23, 61, 43, 0.16);
+  --shadow-card: 0 2px 10px rgba(18, 41, 28, 0.08);
+  --shadow-raised: 0 10px 34px rgba(18, 41, 28, 0.18);
 }
 
 body {
@@ -162,10 +168,11 @@ input, select, button, textarea {
   animation: tt-pop 0.3s ease-out;
 }
 
-/* Dark theme: invert OSM raster tiles so maps match the surface */
-html[data-dark] .leaflet-layer,
-html[data-dark] .leaflet-control-attribution {
-  filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+/* Maps are forest-ink regardless of theme (theme-independent, like photos):
+   restyle OSM raster tiles toward the Eco-Premium ground. */
+.leaflet-layer,
+.leaflet-control-attribution {
+  filter: invert(1) sepia(0.4) hue-rotate(85deg) saturate(0.75) brightness(0.72) contrast(0.95);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -6,7 +6,6 @@ import { useIdleLogout } from './hooks/useIdleLogout'
 import { supabase } from './lib/supabase'
 import { validateImage } from './lib/validateImage'
 import { prefsOf } from './lib/notificationPrefs'
-import { getStoredTheme, applyTheme, setStoredTheme } from './lib/themes'
 import { deriveCredential } from './lib/collectorCred'
 import { haversineDistance } from './utils/haversine'
 import { useViewerLocation } from './hooks/useViewerLocation'
@@ -42,7 +41,6 @@ function App() {
   // CTAs (or directly after an explicit sign-out, when they already know the app).
   const [authView, setAuthView] = useState('landing') // 'landing' | 'form'
   const [authMode, setAuthMode] = useState('login') // initial tab for AuthScreen
-  const [theme, setTheme] = useState(getStoredTheme)
 
   const [requests, realtimeStatus] = useRequests()
   const [posts] = useFeed()
@@ -512,12 +510,6 @@ function App() {
     return profile ? { profile, credential: deriveCredential(requests, profile) } : null
   }
 
-  function handleThemeChange(id) {
-    setTheme(id)
-    applyTheme(id)
-    setStoredTheme(id)
-  }
-
   // A conversation is a person, not a pickup. Opening any pickup with someone
   // opens the single shared thread with that person.
   function openThread(request) {
@@ -611,8 +603,6 @@ function App() {
             notificationPrefs={myPrefs}
             onSaveNotificationPrefs={saveNotificationPrefs}
             credentialFor={credentialFor}
-            theme={theme}
-            onThemeChange={handleThemeChange}
           />
         )}
       </main>

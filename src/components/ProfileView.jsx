@@ -2,7 +2,6 @@
 // here is derived from live requests; nothing is a vanity number.
 import { useState } from 'react'
 import { TAG_COLORS } from '../lib/tagColors'
-import { THEMES } from '../lib/themes'
 import Avatar from './ui/Avatar'
 import Button from './ui/Button'
 import { Input } from './ui/Input'
@@ -138,60 +137,7 @@ function PaymentDetails({ profile, onSave }) {
   )
 }
 
-// Theme picker — swatches always show each theme's own colors so their identity
-// reads regardless of which one is active; the active ring uses the live accent.
-function ThemePicker({ current, onChange }) {
-  return (
-    <section className="p-4" style={CARD_STYLE}>
-      <div className="flex items-center gap-2">
-        <span className="flex h-[18px] w-[18px] items-center justify-center" style={{ color: MUTED }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" /><circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
-            <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" /><circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
-            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.012 17.5 2 12 2z" />
-          </svg>
-        </span>
-        <h2 className="font-display text-[15px]" style={{ color: 'var(--brand)', fontWeight: 600 }}>Appearance</h2>
-      </div>
-      <p className="mt-1 text-[12px]" style={{ color: FAINT }}>
-        Pick the color theme for the whole app.
-      </p>
-      <div className="mt-3 grid grid-cols-2 gap-2.5">
-        {Object.entries(THEMES).map(([id, t]) => {
-          const active = id === current
-          return (
-            <button
-              key={id}
-              onClick={() => onChange(id)}
-              className="tt-press relative flex flex-col items-center gap-2 rounded-xl px-2 py-3"
-              style={{
-                background: active ? 'color-mix(in srgb, var(--text-primary) 4%, transparent)' : 'transparent',
-                boxShadow: active ? '0 0 0 2px var(--accent)' : '0 0 0 1px var(--border)',
-              }}
-              aria-pressed={active}
-              title={t.blurb}
-            >
-              <span className="flex h-9 w-9 overflow-hidden rounded-full" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.18)' }}>
-                <span className="h-full w-1/2" style={{ background: t.swatch[0] }} />
-                <span className="h-full w-1/2" style={{ background: t.swatch[1] }} />
-              </span>
-              <span className="text-[11px] font-bold" style={{ color: INK }}>{t.name}</span>
-              {active && (
-                <span className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full" style={{ background: 'var(--accent)', color: '#ffffff' }}>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 6 9 17l-5-5" />
-                  </svg>
-                </span>
-              )}
-            </button>
-          )
-        })}
-      </div>
-    </section>
-  )
-}
-
-export default function ProfileView({ currentUser, profile, requests, stats, onLogout, onSavePaymentDetails, onUploadAvatar, onSaveName, onChangeEmail, onChangePassword, notificationPrefs, onSaveNotificationPrefs, credentialFor, theme, onThemeChange }) {
+export default function ProfileView({ currentUser, profile, requests, stats, onLogout, onSavePaymentDetails, onUploadAvatar, onSaveName, onChangeEmail, onChangePassword, notificationPrefs, onSaveNotificationPrefs, credentialFor }) {
   const myId = currentUser?.id
   const myCred = credentialFor?.(myId) ?? null
   const title = deriveTitle(stats, myCred?.credential)
@@ -310,9 +256,6 @@ export default function ProfileView({ currentUser, profile, requests, stats, onL
 
         {/* Payment details — where posters send your money */}
         <PaymentDetails key={`${profile?.gcash_number ?? ''}|${profile?.maya_number ?? ''}`} profile={profile} onSave={onSavePaymentDetails} />
-
-        {/* Appearance — theme switcher, applies app-wide */}
-        <ThemePicker current={theme} onChange={onThemeChange} />
 
         {/* Account actions */}
         <section className="overflow-hidden" style={CARD_STYLE}>
