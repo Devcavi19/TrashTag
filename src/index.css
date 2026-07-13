@@ -173,15 +173,71 @@ input, select, button, textarea {
   animation: tt-pop 0.3s ease-out;
 }
 
+/* Dispatch map furniture */
+.tt-price-pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 54px;
+  height: 30px;
+  padding: 0 10px;
+  background: var(--surface-ink);
+  color: var(--accent);
+  border: 1.5px solid var(--border-ink);
+  border-radius: 999px;
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+}
+.tt-price-pin-selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+@keyframes tt-dot-glow {
+  0%, 100% { box-shadow: 0 0 6px 2px color-mix(in srgb, var(--live-dot) 65%, transparent); }
+  50% { box-shadow: 0 0 14px 5px color-mix(in srgb, var(--live-dot) 30%, transparent); }
+}
+.tt-live-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--live-dot);
+  border: 2px solid var(--surface-ink);
+  animation: tt-dot-glow 2.4s ease-in-out infinite;
+}
+
+.tt-radar-pin {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--surface-ink);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+@keyframes tt-ring-pulse {
+  0%, 100% { stroke-opacity: 0.55; }
+  50% { stroke-opacity: 0.12; }
+}
+.tt-radar-ring { animation: tt-ring-pulse 2.6s ease-in-out infinite; }
+.tt-radar-ring-1 { animation-delay: 0.5s; }
+.tt-radar-ring-2 { animation-delay: 1s; }
+
 /* Maps are forest-ink regardless of theme (theme-independent, like photos):
    restyle OSM raster tiles toward the Eco-Premium ground. */
 .leaflet-layer,
 .leaflet-control-attribution {
-  filter: invert(1) sepia(0.4) hue-rotate(85deg) saturate(0.75) brightness(0.72) contrast(0.95);
+  filter: invert(1) sepia(1) hue-rotate(100deg) saturate(2.9) brightness(1.2) contrast(0.9);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .tt-scrim, .tt-sheet, .tt-skeleton, .tt-pop, .tt-radar {
+    animation: none;
+  }
+  .tt-live-dot, .tt-radar-ring {
     animation: none;
   }
   .tt-press:active {

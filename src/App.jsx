@@ -73,6 +73,11 @@ function App() {
     return () => clearTimeout(t)
   }, [notice])
 
+  // The dispatch home needs the map immediately — warm the Leaflet chunk.
+  useEffect(() => {
+    import('./components/DispatchMap')
+  }, [])
+
   // Listen for auth state changes — only act on explicit sign-out
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {

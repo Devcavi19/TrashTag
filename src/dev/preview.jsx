@@ -3,7 +3,7 @@
 // Renders shell + screens with fixture data so redesigns can be verified
 // visually without a live Supabase backend.
 // Usage: /preview.html?screen=shell&theme=eco-premium
-// Screens: shell|cards|sheet|feed|profile|board|inbox|pay|confirmpay|thread|credential|settings|notifprefs|guidelines|dispatchhome|radar|offer|bottomsheet
+// Screens: shell|cards|sheet|feed|profile|board|inbox|pay|confirmpay|thread|credential|settings|notifprefs|guidelines|dispatchhome|radar|offer|bottomsheet|dispatchmap
 import { StrictMode, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import '../index.css'
@@ -35,6 +35,7 @@ import HomeFeed from '../components/HomeFeed'
 import DispatchRadar from '../components/DispatchRadar'
 import IncomingOffer from '../components/IncomingOffer'
 import BottomSheet from '../components/ui/BottomSheet'
+import DispatchMap from '../components/DispatchMap'
 
 const params = new URLSearchParams(location.search)
 const screen = params.get('screen') || 'shell'
@@ -255,6 +256,17 @@ const FIXTURE_HISTORY = [
 ]
 
 const FIXTURE_STATS = { posted: 3, collected: 1, ratingCount: 1, rating: 4 }
+
+const FIXTURE_CENTER = { lat: 10.3157, lng: 123.8854 }
+const FIXTURE_MAP_JOBS = [
+  { id: 'r1', lat: 10.3199, lng: 123.8931, price: 150 },
+  { id: 'r2', lat: 10.3101, lng: 123.8790, price: 220 },
+]
+const FIXTURE_COLLECTORS = [
+  { collectorId: 'c1', lat: 10.3170, lng: 123.8880 },
+  { collectorId: 'c2', lat: 10.3120, lng: 123.8900 },
+  { collectorId: 'c3', lat: 10.3210, lng: 123.8820 },
+]
 
 // Same lookup App provides: profile row + derived Green Collector credential.
 const CRED_REQUESTS = [...FIXTURE_HISTORY, ...RAMON_JOBS]
@@ -478,6 +490,17 @@ const SCREENS = {
     />
   ),
   bottomsheet: <BottomSheetDemo />,
+  dispatchmap: (
+    <div className="fixed inset-0 mx-auto w-full max-w-[430px]">
+      <DispatchMap
+        center={FIXTURE_CENTER}
+        zoom={14}
+        jobs={FIXTURE_MAP_JOBS}
+        collectors={FIXTURE_COLLECTORS}
+        radar={{ ...FIXTURE_CENTER, radiusMeters: 5000 }}
+      />
+    </div>
+  ),
 }
 
 createRoot(document.getElementById('root')).render(
