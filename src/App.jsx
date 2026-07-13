@@ -10,6 +10,7 @@ import { getStoredTheme, applyTheme, setStoredTheme } from './lib/themes'
 import { deriveCredential } from './lib/collectorCred'
 import { haversineDistance } from './utils/haversine'
 import { useViewerLocation } from './hooks/useViewerLocation'
+import { urlBase64ToUint8Array } from './utils/push'
 import HomeFeed from './components/HomeFeed'
 import FeedView from './components/FeedView'
 import LeaderboardView from './components/LeaderboardView'
@@ -136,6 +137,35 @@ function App() {
       }
       updatePresence()
       interval = setInterval(updatePresence, 30000)
+
+      if ('serviceWorker' in navigator && 'PushManager' in window) {
+        navigator.serviceWorker.ready.then(async (registration) => {
+          try {
+            let subscription = await registration.pushManager.getSubscription()
+            if (!subscription) {
+              const permission = await Notification.requestPermission()
+              if (permission === 'granted') {
+                const publicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY
+                subscription = await registration.pushManager.subscribe({
+                  userVisibleOnly: true,
+                  applicationServerKey: urlBase64ToUint8Array(publicKey)
+                })
+              }
+            }
+            if (subscription) {
+              const subJSON = subscription.toJSON()
+              await supabase.from('push_subscriptions').upsert({
+                user_id: currentUser.id,
+                endpoint: subJSON.endpoint,
+                p256dh: subJSON.keys.p256dh,
+                auth: subJSON.keys.auth
+              }, { onConflict: 'endpoint' })
+            }
+          } catch (e) {
+            console.error('Push subscription failed:', e)
+          }
+        })
+      }
     } else {
       supabase.from('collector_presence').update({ online: false }).eq('collector_id', currentUser.id).then()
     }
@@ -171,10 +201,12 @@ function App() {
     if (activeDispatchRequestId) {
       const req = requests.find(r => r.id === activeDispatchRequestId)
       if (req && req.status === 'accepted') {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setActiveDispatchRequestId(null)
         openThread(req)
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requests, activeDispatchRequestId])
 
   async function addRequest(newReq) {

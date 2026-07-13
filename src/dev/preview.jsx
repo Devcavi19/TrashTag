@@ -3,7 +3,7 @@
 // Renders shell + screens with fixture data so redesigns can be verified
 // visually without a live Supabase backend.
 // Usage: /preview.html?screen=shell&theme=bold-impact
-// Screens: shell|cards|sheet|feed|profile|board|inbox|pay|confirmpay|thread|credential|settings|notifprefs|guidelines
+// Screens: shell|cards|sheet|feed|profile|board|inbox|pay|confirmpay|thread|credential|settings|notifprefs|guidelines|dispatchhome|radar|offer
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import '../index.css'
@@ -31,6 +31,9 @@ import NotificationsSheet from '../components/NotificationsSheet'
 import CollectorCredential from '../components/CollectorCredential'
 import CredentialSheet from '../components/CredentialSheet'
 import { deriveCredential } from '../lib/collectorCred'
+import HomeFeed from '../components/HomeFeed'
+import DispatchRadar from '../components/DispatchRadar'
+import IncomingOffer from '../components/IncomingOffer'
 
 const params = new URLSearchParams(location.search)
 const screen = params.get('screen') || 'shell'
@@ -402,6 +405,59 @@ const SCREENS = {
       </div>
       <BottomNav view="home" setView={() => {}} onOpenMessages={() => {}} />
     </>
+  ),
+  dispatchhome: (
+    <>
+      <TopBar />
+      <div className="flex-1 pb-24">
+        <HomeFeed
+          requests={FIXTURE_REQUESTS}
+          currentUser={FIXTURE_USER}
+          onCompose={() => {}}
+          onAccept={() => {}}
+          onLike={() => {}}
+          onOpenThread={() => {}}
+          credentialFor={credentialFor}
+          online={true}
+          setOnline={() => {}}
+          location={{ latitude: 10.32, longitude: 123.90 }}
+          onOpenDispatchRadar={() => {}}
+        />
+      </div>
+      <BottomNav view="home" setView={() => {}} onOpenMessages={() => {}} />
+    </>
+  ),
+  radar: (
+    <>
+      <TopBar />
+      <div className="fixed inset-0 z-[200] bg-[var(--surface)] max-w-[430px] mx-auto overflow-hidden flex flex-col">
+        <div className="flex items-center p-4 border-b border-[var(--border)] bg-[var(--surface-card)]">
+          <button className="tt-press p-2 -ml-2 text-[var(--text-secondary)]">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <h2 className="font-bold flex-1 text-center pr-6 text-[17px]">Dispatch Radar</h2>
+        </div>
+        <div className="flex-1 overflow-hidden relative">
+          <DispatchRadar
+            request={FIXTURE_REQUESTS[0]}
+            onCancel={() => {}}
+            onAcceptOffer={() => {}}
+            onDeclineOffer={() => {}}
+          />
+        </div>
+      </div>
+    </>
+  ),
+  offer: (
+    <IncomingOffer
+      request={FIXTURE_REQUESTS[0]}
+      poster={FIXTURE_USERS.find(u => u.id === FIXTURE_REQUESTS[0].postedBy)}
+      credentialFor={credentialFor}
+      distanceMeters={1200}
+      onAccept={() => {}}
+      onPass={() => {}}
+      onCounter={() => {}}
+    />
   ),
 }
 

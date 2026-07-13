@@ -110,6 +110,16 @@ async function main() {
       .eq('user_id', poster.uid)).data?.length
     check('attacker cannot like as another user', !spoofPresent)
 
+    // 5. Attacker tries to insert push_subscriptions for the poster.
+    const { error: pushErr } = await attacker.c
+      .from('push_subscriptions')
+      .insert({ user_id: poster.uid, endpoint: 'https://attacker.com', p256dh: 'test', auth: 'test' })
+    const pushSpoofPresent = !pushErr && (await poster.c
+      .from('push_subscriptions')
+      .select('endpoint')
+      .eq('user_id', poster.uid)).data?.length
+    check('attacker cannot spoof push subscription for another user', !pushSpoofPresent)
+
     // Sanity: the legitimate owner CAN update their own request. A failure here
     // means RLS is too restrictive, not too loose — still worth surfacing.
     await poster.c.from('requests').update({ price: 75 }).eq('id', id)

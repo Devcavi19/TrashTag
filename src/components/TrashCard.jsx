@@ -15,15 +15,15 @@ function timeAgo(isoString) {
   return `${Math.floor(diff / 86400)}d ago`
 }
 
-export default function TrashCard({ request, currentUserId, onAccept, onLike, onOpenThread, credentialFor, distanceMeters }) {
-  const { id, photo, tags = [], status, gps, price, postedAt, likes = [], postedBy, collectedBy } = request
+export default function TrashCard({ request, currentUserId, onAccept, onOpenThread, credentialFor, distanceMeters }) {
+  const { id, photo, tags = [], status, gps, price, postedAt, postedBy, collectedBy } = request
 
   const [confirmAccept, setConfirmAccept] = useState(false)
 
   const isOwner = postedBy === currentUserId
   const isCollector = collectedBy === currentUserId
   const involved = isOwner || isCollector
-  const liked = likes.includes(currentUserId)
+
 
   return (
     <Card>
