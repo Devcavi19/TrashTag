@@ -458,25 +458,19 @@ const SCREENS = {
     </>
   ),
   radar: (
-    <>
-      <TopBar />
-      <div className="fixed inset-0 z-[200] bg-[var(--surface)] max-w-[430px] mx-auto overflow-hidden flex flex-col">
-        <div className="flex items-center p-4 border-b border-[var(--border)] bg-[var(--surface-card)]">
-          <button className="tt-press p-2 -ml-2 text-[var(--text-secondary)]">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-          </button>
-          <h2 className="font-bold flex-1 text-center pr-6 text-[17px]">Dispatch Radar</h2>
-        </div>
-        <div className="flex-1 overflow-hidden relative">
-          <DispatchRadar
-            request={FIXTURE_REQUESTS[0]}
-            onCancel={() => {}}
-            onAcceptOffer={() => {}}
-            onDeclineOffer={() => {}}
-          />
-        </div>
-      </div>
-    </>
+    <div className="fixed inset-0 mx-auto flex w-full max-w-[430px] flex-col" style={{ background: 'var(--surface)' }}>
+      <DispatchRadar
+        request={{ ...FIXTURE_REQUESTS[0], lat: FIXTURE_CENTER.lat, lng: FIXTURE_CENTER.lng }}
+        collectors={FIXTURE_COLLECTORS}
+        offers={[
+          { id: 'o1', price: 180, profiles: { name: 'Carl Avila', avatar_url: null } },
+          { id: 'o2', price: 200, profiles: { name: 'Juana Reyes', avatar_url: null } },
+        ]}
+        onCancel={() => {}}
+        onAcceptOffer={() => {}}
+        onDeclineOffer={() => {}}
+      />
+    </div>
   ),
   offer: (
     <IncomingOffer

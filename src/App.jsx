@@ -10,6 +10,7 @@ import { deriveCredential } from './lib/collectorCred'
 import { haversineDistance } from './utils/haversine'
 import { useViewerLocation } from './hooks/useViewerLocation'
 import { useNearbyPresence } from './hooks/useNearbyPresence'
+import { useOffers } from './hooks/useOffers'
 import { urlBase64ToUint8Array } from './utils/push'
 import DispatchHome from './components/DispatchHome'
 import FeedView from './components/FeedView'
@@ -51,6 +52,10 @@ function App() {
   const [activeDispatchRequestId, setActiveDispatchRequestId] = useState(null)
   const [incomingOfferReqId, setIncomingOfferReqId] = useState(null)
   const [online, setOnline] = useState(false)
+
+  const radarRequest = activeDispatchRequestId ? requests.find((r) => r.id === activeDispatchRequestId) : null
+  const radarOffers = useOffers(activeDispatchRequestId)
+  const radarCollectors = useNearbyPresence(radarRequest?.lat ?? null, radarRequest?.lng ?? null)
 
   const realtimeDown = realtimeStatus === 'CHANNEL_ERROR' || realtimeStatus === 'TIMED_OUT'
 
@@ -203,13 +208,10 @@ function App() {
   }, [online, location, currentUser?.id])
 
   useEffect(() => {
-    if (activeDispatchRequestId) {
-      const req = requests.find(r => r.id === activeDispatchRequestId)
-      if (req && req.status === 'accepted') {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setActiveDispatchRequestId(null)
-        openThread(req)
-      }
+    if (radarRequest && radarRequest.status === 'accepted') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setActiveDispatchRequestId(null)
+      openThread(radarRequest)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requests, activeDispatchRequestId])
@@ -642,17 +644,29 @@ function App() {
         />
       )}
 
-      {activeDispatchRequestId && requests.find(r => r.id === activeDispatchRequestId) && (
-        <div className="fixed inset-0 z-[200] bg-[var(--surface)] max-w-[430px] mx-auto overflow-hidden flex flex-col">
-          <div className="flex items-center p-4 border-b border-[var(--border)] bg-[var(--surface-card)]">
-            <button className="tt-press p-2 -ml-2 text-[var(--text-secondary)]" onClick={() => setActiveDispatchRequestId(null)}>
+      {radarRequest && (
+        <div className="fixed inset-0 z-[200] mx-auto flex w-full max-w-[430px] flex-col overflow-hidden" style={{ background: 'var(--surface)' }}>
+          <div
+            className="flex items-center border-b p-4"
+            style={{ background: 'var(--surface-ink)', borderColor: 'var(--border-ink)' }}
+          >
+            <button
+              className="tt-press -ml-2 p-2"
+              style={{ color: 'var(--text-on-ink-muted)' }}
+              onClick={() => setActiveDispatchRequestId(null)}
+              aria-label="Back"
+            >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
-            <h2 className="font-bold flex-1 text-center pr-6 text-[17px]">Dispatch Radar</h2>
+            <h2 className="flex-1 pr-6 text-center font-display text-[17px] font-semibold" style={{ color: 'var(--text-on-ink)' }}>
+              Dispatch Radar
+            </h2>
           </div>
-          <div className="flex-1 overflow-hidden relative">
+          <div className="relative flex-1 overflow-hidden">
             <DispatchRadar
-              request={requests.find(r => r.id === activeDispatchRequestId)}
+              request={radarRequest}
+              collectors={radarCollectors}
+              offers={radarOffers}
               onCancel={cancelRequest}
               onAcceptOffer={acceptPriceOffer}
               onDeclineOffer={declinePriceOffer}

@@ -154,15 +154,6 @@ input, select, button, textarea {
   border-radius: 8px;
 }
 
-/* Radar ping */
-@keyframes tt-radar-ping {
-  0% { transform: scale(0.5); opacity: 0.8; }
-  100% { transform: scale(3.5); opacity: 0; }
-}
-.tt-radar {
-  animation: tt-radar-ping 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
 /* Like-button pop */
 @keyframes tt-pop {
   0% { transform: scale(1); }
@@ -234,7 +225,7 @@ input, select, button, textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tt-scrim, .tt-sheet, .tt-skeleton, .tt-pop, .tt-radar {
+  .tt-scrim, .tt-sheet, .tt-skeleton, .tt-pop {
     animation: none;
   }
   .tt-live-dot, .tt-radar-ring {
