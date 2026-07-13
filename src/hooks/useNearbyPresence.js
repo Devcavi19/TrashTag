@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import { supabase } from '../lib/supabase';
 import { haversineDistance } from '../utils/haversine';
 
@@ -16,6 +16,10 @@ function dbToApp(row) {
 
 export function useNearbyPresence(centerLat, centerLng) {
   const [nearbyCollectors, setNearbyCollectors] = useState([]);
+  // Unique per hook instance: DispatchHome and DispatchRadar can both have
+  // this hook mounted at once, and Supabase throws if a second `.on(...)`
+  // is added to an already-subscribed channel of the same name.
+  const instanceId = useId();
 
   useEffect(() => {
     if (centerLat == null || centerLng == null) return;
@@ -41,7 +45,7 @@ export function useNearbyPresence(centerLat, centerLng) {
     fetchPresence();
 
     const channel = supabase
-      .channel('public:collector_presence')
+      .channel(`public:collector_presence:${instanceId}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'collector_presence' },
@@ -55,7 +59,7 @@ export function useNearbyPresence(centerLat, centerLng) {
       cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, [centerLat, centerLng]);
+  }, [centerLat, centerLng, instanceId]);
 
   return nearbyCollectors;
 }
