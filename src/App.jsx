@@ -9,8 +9,9 @@ import { prefsOf } from './lib/notificationPrefs'
 import { deriveCredential } from './lib/collectorCred'
 import { haversineDistance } from './utils/haversine'
 import { useViewerLocation } from './hooks/useViewerLocation'
+import { useNearbyPresence } from './hooks/useNearbyPresence'
 import { urlBase64ToUint8Array } from './utils/push'
-import HomeFeed from './components/HomeFeed'
+import DispatchHome from './components/DispatchHome'
 import FeedView from './components/FeedView'
 import LeaderboardView from './components/LeaderboardView'
 import ProfileView from './components/ProfileView'
@@ -45,6 +46,7 @@ function App() {
   const [requests, realtimeStatus] = useRequests()
   const [posts] = useFeed()
   const { location } = useViewerLocation()
+  const homeCollectors = useNearbyPresence(location?.lat ?? null, location?.lng ?? null)
 
   const [activeDispatchRequestId, setActiveDispatchRequestId] = useState(null)
   const [incomingOfferReqId, setIncomingOfferReqId] = useState(null)
@@ -385,16 +387,6 @@ function App() {
     await supabase.from('requests').update({ after_photo_url: publicUrl }).eq('id', id)
   }
 
-  async function handleLike(requestId, userId) {
-    const req = requests.find((r) => r.id === requestId)
-    if (!req) return
-    if (req.likes.includes(userId)) {
-      await supabase.from('request_likes').delete().eq('request_id', requestId).eq('user_id', userId)
-    } else {
-      await supabase.from('request_likes').insert({ request_id: requestId, user_id: userId })
-    }
-  }
-
   // by: 'poster' writes requests.rating; 'collector' writes requests.collector_rating
   async function handleRate(id, stars, by) {
     const column = by === 'collector' ? 'collector_rating' : 'rating'
@@ -560,22 +552,21 @@ function App() {
 
   return (
     <div className="min-h-screen font-sans" style={{ background: 'var(--surface)' }}>
-      <TopBar />
+      {view !== 'home' && <TopBar />}
 
       <main className="max-w-[430px] mx-auto pb-24">
         {view === 'home' && (
-          <HomeFeed
+          <DispatchHome
             requests={requests}
             currentUser={currentUser}
             onCompose={() => setComposerOpen(true)}
             onAccept={(id) => updateStatus(id, 'accepted')}
-            onLike={handleLike}
             onOpenThread={openThread}
-            credentialFor={credentialFor}
+            onOpenDispatchRadar={(req) => setActiveDispatchRequestId(req.id)}
             online={online}
             setOnline={setOnline}
             location={location}
-            onOpenDispatchRadar={(req) => setActiveDispatchRequestId(req.id)}
+            nearbyCollectors={homeCollectors}
           />
         )}
         {view === 'community' && (

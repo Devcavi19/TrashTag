@@ -1,6 +1,6 @@
 // Switch row: label + optional sub-label on the left, pill switch on the
 // right. Purely controlled — parent owns the value and persistence.
-export default function Toggle({ checked, onChange, label, sub }) {
+export default function Toggle({ checked, onChange, label, sub, accent = false }) {
   return (
     <button
       type="button"
@@ -33,7 +33,7 @@ export default function Toggle({ checked, onChange, label, sub }) {
         <span
           className="tt-toggle-knob absolute h-[20px] w-[20px] rounded-full"
           style={{
-            background: 'var(--surface-card)',
+            background: accent && checked ? 'var(--accent)' : 'var(--surface-card)',
             transform: checked ? 'translateX(23px)' : 'translateX(3px)',
             boxShadow: 'var(--shadow-card)',
           }}

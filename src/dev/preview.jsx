@@ -31,7 +31,7 @@ import NotificationsSheet from '../components/NotificationsSheet'
 import CollectorCredential from '../components/CollectorCredential'
 import CredentialSheet from '../components/CredentialSheet'
 import { deriveCredential } from '../lib/collectorCred'
-import HomeFeed from '../components/HomeFeed'
+import DispatchHome from '../components/DispatchHome'
 import DispatchRadar from '../components/DispatchRadar'
 import IncomingOffer from '../components/IncomingOffer'
 import BottomSheet from '../components/ui/BottomSheet'
@@ -55,6 +55,8 @@ const FIXTURE_REQUESTS = [
     likes: ['u-carl'],
     postedBy: 'u-carl',
     collectedBy: null,
+    lat: 10.3199,
+    lng: 123.8931,
   },
   {
     id: 'r2',
@@ -67,6 +69,8 @@ const FIXTURE_REQUESTS = [
     likes: [],
     postedBy: 'u-herald',
     collectedBy: 'u-carl',
+    lat: 10.3101,
+    lng: 123.8790,
   },
 ]
 
@@ -438,23 +442,19 @@ const SCREENS = {
   ),
   dispatchhome: (
     <>
-      <TopBar />
-      <div className="flex-1 pb-24">
-        <HomeFeed
-          requests={FIXTURE_REQUESTS}
-          currentUser={FIXTURE_USER}
-          onCompose={() => {}}
-          onAccept={() => {}}
-          onLike={() => {}}
-          onOpenThread={() => {}}
-          credentialFor={credentialFor}
-          online={true}
-          setOnline={() => {}}
-          location={{ latitude: 10.32, longitude: 123.90 }}
-          onOpenDispatchRadar={() => {}}
-        />
-      </div>
-      <BottomNav view="home" setView={() => {}} onOpenMessages={() => {}} />
+      <DispatchHome
+        requests={FIXTURE_REQUESTS}
+        currentUser={FIXTURE_USER}
+        onCompose={() => {}}
+        onAccept={() => {}}
+        onOpenThread={() => {}}
+        onOpenDispatchRadar={() => {}}
+        online={true}
+        setOnline={() => {}}
+        location={FIXTURE_CENTER}
+        nearbyCollectors={FIXTURE_COLLECTORS}
+      />
+      <BottomNav view="home" setView={() => {}} unreadCount={2} onOpenMessages={() => {}} />
     </>
   ),
   radar: (
