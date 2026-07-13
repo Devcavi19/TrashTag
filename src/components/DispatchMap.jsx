@@ -8,9 +8,12 @@ import 'leaflet/dist/leaflet.css'
 // Pure presentation: everything arrives via props, nothing touches Supabase.
 
 function priceIcon(price, selected) {
+  // Coerce to a number before interpolating into raw HTML — divIcon markup
+  // isn't escaped by Leaflet, so a non-numeric price could inject markup.
+  const safePrice = Number.isFinite(Number(price)) ? Number(price) : 0
   return L.divIcon({
     className: '',
-    html: `<div class="tt-price-pin${selected ? ' tt-price-pin-selected' : ''}">₱${price}</div>`,
+    html: `<div class="tt-price-pin${selected ? ' tt-price-pin-selected' : ''}">₱${safePrice}</div>`,
     iconSize: [60, 32],
     iconAnchor: [30, 16],
   })
