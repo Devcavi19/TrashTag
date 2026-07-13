@@ -8,6 +8,8 @@ import { validateImage } from './lib/validateImage'
 import { prefsOf } from './lib/notificationPrefs'
 import { getStoredTheme, applyTheme, setStoredTheme } from './lib/themes'
 import { deriveCredential } from './lib/collectorCred'
+import { haversineDistance } from './utils/haversine'
+import { useViewerLocation } from './hooks/useViewerLocation'
 import HomeFeed from './components/HomeFeed'
 import FeedView from './components/FeedView'
 import LeaderboardView from './components/LeaderboardView'
@@ -21,6 +23,8 @@ import LoadingScreen from './components/LoadingScreen'
 import AuthScreen from './components/AuthScreen'
 import Landing from './components/Landing'
 import Toast from './components/Toast'
+import DispatchRadar from './components/DispatchRadar'
+import IncomingOffer from './components/IncomingOffer'
 
 function App() {
   const [appState, setAppState] = useState('loading') // 'loading' | 'auth' | 'app'
@@ -41,6 +45,11 @@ function App() {
 
   const [requests, realtimeStatus] = useRequests()
   const [posts] = useFeed()
+  const { location } = useViewerLocation()
+
+  const [activeDispatchRequestId, setActiveDispatchRequestId] = useState(null)
+  const [incomingOfferReqId, setIncomingOfferReqId] = useState(null)
+  const [online, setOnline] = useState(false)
 
   const realtimeDown = realtimeStatus === 'CHANNEL_ERROR' || realtimeStatus === 'TIMED_OUT'
 
@@ -114,12 +123,66 @@ function App() {
   }
   useIdleLogout(appState === 'app', handleIdleLogout)
 
+  useEffect(() => {
+    if (!currentUser?.id) return
+    let interval
+    if (online) {
+      const updatePresence = async () => {
+        const lat = location?.latitude || 0
+        const lng = location?.longitude || 0
+        await supabase.from('collector_presence').upsert({
+          collector_id: currentUser.id, lat, lng, online: true, updated_at: new Date().toISOString()
+        })
+      }
+      updatePresence()
+      interval = setInterval(updatePresence, 30000)
+    } else {
+      supabase.from('collector_presence').update({ online: false }).eq('collector_id', currentUser.id).then()
+    }
+    return () => clearInterval(interval)
+  }, [online, currentUser?.id, location])
+
+  useEffect(() => {
+    return () => {
+      if (currentUser?.id) supabase.from('collector_presence').update({ online: false }).eq('collector_id', currentUser.id).then()
+    }
+  }, [currentUser?.id])
+
+  useEffect(() => {
+    if (!online || !location || !currentUser?.id) return
+    const channel = supabase.channel('incoming-requests')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'requests' }, (payload) => {
+        const req = payload.new
+        if (req.status !== 'open' || req.poster_id === currentUser.id) return
+        if (req.location_lat != null && req.location_lng != null) {
+          const dist = haversineDistance(location.latitude, location.longitude, req.location_lat, req.location_lng)
+          if (dist <= 5000) {
+            const passed = JSON.parse(localStorage.getItem('passed_requests') || '[]')
+            if (!passed.includes(req.id)) {
+              setIncomingOfferReqId(req.id)
+            }
+          }
+        }
+      }).subscribe()
+    return () => supabase.removeChannel(channel)
+  }, [online, location, currentUser?.id])
+
+  useEffect(() => {
+    if (activeDispatchRequestId) {
+      const req = requests.find(r => r.id === activeDispatchRequestId)
+      if (req && req.status === 'accepted') {
+        setActiveDispatchRequestId(null)
+        openThread(req)
+      }
+    }
+  }, [requests, activeDispatchRequestId])
+
   async function addRequest(newReq) {
     const geohash =
       newReq.lat != null && newReq.lng != null
         ? ngeohash.encode(newReq.lat, newReq.lng, 9)
         : null
-    await supabase.from('requests').insert({
+    const { data } = await supabase.from('requests').insert({
       poster_id: currentUser?.id,
       photo_url: newReq.photo,
       location_label: newReq.label,
@@ -129,13 +192,51 @@ function App() {
       tags: newReq.tags,
       price: newReq.price,
       status: 'open',
-    })
+    }).select().single()
+    if (data) setActiveDispatchRequestId(data.id)
+    setComposerOpen(false)
   }
 
   async function updateStatus(id, newStatus) {
-    const updates = { status: newStatus }
-    if (newStatus === 'accepted') updates.collected_by = currentUser?.id
-    await supabase.from('requests').update(updates).eq('id', id)
+    if (newStatus === 'accepted') {
+      const { data } = await supabase.from('requests')
+        .update({ status: 'accepted', collected_by: currentUser?.id })
+        .eq('id', id)
+        .eq('status', 'open')
+        .select()
+      
+      if (!data || data.length === 0) {
+        setNotice("Another collector got this one.")
+      }
+      if (incomingOfferReqId === id) setIncomingOfferReqId(null)
+    } else {
+      const updates = { status: newStatus }
+      await supabase.from('requests').update(updates).eq('id', id)
+    }
+  }
+
+  async function submitPriceOffer(requestId, price) {
+    await supabase.from('price_offers').insert({
+      request_id: requestId,
+      collector_id: currentUser?.id,
+      price: price
+    })
+    setIncomingOfferReqId(null)
+    setNotice('Offer sent to the poster.')
+  }
+
+  async function acceptPriceOffer(offerId) {
+    const { error } = await supabase.rpc('accept_price_offer', { offer_id: offerId })
+    if (error) setNotice('Could not accept offer: ' + error.message)
+  }
+
+  async function declinePriceOffer(offerId) {
+    await supabase.from('price_offers').update({ status: 'declined' }).eq('id', offerId)
+  }
+
+  async function cancelRequest(id) {
+    await supabase.from('requests').delete().eq('id', id)
+    if (activeDispatchRequestId === id) setActiveDispatchRequestId(null)
   }
 
   // Poster rejects the after-photo: back to the collector for a redo.
@@ -442,6 +543,10 @@ function App() {
             onLike={handleLike}
             onOpenThread={openThread}
             credentialFor={credentialFor}
+            online={online}
+            setOnline={setOnline}
+            location={location}
+            onOpenDispatchRadar={(req) => setActiveDispatchRequestId(req.id)}
           />
         )}
         {view === 'community' && (
@@ -516,6 +621,41 @@ function App() {
           onPaymentNotReceived={reportPaymentNotReceived}
           onRate={handleRate}
           credentialFor={credentialFor}
+        />
+      )}
+
+      {activeDispatchRequestId && requests.find(r => r.id === activeDispatchRequestId) && (
+        <div className="fixed inset-0 z-[200] bg-[var(--surface)] max-w-[430px] mx-auto overflow-hidden flex flex-col">
+          <div className="flex items-center p-4 border-b border-[var(--border)] bg-[var(--surface-card)]">
+            <button className="tt-press p-2 -ml-2 text-[var(--text-secondary)]" onClick={() => setActiveDispatchRequestId(null)}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <h2 className="font-bold flex-1 text-center pr-6 text-[17px]">Dispatch Radar</h2>
+          </div>
+          <div className="flex-1 overflow-hidden relative">
+            <DispatchRadar
+              request={requests.find(r => r.id === activeDispatchRequestId)}
+              onCancel={cancelRequest}
+              onAcceptOffer={acceptPriceOffer}
+              onDeclineOffer={declinePriceOffer}
+            />
+          </div>
+        </div>
+      )}
+
+      {incomingOfferReqId && requests.find(r => r.id === incomingOfferReqId) && (
+        <IncomingOffer
+          request={requests.find(r => r.id === incomingOfferReqId)}
+          poster={profiles.find(p => p.id === requests.find(r => r.id === incomingOfferReqId)?.postedBy)}
+          credentialFor={credentialFor}
+          distanceMeters={location && requests.find(r => r.id === incomingOfferReqId)?.lat ? haversineDistance(location.latitude, location.longitude, requests.find(r => r.id === incomingOfferReqId).lat, requests.find(r => r.id === incomingOfferReqId).lng) : null}
+          onAccept={(id) => updateStatus(id, 'accepted')}
+          onPass={(id) => {
+            const passed = JSON.parse(localStorage.getItem('passed_requests') || '[]')
+            localStorage.setItem('passed_requests', JSON.stringify([...passed, id]))
+            setIncomingOfferReqId(null)
+          }}
+          onCounter={submitPriceOffer}
         />
       )}
 
