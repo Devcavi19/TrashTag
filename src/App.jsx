@@ -87,11 +87,18 @@ function App() {
 
   // Listen for auth state changes — only act on explicit sign-out
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT') {
         setCurrentUser(null)
         setProfiles([])
         setAppState('auth')
+      }
+      // Handle OAuth redirect (Google sign-in callback)
+      if (event === 'SIGNED_IN' && session?.user && appState !== 'app') {
+        const profile = await fetchProfile(session.user.id)
+        setCurrentUser({ ...session.user, name: profile?.name ?? session.user.user_metadata?.name })
+        await fetchAllProfiles()
+        setAppState('app')
       }
     })
     return () => subscription.unsubscribe()
