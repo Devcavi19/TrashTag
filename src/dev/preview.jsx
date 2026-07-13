@@ -2,7 +2,7 @@
 // server (never part of the production build — vite only builds index.html).
 // Renders shell + screens with fixture data so redesigns can be verified
 // visually without a live Supabase backend.
-// Usage: /preview.html?screen=shell&theme=bold-impact
+// Usage: /preview.html?screen=shell&theme=eco-premium
 // Screens: shell|cards|sheet|feed|profile|board|inbox|pay|confirmpay|thread|credential|settings|notifprefs|guidelines|dispatchhome|radar|offer
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -299,8 +299,6 @@ const SCREENS = {
           notificationPrefs={{ jobUpdates: true, messages: true, community: true }}
           onSaveNotificationPrefs={async () => true}
           credentialFor={credentialFor}
-          theme={new URLSearchParams(location.search).get('theme') || 'fresh-canopy'}
-          onThemeChange={() => {}}
         />
       </div>
       <BottomNav view="you" setView={() => {}} onOpenMessages={() => {}} />
