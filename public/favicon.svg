@@ -1,14 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="Kolek app icon">
-  <title>Kolek</title>
-  <defs>
-    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#2BBE66"/>
-      <stop offset="1" stop-color="#0E6B37"/>
-    </linearGradient>
-  </defs>
-  <rect width="1024" height="1024" rx="232" fill="url(#tile)"/>
-  <g transform="translate(262,192) scale(5)">
-    <path d="M50 115 C 27 87 14 69 14 48 C 14 26 30 11 50 11 C 70 11 86 26 86 48 C 86 69 73 87 50 115 Z" fill="#FFFFFF"/>
-    <path d="M50 13 C 45 44 45 74 50 113" fill="none" stroke="#0E6B37" stroke-width="2.2" stroke-linecap="round" opacity="0.22"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><rect x="0" y="0" width="1024" height="1024" rx="228" fill="#17693B"/><g transform="translate(262,187) scale(2.5)"><defs>
+<clipPath id="cmai"><circle cx="100" cy="96" r="62"/></clipPath>
+<mask id="mmai"><rect x="0" y="0" width="200" height="260" fill="white"/><circle cx="78" cy="96" r="17.5" fill="black"/></mask>
+</defs>
+<path d="M100,250 C60,200 10,160 10,100 A90,90 0 1 1 190,100 C190,160 140,200 100,250 Z M100,34 A62,62 0 1 0 100,158 A62,62 0 1 0 100,34 Z" fill-rule="evenodd" fill="#FFFFFF"/>
+<g clip-path="url(#cmai)" mask="url(#mmai)">
+  <line x1="26" y1="128" x2="174" y2="128" stroke="#FFFFFF" stroke-width="6"/>
+  <g stroke="#FFFFFF" stroke-width="16">
+    <line x1="78" y1="20" x2="78" y2="175"/>
+    <line x1="78" y1="96" x2="152" y2="34"/>
+    <line x1="78" y1="96" x2="152" y2="158"/>
   </g>
-</svg>
+</g>
+<circle cx="78" cy="96" r="11.5" fill="#FFFFFF"/></g></svg>
