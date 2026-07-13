@@ -3,8 +3,8 @@
 // Renders shell + screens with fixture data so redesigns can be verified
 // visually without a live Supabase backend.
 // Usage: /preview.html?screen=shell&theme=eco-premium
-// Screens: shell|cards|sheet|feed|profile|board|inbox|pay|confirmpay|thread|credential|settings|notifprefs|guidelines|dispatchhome|radar|offer
-import { StrictMode } from 'react'
+// Screens: shell|cards|sheet|feed|profile|board|inbox|pay|confirmpay|thread|credential|settings|notifprefs|guidelines|dispatchhome|radar|offer|bottomsheet
+import { StrictMode, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import '../index.css'
 import { applyTheme } from '../lib/themes'
@@ -34,6 +34,7 @@ import { deriveCredential } from '../lib/collectorCred'
 import HomeFeed from '../components/HomeFeed'
 import DispatchRadar from '../components/DispatchRadar'
 import IncomingOffer from '../components/IncomingOffer'
+import BottomSheet from '../components/ui/BottomSheet'
 
 const params = new URLSearchParams(location.search)
 const screen = params.get('screen') || 'shell'
@@ -162,6 +163,25 @@ function SheetPreview() {
         <Button full>Accept pickup</Button>
       </div>
     </Sheet>
+  )
+}
+
+function BottomSheetDemo() {
+  const [detent, setDetent] = useState('half')
+  return (
+    <div className="fixed inset-0 mx-auto w-full max-w-[430px]" style={{ background: 'var(--surface-ink)' }}>
+      <p className="p-4 text-sm" style={{ color: 'var(--text-on-ink-muted)' }}>
+        Map placeholder — drag the handle, or tap it to cycle detents. Current: {detent}
+      </p>
+      <BottomSheet detent={detent} onDetentChange={setDetent} bottomOffset={0}>
+        {Array.from({ length: 20 }, (_, i) => (
+          <div key={i} className="mb-2 rounded-[14px] border p-3 text-sm"
+            style={{ background: 'var(--surface-card)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
+            Row {i + 1} — inner content scrolls when taller than the sheet
+          </div>
+        ))}
+      </BottomSheet>
+    </div>
   )
 }
 
@@ -457,6 +477,7 @@ const SCREENS = {
       onCounter={() => {}}
     />
   ),
+  bottomsheet: <BottomSheetDemo />,
 }
 
 createRoot(document.getElementById('root')).render(

@@ -132,6 +132,11 @@ input, select, button, textarea {
   animation: tt-sheet-in 0.28s cubic-bezier(0.32, 0.72, 0.22, 1);
 }
 
+/* BottomSheet detent snap */
+.tt-sheet-detent {
+  transition: height 0.3s cubic-bezier(0.32, 0.72, 0.22, 1);
+}
+
 /* Skeleton shimmer */
 @keyframes tt-shimmer {
   from { background-position: 200% 0; }
@@ -183,6 +188,9 @@ input, select, button, textarea {
     transform: none;
   }
   .tt-toggle-knob {
+    transition: none;
+  }
+  .tt-sheet-detent {
     transition: none;
   }
 }
