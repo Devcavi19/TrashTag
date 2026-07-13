@@ -96,7 +96,7 @@ Same map, transitioned rather than replaced:
 | `src/components/BottomNav.jsx` | restyled (ink + gold) |
 | `src/components/HomeFeed.jsx` | retired (deleted) |
 | `src/index.css`, `src/lib/themes.js` | token overhaul, single theme, new keyframes, map filter |
-| `src/dev/preview.jsx` | `dispatchhome`/`radar`/`offer` fixtures rebuilt (fixture map = static styled div, no tiles) |
+| `src/dev/preview.jsx` | `dispatchhome`/`radar`/`offer` fixtures rebuilt (fixtures render the real Leaflet map; OSM tiles need network in dev) |
 | `CLAUDE.md` | styling section updated |
 
 **Not touched:** `App.jsx` mutators and realtime wiring, all hooks, `MessageThread`, payment flow, TrashCard/StatusBadge (still used by other views until sub-project 2), schema/RLS/Edge Function, PWA config.

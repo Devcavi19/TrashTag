@@ -3,7 +3,7 @@ function NavButton({ active, label, onClick, badge, children }) {
     <button
       onClick={onClick}
       className="tt-press relative flex flex-1 flex-col items-center gap-0.5 py-2"
-      style={{ color: active ? 'var(--brand)' : 'var(--text-muted)' }}
+      style={{ color: active ? 'var(--accent)' : 'var(--text-on-ink-muted)' }}
       aria-current={active ? 'page' : undefined}
     >
       <span className="relative">
@@ -11,7 +11,7 @@ function NavButton({ active, label, onClick, badge, children }) {
         {badge > 0 && (
           <span
             className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-bold"
-            style={{ background: 'var(--accent)', color: '#ffffff' }}
+            style={{ background: 'var(--danger)', color: 'var(--on-brand)' }}
           >
             {badge}
           </span>
@@ -32,9 +32,9 @@ export default function BottomNav({
     <nav
       className="fixed bottom-0 left-1/2 z-40 w-full max-w-[430px] -translate-x-1/2"
       style={{
-        background: 'var(--surface-raised)',
-        borderTop: '1px solid var(--border)',
-        boxShadow: '0 -1px 12px rgba(0,0,0,0.04)',
+        background: 'var(--surface-ink)',
+        borderTop: '1px solid var(--border-ink)',
+        boxShadow: '0 -1px 12px rgba(0, 0, 0, 0.25)',
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}
     >
@@ -60,9 +60,9 @@ export default function BottomNav({
               width: 52,
               height: 52,
               marginTop: -18,
-              background: 'var(--brand)',
-              color: 'var(--on-brand)',
-              boxShadow: '0 6px 16px color-mix(in srgb, var(--brand) 40%, transparent)',
+              background: 'var(--accent)',
+              color: 'var(--on-accent)',
+              boxShadow: '0 6px 16px color-mix(in srgb, var(--accent) 45%, transparent)',
             }}
             aria-label="Messages"
           >
@@ -73,9 +73,9 @@ export default function BottomNav({
               <span
                 className="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold"
                 style={{
-                  background: 'var(--accent)',
-                  color: '#ffffff',
-                  boxShadow: '0 0 0 2px var(--surface-raised)',
+                  background: 'var(--danger)',
+                  color: 'var(--on-brand)',
+                  boxShadow: '0 0 0 2px var(--surface-ink)',
                 }}
               >
                 {unreadCount}
